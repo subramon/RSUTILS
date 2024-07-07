@@ -43,10 +43,12 @@ gen_inc_files : \
 	../inc/get_bit_u64.h \
 	../inc/is_valid_chars_for_num.h \
 	../inc/mk_file.h \
+	../inc/mk_dir_file_name.h \
 	../inc/q_omp_get_num_procs.h \
 	../inc/rdtsc.h \
 	../inc/rs_mmap.h \
 	../inc/set_bit_u64.h \
+	../inc/stretch.h \
 	../inc/tm2time.h  \
 	../inc/trim.h 
 
@@ -151,6 +153,9 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 ../inc/mk_file.h :
 	luajit ../src/cli_extract_func_decl.lua mk_file.c ${INCDIR}
 
+../inc/mk_dir_file_name.h :
+	luajit ../src/cli_extract_func_decl.lua mk_dir_file_name.c ${INCDIR}
+
 ../inc/q_omp_get_num_procs.h :
 	luajit ../src/cli_extract_func_decl.lua q_omp_get_num_procs.c ${INCDIR}
 
@@ -162,6 +167,9 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 
 ../inc/set_bit_u64.h :
 	luajit ../src/cli_extract_func_decl.lua set_bit_u64.c ${INCDIR}
+
+../inc/stretch.h :
+	luajit ../src/cli_extract_func_decl.lua stretch.c ${INCDIR}
 
 ../inc/trim.h : 
 	luajit ../src/cli_extract_func_decl.lua trim.c ${INCDIR}
@@ -180,12 +188,14 @@ GEN_INC_FILES = \
 	../inc/isfile.h  \
 	../inc/is_valid_chars_for_num.h  \
 	../inc/mk_file.h \
+	../inc/mk_dir_file_name.h \
 	../inc/q_omp_get_num_procs.h \
 	../inc/rand_file_name.h  \
 	../inc/rdtsc.h \
 	../inc/rs_mmap.h \
 	../inc/SC_to_txt.h   \
 	../inc/set_bit_u64.h \
+	../inc/stretch.h \
 	../inc/trim.h  \
 #--------
 
@@ -206,6 +216,7 @@ SRCS += is_valid_chars_for_num.c
 SRCS += isfile.c 
 SRCS += isdir.c 
 SRCS += mk_file.c 
+SRCS += mk_dir_file_name.c 
 SRCS += q_omp_get_num_procs.c  
 SRCS += qtypes.c 
 SRCS += rand_file_name.c 
@@ -214,6 +225,7 @@ SRCS += rmtree.c
 SRCS += rs_mmap.c 
 SRCS += SC_to_txt.c 
 SRCS += set_bit_u64.c  
+SRCS += stretch.c  
 SRCS += spooky_hash.c 
 SRCS += tm2time.c 
 SRCS += trim.c 

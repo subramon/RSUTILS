@@ -1,3 +1,6 @@
+#include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
 #ifndef __QTYPES_H
 #define __QTYPES_H
 //START_FOR_CDEF
