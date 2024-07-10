@@ -1,14 +1,14 @@
 #include "q_incs.h"
-#include "_trim.h"
+#include "trim.h"
 
 int
 main()
 {
   int status = 0;
   int n = 32;
-  char inbuf[n];
-  char outbuf[n];
-  memset(inbuf, '\0', n);
+  char inbuf[n];  memset(inbuf, '\0', n);
+  char outbuf[n]; memset(outbuf, '\0', n);
+
   for ( int i = 0; i < 2; i++ ) { 
     inbuf[i] = ' ';
   }

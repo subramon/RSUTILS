@@ -31,7 +31,6 @@ gen_inc_files : \
 	../inc/I8_to_txt.h \
 	../inc/F4_to_txt.h \
 	../inc/F8_to_txt.h \
-	../inc/copy_file.h \
 	../inc/file_exists.h \
 	../inc/isfile.h \
 	../inc/isdir.h \
@@ -120,9 +119,6 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 ../src/F8_to_txt.c :
 	luajit print_generator.lua F8
 
-../inc/copy_file.h : 
-	luajit ../src/cli_extract_func_decl.lua copy_file.c ${INCDIR}
-
 ../inc/file_exists.h : 
 	luajit ../src/cli_extract_func_decl.lua file_exists.c ${INCDIR}
 
@@ -205,7 +201,6 @@ GEN_INC_FILES = \
 spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
 SRCS := cat_to_buf.c 
-SRCS += copy_file.c 
 SRCS += BL_to_txt.c 
 SRCS += file_exists.c 
 SRCS += get_bit_u64.c  

@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include "q_macros.h"
 #include "trim.h"
+// Let B represent a blank character i.e., isspace(B) == true
+// Then BBabcBB => abc
+// Then abcdBB => abcd
+// Then abcdeBB => abcde
 // assumption that inbuf and outbuf have been malloc'd with n bytes
 // also, inbuf is null terminated and memset to 0 before being filled
 //START_FUNC_DECL

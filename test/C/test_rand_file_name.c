@@ -1,6 +1,5 @@
 #include "q_incs.h"
-#include "_mix_UI8.h"
-#include "_rand_file_name.h"
+#include "rand_file_name.h"
 
 int
 main()
