@@ -625,7 +625,10 @@ static int l_cutils_getfiles(
 
   //-------------
   d = opendir(dir_name);
-  if ( d == NULL ) { WHEREAMI; goto BYE; }
+  if ( d == NULL ) { 
+    fprintf(stderr, "Could not opendir(%s)\n", dir_name); 
+    WHEREAMI; goto BYE; 
+  }
   // Now return table of strings
   lua_newtable(L);
   int dir_idx = 1;

@@ -1,6 +1,7 @@
 #include "q_incs.h"
-#include "_rdtsc.h"
-#include "_get_bit_u64.h"
+#include "q_macros.h"
+#include "rdtsc.h"
+#include "get_bit_u64.h"
 
 int
 main()
@@ -32,6 +33,7 @@ main()
     l = l >> 1; 
     ctr++; if ( ctr == 64 ) { l = X[++xidx]; ctr = 0; }
   }
+  printf("SUCCESS\n");
 BYE:
   return status;
 }

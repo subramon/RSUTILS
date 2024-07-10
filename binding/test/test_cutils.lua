@@ -4,7 +4,7 @@ local plfile = require 'pl.file'
 local cutils = require 'libcutils'
 require 'Q/UTILS/lua/strict'
 
-local rootdir = os.getenv("Q_SRC_ROOT")
+local rootdir = assert(os.getenv("RSUTILS_SRC_ROOT"))
 plpath.isdir(rootdir)
 
 local tests = {}
@@ -13,7 +13,7 @@ tests.t1 = function()
   x = cutils.rdtsc()
   assert(math.ceil(x) == math.floor(x))
   
-  local dir = rootdir .. "/RUNTIME/CUTILS/src/"
+  local dir = rootdir .. "/src/"
   x = cutils.getfiles(dir, ".*.c$", "only_files")
   assert(type(x) == "table")
   for _, v in ipairs(x) do assert(type(v) == "string") end 
@@ -45,7 +45,7 @@ tests.t1 = function()
   assert(type(nsec) == "number")
   --==============
   for i = 1, 110 do 
-    local chkfile = rootdir .. "/RUNTIME/CUTILS/test/test_cutils.lua"
+    local chkfile = rootdir .. "/binding/test/test_cutils.lua"
     local z = cutils.read(chkfile)
     assert(type(z) == "string")
     assert(#z > 0)
@@ -61,7 +61,7 @@ tests.t1 = function()
   --============
   -- not being able to negate regexes properly
   -- also how do I match special characters. not working as expected
-  dir = rootdir .. "/RUNTIME/CUTILS/"
+  dir = rootdir  .. "/binding/" 
   x = cutils.getfiles(dir, "", "only_dirs")
   assert(type(x) == "table")
   for _, v in ipairs(x) do 
