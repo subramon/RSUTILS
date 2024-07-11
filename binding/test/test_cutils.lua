@@ -1,4 +1,4 @@
-local is_in = require 'Q/UTILS/lua/is_in'
+local is_in = require 'RSUTILS/lua/is_in'
 local plpath = require 'pl.path'
 local plfile = require 'pl.file'
 local cutils = require 'libcutils'

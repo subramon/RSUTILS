@@ -5,7 +5,7 @@
 //STOP_INCLUDES
 #include "set_bit_u64.h"
 //START_FUNC_DECL
-int // TODO inline this function
+int 
 set_bit_u64(
     uint64_t *X, 
     uint64_t i, 

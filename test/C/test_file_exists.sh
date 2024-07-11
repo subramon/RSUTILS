@@ -2,7 +2,6 @@
 set -e
 test -d ${RSUTILS_SRC_ROOT}
 filename=${RSUTILS_SRC_ROOT}/test/C/test_file_exists.c
-echo "filename = $filename"
 test -f $filename
 gcc -g test_file_exists.c ../../src/file_exists.c \
   -g -std=gnu99 \

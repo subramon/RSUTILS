@@ -4,11 +4,9 @@ CC = gcc
 INCS=-I../inc/ -I../inc/
 INCDIR=../inc/
 
-MYSO = libutils.so
+MYSO = librsutils.so
 
-EXTSO=${Q_ROOT}/lib/${MYSO}
-
-all : ${MYSO} ${EXTSO}
+all : ${MYSO} 
 
 gen_inc_files : \
 	../inc/txt_to_BL.h \
@@ -31,8 +29,10 @@ gen_inc_files : \
 	../inc/I8_to_txt.h \
 	../inc/F4_to_txt.h \
 	../inc/F8_to_txt.h \
+	../inc/file_as_str.h \
 	../inc/file_exists.h \
 	../inc/isfile.h \
+	../inc/isfile_in_dir.h \
 	../inc/isdir.h \
 	../inc/rand_file_name.h \
 	../inc/get_bit_u64.h \
@@ -47,6 +47,7 @@ gen_inc_files : \
 	../inc/rdtsc.h \
 	../inc/rs_mmap.h \
 	../inc/set_bit_u64.h \
+	../inc/str_as_file.h \
 	../inc/stretch.h \
 	../inc/tm2time.h  \
 	../inc/trim.h 
@@ -119,11 +120,17 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 ../src/F8_to_txt.c :
 	luajit print_generator.lua F8
 
+../inc/file_as_str.h : 
+	luajit ../src/cli_extract_func_decl.lua file_as_str.c ${INCDIR}
+
 ../inc/file_exists.h : 
 	luajit ../src/cli_extract_func_decl.lua file_exists.c ${INCDIR}
 
 ../inc/isfile.h :
 	luajit ../src/cli_extract_func_decl.lua isfile.c ${INCDIR}
+
+../inc/isfile_in_dir.h :
+	luajit ../src/cli_extract_func_decl.lua isfile_in_dir.c ${INCDIR}
 
 ../inc/isdir.h :
 	luajit ../src/cli_extract_func_decl.lua isdir.c ${INCDIR}
@@ -164,6 +171,9 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 ../inc/set_bit_u64.h :
 	luajit ../src/cli_extract_func_decl.lua set_bit_u64.c ${INCDIR}
 
+../inc/str_as_file.h :
+	luajit ../src/cli_extract_func_decl.lua str_as_file.c ${INCDIR}
+
 ../inc/stretch.h :
 	luajit ../src/cli_extract_func_decl.lua stretch.c ${INCDIR}
 
@@ -175,6 +185,7 @@ SC_to_txt.c : ../inc/SC_to_txt.h
 
 GEN_INC_FILES = \
 	../inc/BL_to_txt.h   \
+	../inc/file_as_str.h  \
 	../inc/file_exists.h  \
 	../inc/get_bit_u64.h \
 	../inc/get_file_size.h  \
@@ -182,6 +193,7 @@ GEN_INC_FILES = \
 	../inc/get_time_usec.h \
 	../inc/isdir.h  \
 	../inc/isfile.h  \
+	../inc/isfile_in_dir.h  \
 	../inc/is_valid_chars_for_num.h  \
 	../inc/mk_file.h \
 	../inc/mk_dir_file_name.h \
@@ -191,6 +203,7 @@ GEN_INC_FILES = \
 	../inc/rs_mmap.h \
 	../inc/SC_to_txt.h   \
 	../inc/set_bit_u64.h \
+	../inc/str_as_file.h \
 	../inc/stretch.h \
 	../inc/trim.h  \
 #--------
@@ -203,12 +216,14 @@ spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 SRCS := cat_to_buf.c 
 SRCS += BL_to_txt.c 
 SRCS += file_exists.c 
+SRCS += file_as_str.c 
 SRCS += get_bit_u64.c  
 SRCS += get_file_size.c 
 SRCS += mem_info.c 
 SRCS += get_time_usec.c 
 SRCS += is_valid_chars_for_num.c 
 SRCS += isfile.c 
+SRCS += isfile_in_dir.c 
 SRCS += isdir.c 
 SRCS += mk_file.c 
 SRCS += mk_dir_file_name.c 
@@ -220,6 +235,7 @@ SRCS += rmtree.c
 SRCS += rs_mmap.c 
 SRCS += SC_to_txt.c 
 SRCS += set_bit_u64.c  
+SRCS += str_as_file.c  
 SRCS += stretch.c  
 SRCS += spooky_hash.c 
 SRCS += tm2time.c 
@@ -239,19 +255,15 @@ GEN_SRCS += ../src/txt_to_I1.c
 GEN_SRCS += ../src/txt_to_I2.c
 GEN_SRCS += ../src/txt_to_I4.c
 GEN_SRCS += ../src/txt_to_I8.c
-GEN_SRCS += ../src/txt_to_UI1.c # TODO need to be auto-generated
-GEN_SRCS += ../src/txt_to_UI2.c # TODO need to be auto-generated
-GEN_SRCS += ../src/txt_to_UI4.c # TODO need to be auto-generated
-GEN_SRCS += ../src/txt_to_UI8.c # TODO need to be auto-generated
+GEN_SRCS += ../src/txt_to_UI1.c
+GEN_SRCS += ../src/txt_to_UI2.c
+GEN_SRCS += ../src/txt_to_UI4.c
+GEN_SRCS += ../src/txt_to_UI8.c
 GEN_SRCS += ../src/txt_to_F4.c
 GEN_SRCS += ../src/txt_to_F8.c
 
 GEN_OBJS = $(GEN_SRCS:.c=.o)
 #----------------------------------
-
-
-${EXTSO} : ${MYSO}
-	cp ${MYSO} ${EXTSO}
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
@@ -261,7 +273,7 @@ clean :
 	rm -f _*
 	rm -f *.so
 	rm -f *.o
-	rm -f  ${EXTSO} ${MYSO}
+	rm -f  ${MYSO}
 
 
 # do not use following unless you absolutely need to

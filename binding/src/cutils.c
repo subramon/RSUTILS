@@ -18,22 +18,74 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#include "file_as_str.h"
 #include "file_exists.h"
 #include "get_bit_u64.h"
 #include "get_file_size.h"
 #include "isdir.h"
 #include "isfile.h"
+#include "isfile_in_dir.h"
 #include "line_breaks.h"
 #include "mem_info.h"
 #include "mk_file.h"
 #include "qtypes.h"
 #include "rdtsc.h"
 #include "rs_mmap.h"
+#include "str_as_file.h"
 #include "tm2time.h"
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 
 int luaopen_libcutils (lua_State *L);
 
+//----------------------------------------
+static int l_cutils_exec( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  int fd = -1;
+  char * temp_file_name = NULL;
+  FILE *ifp = NULL; 
+#define BUFLEN 1024
+  char buf[BUFLEN]; 
+
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *pcmd  = luaL_checkstring(L, 1);
+  if ( ( pcmd == NULL ) ||( *pcmd == '\0' ) ) { go_BYE(-1); }
+  fprintf(stderr, "cutils.exec %s \n", pcmd); 
+
+  // create output file 
+  temp_file_name = strdup("/tmp/_cutils_XXXXXX"); 
+  fd = mkstemp(temp_file_name); 
+  if ( fd < 0 ) { go_BYE(-1); }
+
+  ifp = popen(pcmd, "r");
+  if ( ifp == NULL ) { go_BYE(-1); }
+  for ( ; ; ) { 
+    memset(buf, 0, BUFLEN);
+    ssize_t nr = fread(buf, 1, BUFLEN-1, ifp); 
+    if ( nr < 0 ) { go_BYE(-1); }
+    if ( nr == 0 ) { break; }
+    ssize_t nw = write(fd, buf, nr); 
+    if ( nw != nr ) { go_BYE(-1); }
+    if ( nr < BUFLEN-1 ) { break; }
+  }
+  pclose(ifp);  ifp = NULL; 
+  close(fd); fd = -1;
+  char *str = file_as_str(temp_file_name); 
+  if ( temp_file_name != NULL ) { unlink(temp_file_name); } 
+  free_if_non_null(temp_file_name); 
+  lua_pushstring(L, str); 
+  return 1; 
+BYE:
+  if ( fd >= 0 ) { close(fd); }
+  if ( temp_file_name != NULL ) { unlink(temp_file_name); } 
+  free_if_non_null(temp_file_name); 
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
 //----------------------------------------
 static int l_cutils_basename( 
     lua_State *L
@@ -320,6 +372,43 @@ BYE:
   return 2;
 }
 //----------------------------------------
+static int l_cutils_str_as_file( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 2 ) { go_BYE(-1); }
+  const char *const str       = luaL_checkstring(L, 1);
+  const char *const file_name = luaL_checkstring(L, 2);
+  status = str_as_file(str, file_name); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+//----------------------------------------
+static int l_cutils_file_as_str( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *const file_name = luaL_checkstring(L, 1);
+  char *x  =  file_as_str(file_name);
+  if ( x == NULL ) { go_BYE(-1); }
+  lua_pushstring(L, x);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+//----------------------------------------
+//----------------------------------------
 static int l_cutils_getsize( 
     lua_State *L
     )
@@ -338,6 +427,25 @@ static int l_cutils_isfile(
   bool exists = isfile(file_name);
   lua_pushboolean(L, exists);
   return 1;
+}
+//----------------------------------------
+static int l_cutils_isfile_in_dir( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  int nargs = lua_gettop(L);
+  if ( nargs != 2 ) { go_BYE(-1); }
+  const char *const file_name = luaL_checkstring(L, 1);
+  const char *const  dir_name = luaL_checkstring(L, 2);
+  bool exists = isfile_in_dir(file_name, dir_name);
+  lua_pushboolean(L, exists);
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushnumber(L, status);
+  lua_pushstring(L, __func__);
+  return 3;
 }
 //----------------------------------------
 static int l_cutils_str_qtype_to_str_ispctype( 
@@ -719,8 +827,11 @@ static const struct luaL_Reg cutils_methods[] = {
     { "get_width_qtype",   l_cutils_get_width_qtype },
     { "get_c_qtype", l_cutils_get_c_qtype },
     { "delete",      l_cutils_delete },
+    { "exec",        l_cutils_exec },
+    { "file_as_str", l_cutils_file_as_str },
     { "isdir",       l_cutils_isdir },
     { "isfile",      l_cutils_isfile },
+    { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "is_qtype",    l_cutils_is_qtype },
     { "line_breaks", l_cutils_line_breaks },
     { "makepath",    l_cutils_makepath },
@@ -731,6 +842,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
     { "rdtsc",       l_cutils_rdtsc },
+    { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
     { "unlink",     l_cutils_unlink },
@@ -745,6 +857,8 @@ static const struct luaL_Reg cutils_functions[] = {
     { "dirname",     l_cutils_dirname },
     { "currentdir",  l_cutils_currentdir },
     { "delete",      l_cutils_delete },
+    { "exec",        l_cutils_exec },
+    { "file_as_str", l_cutils_file_as_str },
     { "get_bit_u64", l_cutils_get_bit_u64 },
     { "getfiles",    l_cutils_getfiles },
     { "getsize",     l_cutils_getsize },
@@ -754,6 +868,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "is_qtype",     l_cutils_is_qtype },
     { "isdir",       l_cutils_isdir },
     { "isfile",      l_cutils_isfile },
+    { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "line_breaks", l_cutils_line_breaks },
     { "makepath",    l_cutils_makepath },
     { "mem_info",     l_cutils_mem_info },
@@ -764,6 +879,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
     { "rdtsc",       l_cutils_rdtsc },
+    { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
     { "unlink",     l_cutils_unlink },

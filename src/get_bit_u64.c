@@ -2,7 +2,7 @@
 #include "q_macros.h"
 #include "get_bit_u64.h"
 //START_FUNC_DECL
-int // TODO inline this function
+int 
 get_bit_u64(
     const uint64_t * const X,
     uint64_t i
