@@ -6,6 +6,8 @@ require 'Q/UTILS/lua/strict'
 
 local rootdir = assert(os.getenv("RSUTILS_SRC_ROOT"))
 plpath.isdir(rootdir)
+rootdir = rootdir .. "/RSUTILS/"
+plpath.isdir(rootdir)
 
 local tests = {}
 tests.t1 = function()
@@ -14,6 +16,7 @@ tests.t1 = function()
   assert(math.ceil(x) == math.floor(x))
   
   local dir = rootdir .. "/src/"
+  print("dir = ", dir)
   x = cutils.getfiles(dir, ".*.c$", "only_files")
   assert(type(x) == "table")
   for _, v in ipairs(x) do assert(type(v) == "string") end 

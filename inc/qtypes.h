@@ -30,9 +30,7 @@ typedef enum {
   TM,  // time struct  tm_t
   TM1, // time struct  tm_t
 
-  CUSTOM1, // for MG experiment 
-
-  NUM_QTYPES // must be last one 
+  QF // must be last one 
 } qtype_t;
 // STOP extract_for_qtypes.tex
 typedef struct _tm_t {

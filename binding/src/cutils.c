@@ -52,7 +52,6 @@ static int l_cutils_exec(
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *pcmd  = luaL_checkstring(L, 1);
   if ( ( pcmd == NULL ) ||( *pcmd == '\0' ) ) { go_BYE(-1); }
-  fprintf(stderr, "cutils.exec %s \n", pcmd); 
 
   // create output file 
   temp_file_name = strdup("/tmp/_cutils_XXXXXX"); 

@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include "_isfile.h"
+#include "isfile.h"
 
 int main(int argc, char** argv) {
   int status = 0;

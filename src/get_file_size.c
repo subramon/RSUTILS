@@ -22,7 +22,7 @@ get_file_size(
   struct stat filestat;
 
   fd = open(file_name, O_RDONLY);
-  if ( fd < 0 ) { go_BYE(-1); }
+  if ( fd < 0 ) { /* silent failure */ return -1; } 
   status = fstat(fd, &filestat);  cBYE(status);
   file_size = (int64_t) filestat.st_size;
 BYE:

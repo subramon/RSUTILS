@@ -4,9 +4,14 @@
 int
 main()
 {
-  char X[32];
+  int status = 0;
+#define N 64
+  char X[N];
   for ( int i = 0; i < 10; i++ ) { 
-    rand_file_name(X, 32);
+    status = rand_file_name(X, N); cBYE(status);
     fprintf(stderr, "X = %s \n", X);
   }
+  printf("SUCCESS\n");
+BYE:
+  return status;
 }
