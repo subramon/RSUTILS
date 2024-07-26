@@ -17,6 +17,7 @@ SRCS += ../../src/isfile_in_dir.c
 SRCS += ../../src/line_breaks.c 
 SRCS += ../../src/mem_info.c 
 SRCS += ../../src/mk_file.c 
+SRCS += ../../src/rand_file_name.c 
 SRCS += ../../src/rdtsc.c 
 SRCS += ../../src/rs_mmap.c 
 SRCS += ../../src/str_as_file.c 

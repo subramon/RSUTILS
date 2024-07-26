@@ -29,6 +29,7 @@
 #include "mem_info.h"
 #include "mk_file.h"
 #include "qtypes.h"
+#include "rand_file_name.h"
 #include "rdtsc.h"
 #include "rs_mmap.h"
 #include "str_as_file.h"
@@ -142,6 +143,22 @@ static int l_cutils_dirname(
   lua_pushstring(L, dir);
   free_if_non_null(x);
   return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
+//----------------------------------------
+static int l_cutils_rand_file_name( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  char buf[64]; memset(buf, 0, 64);
+  status = rand_file_name(buf, 63);
+  lua_pushstring(L, buf);
+  return 1;
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, __func__);
@@ -840,6 +857,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "num_lines",   l_cutils_num_lines },
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
+    { "rand_file_name",       l_cutils_rand_file_name },
     { "rdtsc",       l_cutils_rdtsc },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
@@ -877,6 +895,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "omp_get_num_procs",   l_cutils_omp_get_num_procs },
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
+    { "rand_file_name",       l_cutils_rand_file_name },
     { "rdtsc",       l_cutils_rdtsc },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
