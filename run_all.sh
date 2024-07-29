@@ -1,6 +1,6 @@
 source to_source
 test -d $RSUTILS_SRC_ROOT
-cd binding/test/
+cd $RSUTILS_SRC_ROOT/binding/test/
 luajit test_cutils.lua
 #TODO Add all the other test_*.lua :wq
 

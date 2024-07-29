@@ -5,8 +5,7 @@ local cutils = require 'libcutils'
 require 'Q/UTILS/lua/strict'
 
 local rootdir = assert(os.getenv("RSUTILS_SRC_ROOT"))
-plpath.isdir(rootdir)
-rootdir = rootdir .. "/RSUTILS/"
+-- example of rootdir is home/subramon/RSUTILS
 plpath.isdir(rootdir)
 
 local tests = {}

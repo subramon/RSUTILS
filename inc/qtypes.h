@@ -1,3 +1,6 @@
+// IMPORTANT
+// TODO P2 Because of some legacy stuff, this file is duplicated in 
+// Q/UTILS/inc/. If you make a change here, copy the file over there
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
