@@ -150,6 +150,27 @@ BYE:
   return 3; 
 }
 //----------------------------------------
+static int l_cutils_realpath( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *path = luaL_checkstring(L, 1);
+  if ( !isfile(path) ) { go_BYE(-1); } 
+  char *str_realpath = realpath(path, NULL);
+  if ( str_realpath == NULL ) { go_BYE(-1); } 
+  if ( !isfile(str_realpath) ) { go_BYE(-1); } 
+
+  lua_pushstring(L, str_realpath);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
+//----------------------------------------
 static int l_cutils_rand_file_name( 
     lua_State *L
     )
@@ -858,6 +879,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
     { "rand_file_name",       l_cutils_rand_file_name },
+    { "realpath",       l_cutils_realpath },
     { "rdtsc",       l_cutils_rdtsc },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
@@ -896,6 +918,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
     { "rand_file_name",       l_cutils_rand_file_name },
+    { "realpath",       l_cutils_realpath },
     { "rdtsc",       l_cutils_rdtsc },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },

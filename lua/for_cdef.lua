@@ -23,7 +23,6 @@ local cutils = require 'libcutils'
 local function for_cdef(
   infile,
   incs,
-  subs,
   use_cache
   )
   -- Determine the input file 
@@ -113,6 +112,8 @@ local function for_cdef(
   --==============
   return rslt, false
 end
--- return for_cdef
-x = for_cdef("/home/subramon/CMEM/inc/cmem_struct.h", { "/home/subramon/RSUTILS/inc/" })
+return for_cdef
+--[[ qd test 
+x = for_cdef("/home/subramon/CMEM/inc/cmem_struct.h", { "/home/subramon/RSUTILS/inc/" }, false)
 print(x)
+--]]
