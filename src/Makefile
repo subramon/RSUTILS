@@ -1,4 +1,5 @@
-#!/bin/ballsh
+#!/bin/bash
+
 
 CC = gcc 
 INCS=-I../inc/ -I../inc/
@@ -6,7 +7,7 @@ INCDIR=../inc/
 
 MYSO = librsutils.so
 
-all : ${MYSO} 
+all : ${MYSO}  ut_task_cpu_time
 
 gen_inc_files : \
 	../inc/txt_to_BL.h \
@@ -48,6 +49,7 @@ gen_inc_files : \
 	../inc/rs_mmap.h \
 	../inc/set_bit_u64.h \
 	../inc/str_as_file.h \
+	../inc/split_str.h \
 	../inc/stretch.h \
 	../inc/tm2time.h  \
 	../inc/trim.h 
@@ -227,6 +229,9 @@ SRCS += isfile_in_dir.c
 SRCS += isdir.c 
 SRCS += mk_file.c 
 SRCS += mk_dir_file_name.c 
+SRCS += multiple.c 
+SRCS += bf16tofp32.c
+SRCS += fp32tobf16.c
 SRCS += q_omp_get_num_procs.c  
 SRCS += qtypes.c 
 SRCS += rand_file_name.c 
@@ -235,9 +240,15 @@ SRCS += rmtree.c
 SRCS += rs_mmap.c 
 SRCS += SC_to_txt.c 
 SRCS += set_bit_u64.c  
+SRCS += sort1.c 
 SRCS += str_as_file.c  
 SRCS += stretch.c  
 SRCS += spooky_hash.c 
+SRCS += task_cpu_time.c
+SRCS += split_str.c
+SRCS += read_csv.c
+SRCS += unique.c
+SRCS += num_lines.c
 SRCS += tm2time.c 
 SRCS += trim.c 
 SRCS += txt_to_BL.c 
@@ -269,6 +280,8 @@ ${MYSO} : ${GEN_OBJS} ${OBJS}
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
 		${GEN_OBJS} ${OBJS} -o ${MYSO}
 
+ut_task_cpu_time : ut_task_cpu_time.c
+	gcc -I../inc/ ut_task_cpu_time.c -o ut_task_cpu_time ${MYSO} -lpthread -lm
 clean :
 	rm -f _*
 	rm -f *.so

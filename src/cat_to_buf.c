@@ -1,15 +1,7 @@
 #include "q_incs.h"
+#include "multiple.h"
 #include "cat_to_buf.h"
 
-static uint32_t 
-multiple8(
-    uint32_t n
-    )
-{
-  uint32_t m = (n >> 3) << 3;
-  if ( m != n ) { m += 8; }
-  return m;
-}
 #define MIN_TO_ADD 64
 // concatenates str to buf 
 // If buf is not big enough, it will re-allocate space
@@ -45,7 +37,7 @@ cat_to_buf(
   }
   if ( str_len + buflen + 1 >= bufsz ) { // +1 for nullc
     bufsz += mcr_max(MIN_TO_ADD, ((str_len + buflen) - bufsz));
-    bufsz = multiple8(bufsz);
+    bufsz = multiple_n(bufsz, 8);
     char *newbuf = malloc(bufsz);
     return_if_malloc_failed(newbuf);
     memset(newbuf, 0, bufsz); 

@@ -40,7 +40,7 @@ BYE:
   return status;
 }
 
-int
+uint32_t
 get_width_qtype(
     const char * const str_qtype
     )
@@ -51,7 +51,7 @@ get_width_qtype(
   return width;
 }
 
-int
+uint32_t
 get_width_c_qtype(
       qtype_t qtype
     )
