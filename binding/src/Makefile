@@ -7,6 +7,8 @@ all: libcutils.so
 SRCS := cutils.c 
 SRCS += ../../src/qtypes.c 
 SRCS += ../../src/file_exists.c 
+SRCS += ../../src/cat_to_buf.c 
+SRCS += ../../src/multiple.c 
 SRCS += ../../src/file_as_str.c 
 SRCS += ../../src/get_bit_u64.c 
 SRCS += ../../src/get_file_size.c 

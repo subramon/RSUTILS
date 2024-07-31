@@ -142,21 +142,24 @@ get_str_qtype(
   if ( qtype == I2 ) { return "I2"; }
   if ( qtype == I4 ) { return "I4"; }
   if ( qtype == I8 ) { return "I8"; }
+  if ( qtype == I16 ) { return "I16"; }
 
   if ( qtype == UI1 ) { return "UI1"; }
   if ( qtype == UI2 ) { return "UI2"; }
   if ( qtype == UI4 ) { return "UI4"; }
   if ( qtype == UI8 ) { return "UI8"; }
+  if ( qtype == UI16 ) { return "UI16"; }
 
   if ( qtype == F2 ) { return "F2"; }
   if ( qtype == F4 ) { return "F4"; }
   if ( qtype == F8 ) { return "F8"; }
 
-  if ( qtype == TM1 ) { return "TM1"; }
-  if ( qtype == TM ) { return "TM"; }
-
-
   if ( qtype == SC ) { return "SC"; }
+  if ( qtype == SV ) { return "SV"; }
+  if ( qtype == TM ) { return "TM"; }
+  if ( qtype == TM1 ) { return "TM1"; }
+
+
   return NULL; 
 }
 
@@ -243,3 +246,25 @@ F2_to_F4(
   return y;
 }
 
+char *
+qtypes_as_lua_tbl(
+    void
+    )
+{
+  int status = 0;
+  char *out_str  = NULL;  int out_sz = 0; int out_len = 0;
+  char buf[64]; memset(buf, 0, 64);
+  sprintf(buf, "local qtypes = {}\n");
+  status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
+
+  int idx = 0;
+  for ( qtype_t qt = Q0; qt < QF; qt++ ) { 
+    char *str = get_str_qtype(qt); if ( str == NULL ) { go_BYE(-1); }
+    sprintf(buf, "qtypes['%s'] = %d \n", get_str_qtype(qt), idx++);
+    status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
+  }
+  sprintf(buf, "return qtypes\n");
+  status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
+BYE:
+  if ( status != 0 ) { return NULL; } else { return out_str; }
+}
