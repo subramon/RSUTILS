@@ -1,7 +1,4 @@
 local cutils  = require 'libcutils'
--- local plpath  = require 'pl.path'
--- local pldir   = require 'pl.dir'
-local qcfg = require 'Q/UTILS/lua/qcfg'
 
 local section = { 
   c = 'definition', 
@@ -9,13 +6,16 @@ local section = {
   ispc = 'definition', 
   }
 
-local function do_replacements(subs, lang)
+-- The src_root is needed if a fully qualified path is not provided
+-- either for the template file (tmpl) or the output directory (opdir)
+local function do_replacements(subs, lang, src_root)
   assert ( ( lang == "C" ) or ( lang == "ISPC" ) ) 
   local tmpl
   if ( lang == "C" ) then tmpl = assert(subs.tmpl) end 
   if ( lang == "ISPC" ) then tmpl = assert(subs.tmpl_ispc) end 
   if ( string.find(tmpl, "/") ~= 1 ) then -- TODO P4: What if no '/'? 
-    tmpl = qcfg.q_src_root .. tmpl
+    assert(type(src_root) == "string")
+    tmpl = src_root .. tmpl
   end
   local T
   assert(cutils.isfile(tmpl), "File not found " .. tmpl)
@@ -26,13 +26,14 @@ local function do_replacements(subs, lang)
   return T
 end
 
-local _dotfile = function(subs, opdir, lang, ext)
+local _dotfile = function(subs, opdir, lang, ext, src_root)
   assert(type(opdir) == "string")
   assert(#opdir > 0)
   local func_name = subs.fn
   local basic_fname = opdir .. "/" .. func_name .. "." .. ext
   if ( string.find(opdir, "/") ~= 1 ) then -- TODO P4: What if no '/' ?
-    opdir = qcfg.q_src_root .. opdir
+    assert(type(src_root) == "string")
+    opdir = src_root .. opdir
   end
   if ( not cutils.isdir(opdir) ) then
     assert(cutils.makepath(opdir), "Unable to create dir " .. opdir)
@@ -51,24 +52,26 @@ end
 
 local fns = {}
 
-fns.dotc = function (subs, opdir)
-  return _dotfile(subs, opdir, "C", 'c')
+fns.dotc = function (subs, opdir, src_root)
+  return _dotfile(subs, opdir, "C", 'c', src_root)
 end
 
-fns.doth = function (subs, opdir)
-  return _dotfile(subs, opdir, "C", 'h')
+fns.doth = function (subs, opdir, src_root)
+  return _dotfile(subs, opdir, "C", 'h', src_root)
 end
 
-fns.ispc = function (subs, srcdir, incdir)
+fns.ispc = function (subs, srcdir, incdir, src_root)
   -- this will return .ispc file and .h file 
   -- first create the .ispc file 
-  local ispc_basic, ispc_full =  _dotfile(subs, srcdir, "ISPC", 'ispc')
+  local ispc_basic, ispc_full =  
+    _dotfile(subs, srcdir, "ISPC", 'ispc', src_root)
   -- now create the .h file
   -- first, create its name (rather ugly repetition)
   local func_name = subs.fn_ispc
   local h_basic = incdir .. "/" .. func_name .. ".h"
   if ( string.find(incdir, "/") ~= 1 ) then -- TODO P4: What if no '/' ?
-    incdir = qcfg.q_src_root .. incdir
+    assert(type(src_root) == "string")
+    incdir = src_root .. incdir
   end
   if ( not cutils.isdir(incdir) ) then
     assert(cutils.makepath(incdir))

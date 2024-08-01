@@ -1,5 +1,6 @@
 #include "q_incs.h"
 #include "q_macros.h"
+#include "cat_to_buf.h"
 #include "qtypes.h"
 
 qtype_t
@@ -121,6 +122,9 @@ get_c_qtype(
   if ( strcmp("SC", str_qtype) == 0 ) { return   SC; }  
   if ( strncmp("SC:", str_qtype, 3) == 0 ) { return SC; }   // NOTE
 
+  if ( strcmp("TM", str_qtype) == 0 ) { return TM; }  
+  if ( strncmp("TM:", str_qtype, 3) == 0 ) { return TM; }  
+
   if ( strcmp("TM1", str_qtype) == 0 ) { return TM1; }  
   if ( strncmp("TM1:", str_qtype, 3) == 0 ) { return TM1; }  
 
@@ -187,8 +191,8 @@ str_qtype_to_str_ctype(
   if ( strcmp(str_qtype, "F4") == 0 ) { return "float"; } 
   if ( strcmp(str_qtype, "F8") == 0 ) { return "double"; } 
 
-  if ( strcmp(str_qtype, "TM1") == 0 ) { return "tm_t"; } 
   if ( strcmp(str_qtype, "TM") == 0 ) { return "struct tm"; } 
+  if ( strcmp(str_qtype, "TM1") == 0 ) { return "tm_t"; } 
 
   return NULL; 
 }
@@ -218,8 +222,8 @@ str_qtype_to_str_ispctype(
   if ( strcmp(str_qtype, "F4") == 0 ) { return "float"; } 
   if ( strcmp(str_qtype, "F8") == 0 ) { return "double"; } 
 
-  if ( strcmp(str_qtype, "TM1") == 0 ) { return NULL; } 
   if ( strcmp(str_qtype, "TM") == 0 ) { return NULL; } 
+  if ( strcmp(str_qtype, "TM1") == 0 ) { return NULL; } 
   if ( strcmp(str_qtype, "CUSTOM1") == 0 ) { return NULL; } 
   return NULL; 
 }
@@ -252,14 +256,14 @@ qtypes_as_lua_tbl(
     )
 {
   int status = 0;
-  char *out_str  = NULL;  int out_sz = 0; int out_len = 0;
+  char *out_str  = NULL;  uint32_t out_sz = 0, out_len = 0;
   char buf[64]; memset(buf, 0, 64);
   sprintf(buf, "local qtypes = {}\n");
   status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
 
   int idx = 0;
   for ( qtype_t qt = Q0; qt < QF; qt++ ) { 
-    char *str = get_str_qtype(qt); if ( str == NULL ) { go_BYE(-1); }
+    const char *str = get_str_qtype(qt); if ( str == NULL ) { go_BYE(-1); }
     sprintf(buf, "qtypes['%s'] = %d \n", get_str_qtype(qt), idx++);
     status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
   }

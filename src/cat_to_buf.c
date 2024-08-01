@@ -8,8 +8,8 @@
 int
 cat_to_buf(
     char **ptr_buf,  // [bufsz]
-    int *ptr_bufsz, 
-    int *ptr_buflen, 
+    uint32_t *ptr_bufsz, 
+    uint32_t *ptr_buflen, 
     const char * const str,
     int str_len
     )
@@ -17,8 +17,8 @@ cat_to_buf(
   int status = 0;
 
   char *buf  = *ptr_buf;
-  int bufsz  = *ptr_bufsz; 
-  int buflen = *ptr_buflen; 
+  uint32_t bufsz  = *ptr_bufsz; 
+  uint32_t buflen = *ptr_buflen; 
 
   if ( str == NULL ) { go_BYE(-1); } 
   if ( str_len == 0  ) {  str_len  = strlen(str); }

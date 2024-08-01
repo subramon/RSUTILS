@@ -162,8 +162,8 @@ read_csv(
         uiptr[i] = uival;
       }
       //-------------------------------------------
-      else if ( strncmp(str_qtypes[j], "TM:", 3) == 0 ) {
-        const char * const format = str_qtypes[j] + 3;
+      else if ( strncmp(str_qtypes[j], "TM1:", 4) == 0 ) {
+        const char * const format = str_qtypes[j] + 4;
         if ( *format == '\0' ) { go_BYE(-1); }
         tm_t  *tptr = (tm_t *)out[j];
         struct tm l_tm;

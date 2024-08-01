@@ -249,6 +249,7 @@ SRCS += split_str.c
 SRCS += read_csv.c
 SRCS += unique.c
 SRCS += num_lines.c
+SRCS += num_cols.c
 SRCS += tm2time.c 
 SRCS += trim.c 
 SRCS += txt_to_BL.c 

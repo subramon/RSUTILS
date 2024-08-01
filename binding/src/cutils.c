@@ -28,6 +28,8 @@
 #include "line_breaks.h"
 #include "mem_info.h"
 #include "mk_file.h"
+#include "num_lines.h"
+#include "num_cols.h"
 #include "qtypes.h"
 #include "rand_file_name.h"
 #include "rdtsc.h"
@@ -251,25 +253,34 @@ static int l_cutils_isdir(
   return 1;
 }
 //----------------------------------------
+static int l_cutils_num_cols( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *const file_name = luaL_checkstring(L, 1);
+  int nc = num_cols(file_name); if ( nc < 0 ) { go_BYE(-1); }
+  lua_pushnumber(L, nc);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+//----------------------------------------
 static int l_cutils_num_lines( 
     lua_State *L
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *const file_name = luaL_checkstring(L, 1);
-  status = rs_mmap(file_name, &X, &nX, 0); cBYE(status);
-  if ( X[nX-1] != '\n' ) { go_BYE(-1); }
-  uint64_t num_lines = 0;
-  for ( uint64_t i = 0; i < nX; i++ ) { 
-    if ( X[i] == '\n' ) { num_lines++; }
-  }
-  lua_pushnumber(L, num_lines);
-  mcr_rs_munmap(X, nX);
+  int nl = num_lines(file_name); if ( nl < 0 ) { go_BYE(-1); }
+  lua_pushnumber(L, nl);
   return 1;
 BYE:
-  mcr_rs_munmap(X, nX);
   lua_pushnil(L);
   lua_pushstring(L, __func__);
   lua_pushnumber(L, status);
@@ -892,6 +903,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "mem_info",    l_cutils_mem_info },
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
+    { "num_cols",   l_cutils_num_cols },
     { "num_lines",   l_cutils_num_lines },
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
@@ -931,6 +943,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "mem_info",     l_cutils_mem_info },
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
+    { "num_cols",   l_cutils_num_cols },
     { "num_lines",   l_cutils_num_lines },
     { "omp_get_num_procs",   l_cutils_omp_get_num_procs },
     { "quote_str",   l_cutils_quote_str },
