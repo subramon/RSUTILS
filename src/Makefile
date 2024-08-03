@@ -230,6 +230,7 @@ SRCS += isdir.c
 SRCS += mk_file.c 
 SRCS += mk_dir_file_name.c 
 SRCS += multiple.c 
+SRCS += free_2d_array.c 
 SRCS += bf16tofp32.c
 SRCS += fp32tobf16.c
 SRCS += q_omp_get_num_procs.c  
