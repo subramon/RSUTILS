@@ -176,7 +176,6 @@ static int l_cutils_realpath(
   int status = 0;
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *path = luaL_checkstring(L, 1);
-  if ( !isfile(path) ) { go_BYE(-1); } 
   char *str_realpath = realpath(path, NULL);
   if ( str_realpath == NULL ) { go_BYE(-1); } 
   if ( !isfile(str_realpath) ) { go_BYE(-1); } 

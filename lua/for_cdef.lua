@@ -10,11 +10,14 @@
 --    #ifndef
 --    #endif
 --    #define
--- 4) Return a string with the above
+-- 4) Return 3 things
+--  4a) a string with the above
+--  4b) whether you found the cdef str in the cache 
+--  4c) name of file in the cache where the cdef str would have been stored
 
-local qcfg   = require 'Q/UTILS/lua/qcfg'
 local exec   = require 'RSUTILS/lua/exec_and_capture_stdout'
 local c_exec = require 'RSUTILS/lua/c_exec'
+local is_cdef_cached = require 'RSUTILS/lua/is_cdef_cached'
 local cutils = require 'libcutils'
 
 -- Creates file with name cdef_file which contains
@@ -23,35 +26,29 @@ local cutils = require 'libcutils'
 local function for_cdef(
   infile,
   incs,
-  use_cache
+  cache_root,
+  src_root
   )
   -- Determine the input file 
-  local src_root = qcfg.q_src_root
   assert(type(infile) == "string")
   -- TODO P4: What if no forward slash in infile?
   if ( string.find(infile, "/") ~= 1 ) then
     -- we do not have fully qualified path
+    assert(type(src_root) == "string")
     infile = src_root .. "/" .. infile
   end
   assert(cutils.isfile(infile), "File not found: " .. infile)
-  if ( use_cache ) then 
-    -- START: make name of cdef file 
-    -- Bit ugly: we assume that file to be cdef'd is either in Q or RSUTILS
-    local n1, n2 = string.find(infile, "/Q/")
-    if ( not n1 ) then 
-      n1, n2 = string.find(infile, "/RSUTILS/")
-    end
-    assert(n1 >= 1)
-    local str = string.sub(infile, n2)
-    local cdef_file = 
-      qcfg.q_root .. "/cdefs/" .. string.gsub(str, "/", "_")
-    -- STOP : make name of cdef file 
-    if ( cutils.isfile(cdef_file) ) then
-      -- print("Using cached version", cdef_file)
-      local rslt = cutils.file_as_str(cdef_file)
-      return rslt, true, nil
+  --=======================================================
+  local cdef_file
+  if ( cache_root ) then 
+    cdef_file, is_cdef_file = is_cdef_cached(infile, src_root, cache_root)
+    if ( is_cdef_file ) then 
+      return cutils.file_as_str(cdef_file), true, cdef_file
     end
   end
+  --=======================================================
+  -- Control comes here means that we didn't get lucky and find
+  -- the cdef_str in the cache. So, we have to create it 
   --============================================
   -- Determine the incs i.e., -I....
   local cmd
@@ -110,10 +107,11 @@ local function for_cdef(
   local chk = string.gsub(rslt, "%s", "")
   assert(#chk > 0, "infile = " .. infile)
   --==============
-  return rslt, false
+  return rslt, false, cdef_file
 end
 return for_cdef
 --[[ qd test 
-x = for_cdef("/home/subramon/CMEM/inc/cmem_struct.h", { "/home/subramon/RSUTILS/inc/" }, false)
+x = for_cdef("CMEM/inc/cmem_struct.h", 
+  { "/home/subramon/RSUTILS/inc/" }, false, "/home/subramon/" )
 print(x)
 --]]

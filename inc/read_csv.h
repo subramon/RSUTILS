@@ -1,7 +1,7 @@
 extern int
 read_csv(
     const char * const infile,
-    const char ** const qtypes,
+    char ** const qtypes,
     void ** const out, // [ncols][nrows]
     const uint32_t * const width, // [ncols] width of a column (needed for SC)
     uint32_t nrows,
