@@ -78,6 +78,7 @@ static int l_cutils_exec(
   if ( temp_file_name != NULL ) { unlink(temp_file_name); } 
   free_if_non_null(temp_file_name); 
   lua_pushstring(L, str); 
+  free(str); // Lua has taken control TODO P0 THINK 
   return 1; 
 BYE:
   if ( fd >= 0 ) { close(fd); }
@@ -463,7 +464,8 @@ static int l_cutils_file_as_str(
   const char *const file_name = luaL_checkstring(L, 1);
   char *x  =  file_as_str(file_name);
   if ( x == NULL ) { go_BYE(-1); }
-  lua_pushstring(L, x);
+  lua_pushstring(L, x); 
+  free(x); // Lua has taken control. TODO P0 Thinkl
   return 1;
 BYE:
   lua_pushnil(L);
@@ -983,7 +985,7 @@ int luaopen_libcutils (lua_State *L) {
   luaL_register(L, NULL, cutils_methods);
 
   /* Register cutils in types table */
-  int status = luaL_dostring(L, "return require 'Q/UTILS/lua/register_type'");
+  int status = luaL_dostring(L, "return require 'RSUTILS/lua/register_type'");
   if (status != 0 ) {
     printf("Running require failed:  %s\n", lua_tostring(L, -1));
     exit(1);
