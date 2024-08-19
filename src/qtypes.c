@@ -47,6 +47,16 @@ get_width_qtype(
     )
 {
   if ( str_qtype == NULL ) { WHEREAMI; return -1; }
+  if ( strncmp(str_qtype, "SC:", strlen("SC:")) == 0 ) { 
+    const char *cptr = str_qtype + strlen("SC:");
+    for ( const char *xptr = cptr; *xptr != '\0'; xptr++ ) { 
+      if ( !isdigit(*xptr) ) { WHEREAMI; return 0; }
+    }
+    int width = atoi(cptr);
+    if ( width < 2 ) { WHEREAMI; return 0; } // need 1 for nullc
+    if ( width > 16384 ) { WHEREAMI; return 0; } // some reasonable limit 
+    return width;
+  }
   qtype_t qtype = get_c_qtype(str_qtype);
   int width = get_width_c_qtype(qtype);
   return width;

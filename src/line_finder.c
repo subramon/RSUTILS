@@ -4,6 +4,7 @@
 #include <inttypes.h>
 #include <string.h>
 #include <stdbool.h>
+#include "line_finder.h"
 
 // If you want bslash or dquote in the value, then you MUST 
 // start and stop the value with a dquote 
@@ -14,6 +15,43 @@ typedef enum  {
   S3
 } state_t;
 
+static bool to_write(
+    char **cells, 
+    bool *is_load, 
+    uint32_t col_idx
+    )
+{
+  if ( ( cells != NULL ) && 
+      ( ( is_load == NULL ) || 
+        ( ( is_load != NULL ) && ( is_load[col_idx] == true ) ) ) ) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+static int rs_strcpy(
+    char *dst,
+    const char *const src,
+    uint32_t start,
+    uint32_t stop
+    )
+{
+  int status = 0;
+  if ( dst == NULL ) { go_BYE(-1); }
+  if ( src == NULL ) { go_BYE(-1); }
+  if ( start >= stop ) { go_BYE(-1); } // TODO > or >= ??
+  uint32_t didx = 0;
+  for ( uint32_t sidx = start; sidx < stop; sidx++, didx++ ) { 
+    if ( src[sidx] == '\\' ) { 
+      sidx++;
+    }
+    dst[didx] = src[sidx];
+  }
+BYE:
+  return status;
+}
+
 int
 line_finder(
     const char * const X, // [nX] input 
@@ -22,6 +60,9 @@ line_finder(
     int rec_sep,
     uint32_t ncol, // number of columns 
     uint32_t *max_width, // [ncol] can be null 
+    // Note that max_width needs one spot for nullc
+    bool *is_load, // [ncol] can be null 
+    char **cells, // [ncol][max_width[i]] can be null
     uint32_t *ptr_eoln_idx
     )
 {
@@ -29,8 +70,7 @@ line_finder(
   if ( X == NULL ) { go_BYE(-1); } 
   if ( nX == 0 ) { go_BYE(-1); } 
   if ( ncol == 0 ) { go_BYE(-1); } 
-  uint32_t ncol_seen = 0; 
-  int col_idx = 0;
+  uint32_t col_idx = 0;
   uint32_t start_idx, stop_idx;
   char dquote = '"';
   char bslash = '\\';
@@ -39,10 +79,25 @@ line_finder(
   *ptr_eoln_idx = 0;
   bool eoln_found = false;
   for ( uint64_t idx = 0; eoln_found == false; idx++ ) {
-    if ( idx == nX ) { go_BYE(-1); } 
+    if ( idx == nX ) { 
+      go_BYE(-1); } 
     char c = X[idx];
     switch ( state ) {
       case S0 : 
+        if ( ( col_idx == ncol-1) && ( c == rec_sep ) ) {
+          printf("Identified %dth cell = []\n", col_idx);
+          *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+          eoln_found = true;
+          break;
+        }
+        if ( ( col_idx <  ncol-1) && ( c == fld_sep ) ) {
+          if ( to_write(cells, is_load, col_idx) ) {
+            cells[col_idx][0] = '\0';
+          }
+          printf("Identified %dth cell = []\n", col_idx);// empty cell 
+          col_idx++;
+          break;
+        }
         if ( c == dquote ) {
           state = S1;
           num_bslash = 0;
@@ -55,7 +110,6 @@ line_finder(
           state = S2;
           start_idx = idx;
         }
-        col_idx++; // just started a new cell 
         break;
       case S1 : // inside a dquote demarcated cell 
         {
@@ -73,19 +127,25 @@ line_finder(
             stop_idx = idx;
             if ( max_width != NULL ) { 
               uint32_t width = (stop_idx - start_idx) - num_bslash;
-              if ( col_idx >= ncol ) { go_BYE(-1); }
-              if ( width > max_width[col_idx] ) { go_BYE(-1); }
+              if ( col_idx > ncol ) { go_BYE(-1); }
+              // Note that max_width needs one spot for nullc
+              if ( width >= max_width[col_idx] ) { go_BYE(-1); }
             }
             printf("Identified %dth cell = [", col_idx);
             for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
               printf("%c", X[j]);
             }
             printf("]\n");
+          if ( to_write(cells, is_load, col_idx) ) {
+            status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
+            cBYE(status);
+          }
             if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
               *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
               eoln_found = true;
               break;
             }
+            col_idx++;  // get ready for next cell
             state = S0;
             idx++; // jump over dquote
             if ( idx == nX ) { go_BYE(-1); }
@@ -96,9 +156,6 @@ line_finder(
               *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
               eoln_found = true;
               break;
-            }
-            else {
-              state = S0;
             }
           }
           else {
@@ -112,25 +169,38 @@ line_finder(
           go_BYE(-1);
         }
         else if ( 
-            ( ( col_idx <  ncol) && ( c == fld_sep ) ) || 
-            ( ( col_idx == ncol) && ( c == rec_sep ) ) ) {
+            ( ( col_idx <  ncol-1) && ( c == fld_sep ) ) || 
+            ( ( col_idx == ncol-1) && ( c == rec_sep ) ) ) {
           stop_idx = idx;
           if ( max_width != NULL ) { 
             uint32_t width = stop_idx - start_idx;
             if ( col_idx >= ncol ) { go_BYE(-1); }
-            if ( width > max_width[col_idx] ) { go_BYE(-1); }
+            if ( width > max_width[col_idx] ) { 
+              go_BYE(-1); }
           }
           printf("Identified %dth cell = [", col_idx);
           for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
             printf("%c", X[j]);
           }
           printf("]\n");
+          if ( to_write(cells, is_load, col_idx) ) {
+            status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
+            cBYE(status);
+          }
           if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
             *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
             eoln_found = true;
             break;
           }
+          col_idx++; // get ready for next cell
           state = S0;
+            if ( ( col_idx <  ncol) && ( c != fld_sep ) ) { go_BYE(-1); }
+            if ( ( col_idx == ncol) && ( c != rec_sep ) ) { go_BYE(-1); }
+            if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+              *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+              eoln_found = true;
+              break;
+            }
         }
         break;
       default : 

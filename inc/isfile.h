@@ -1,9 +1,7 @@
-
-#include "q_incs.h"
-#ifndef __isfile_H
-#define __isfile_H
+#ifndef __ISFILE_H
+#define __ISFILE_H
 extern bool 
 isfile (
     const char * const filename
     );
-#endif
+#endif // __ISFILE_H

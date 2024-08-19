@@ -1,5 +1,6 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include "multiple.h"
 bool 
 is_multiple_n(
     uint64_t x,
@@ -10,9 +11,9 @@ is_multiple_n(
   if ( ( ( x / n ) * n ) != x ) { return false; } else { return true; }
 }
 
-uint32_t 
+uint64_t 
 multiple_n(
-    uint32_t x,
+    uint64_t x,
     uint32_t n
     )
 {

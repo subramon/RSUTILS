@@ -1,15 +1,16 @@
 #include "q_incs.h"
 #include "qtypes.h"
 #include "rs_mmap.h"
-#include "read_csv.h"
 #include <time.h>
 // TODO P4 Why do as an include not obviate need for below
 extern char *strptime(const char *s, const char *format, struct tm *tm);
-// TODO Consider converting [const char ** const qtypes], to [int *c_qtypes]
-// for performance 
+#include "read_csv.h"
 int
 read_csv(
     const char * const infile,
+    const char *in_X,
+    size_t in_nX,
+
     char ** const str_qtypes,
     void ** const out, // [ncols][nrows]
     const uint32_t * const widths, // [ncols] width of a column (needed for SC)
@@ -25,7 +26,12 @@ read_csv(
   char *X = NULL; size_t nX = 0;
 #define BUFSZ 511 // Good enough for largest cell
   char *buf = NULL;
-  if ( infile == NULL ) { go_BYE(-1); }
+  if ( infile == NULL ) { 
+    if ( ( in_X == NULL ) || ( in_nX == 0 ) ) { go_BYE(-1); }
+  }
+  else {
+    if ( ( in_X != NULL ) || ( in_nX != 0 ) ) { go_BYE(-1); }
+  }
   if ( out    == NULL ) { go_BYE(-1); }
 
   if ( str_fld_sep == NULL ) { go_BYE(-1); }
@@ -39,7 +45,13 @@ read_csv(
   char fld_sep   = str_fld_sep[0];
   char fld_delim = str_fld_delim[0];
   char rec_sep   = str_rec_sep[0];
-  status = rs_mmap(infile, &X, &nX, 0); cBYE(status);
+  if ( infile == NULL ) { 
+    status = rs_mmap(infile, &X, &nX, 0); cBYE(status);
+  }
+  else {
+    X = in_X;
+    nX = in_nX;
+  }
 
   size_t xidx = 0;
   if ( is_hdr ) {  // skip over first line 
@@ -212,6 +224,6 @@ read_csv(
 
 BYE:
   free_if_non_null(buf);
-  if ( X != NULL ) { munmap(X, nX); }
+  if ( infile != NULL ) { if ( X != NULL ) { munmap(X, nX); } }
   return status;
 }

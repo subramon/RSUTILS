@@ -191,12 +191,12 @@ GEN_INC_FILES = \
 	../inc/file_exists.h  \
 	../inc/get_bit_u64.h \
 	../inc/get_file_size.h  \
-	../inc/mem_info.h  \
 	../inc/get_time_usec.h \
 	../inc/isdir.h  \
 	../inc/isfile.h  \
 	../inc/isfile_in_dir.h  \
 	../inc/is_valid_chars_for_num.h  \
+	../inc/mem_info.h  \
 	../inc/mk_file.h \
 	../inc/mk_dir_file_name.h \
 	../inc/q_omp_get_num_procs.h \
@@ -216,28 +216,30 @@ GEN_INC_FILES = \
 spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
 SRCS := BL_to_txt.c 
+SRCS += bf16tofp32.c
 SRCS += cat_to_buf.c 
 SRCS += file_exists.c 
 SRCS += file_as_str.c 
+SRCS += fp32tobf16.c
+SRCS += free_2d_array.c 
 SRCS += get_bit_u64.c  
 SRCS += get_time_usec.c 
 SRCS += get_file_size.c 
-SRCS += mem_info.c 
 SRCS += is_valid_chars_for_num.c 
 SRCS += isfile.c 
 SRCS += isfile_in_dir.c 
 SRCS += isdir.c 
-SRCS += multiple.c 
-SRCS += free_2d_array.c 
-SRCS += bf16tofp32.c
-SRCS += fp32tobf16.c
+SRCS += line_finder.c
 SRCS += mk_dir_file_name.c 
 SRCS += mk_file.c 
+SRCS += mem_info.c 
 SRCS += mk_temp_file.c
+SRCS += multiple.c 
 SRCS += num_cols.c
 SRCS += num_lines.c
 SRCS += q_omp_get_num_procs.c  
 SRCS += qtypes.c 
+SRCS += queue_helpers.c  
 SRCS += rand_file_name.c 
 SRCS += rdtsc.c 
 SRCS += read_csv.c

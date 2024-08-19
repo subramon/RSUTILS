@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/stat.h>
+
 #include "q_macros.h"
 //STOP_INCLUDES
 #include "isfile.h"

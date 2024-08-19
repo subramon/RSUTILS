@@ -6,5 +6,7 @@ line_finder(
     int rec_sep,
     uint32_t ncol, // number of columns 
     uint32_t *max_width, // [ncol] can be null 
+    bool *is_load, // [ncol] can be null 
+    char **cells, // [ncol][max_width[i]] can be null
     uint32_t *ptr_eoln_idx
     );
