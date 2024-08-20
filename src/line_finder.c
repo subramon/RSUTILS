@@ -85,7 +85,7 @@ line_finder(
     switch ( state ) {
       case S0 : 
         if ( ( col_idx == ncol-1) && ( c == rec_sep ) ) {
-          printf("Identified %dth cell = []\n", col_idx);
+          // printf("Identified %dth cell = []\n", col_idx);
           *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
           eoln_found = true;
           break;
@@ -94,7 +94,7 @@ line_finder(
           if ( to_write(cells, is_load, col_idx) ) {
             cells[col_idx][0] = '\0';
           }
-          printf("Identified %dth cell = []\n", col_idx);// empty cell 
+          // printf("Identified %dth cell = []\n", col_idx);// empty cell 
           col_idx++;
           break;
         }
@@ -131,15 +131,17 @@ line_finder(
               // Note that max_width needs one spot for nullc
               if ( width >= max_width[col_idx] ) { go_BYE(-1); }
             }
-            printf("Identified %dth cell = [", col_idx);
-            for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
-              printf("%c", X[j]);
+            /*
+               printf("Identified %dth cell = [", col_idx);
+               for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
+               printf("%c", X[j]);
+               }
+               printf("]\n");
+               */
+            if ( to_write(cells, is_load, col_idx) ) {
+              status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
+              cBYE(status);
             }
-            printf("]\n");
-          if ( to_write(cells, is_load, col_idx) ) {
-            status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
-            cBYE(status);
-          }
             if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
               *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
               eoln_found = true;
@@ -175,14 +177,18 @@ line_finder(
           if ( max_width != NULL ) { 
             uint32_t width = stop_idx - start_idx;
             if ( col_idx >= ncol ) { go_BYE(-1); }
-            if ( width > max_width[col_idx] ) { 
-              go_BYE(-1); }
+            if ( ( width > max_width[col_idx] ) && 
+                ( max_width[col_idx] > 0 ) ) {
+              go_BYE(-1); 
+            }
           }
-          printf("Identified %dth cell = [", col_idx);
-          for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
-            printf("%c", X[j]);
-          }
-          printf("]\n");
+          /*
+             printf("Identified %dth cell = [", col_idx);
+             for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
+             printf("%c", X[j]);
+             }
+             printf("]\n");
+             */
           if ( to_write(cells, is_load, col_idx) ) {
             status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
             cBYE(status);
@@ -194,13 +200,13 @@ line_finder(
           }
           col_idx++; // get ready for next cell
           state = S0;
-            if ( ( col_idx <  ncol) && ( c != fld_sep ) ) { go_BYE(-1); }
-            if ( ( col_idx == ncol) && ( c != rec_sep ) ) { go_BYE(-1); }
-            if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
-              *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
-              eoln_found = true;
-              break;
-            }
+          if ( ( col_idx <  ncol) && ( c != fld_sep ) ) { go_BYE(-1); }
+          if ( ( col_idx == ncol) && ( c != rec_sep ) ) { go_BYE(-1); }
+          if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+            *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+            eoln_found = true;
+            break;
+          }
         }
         break;
       default : 

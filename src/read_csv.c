@@ -8,11 +8,11 @@ extern char *strptime(const char *s, const char *format, struct tm *tm);
 int
 read_csv(
     const char * const infile,
-    const char *in_X,
+    char *in_X,
     size_t in_nX,
 
     char ** const str_qtypes,
-    void ** const out, // [ncols][nrows]
+    char ** const out, // [ncols][nrows]
     const uint32_t * const widths, // [ncols] width of a column (needed for SC)
     uint32_t nrows,
     uint32_t ncols,
@@ -23,6 +23,7 @@ read_csv(
     )
 {
   int status = 0;
+  char bslash = '\\';
   char *X = NULL; size_t nX = 0;
 #define BUFSZ 511 // Good enough for largest cell
   char *buf = NULL;
@@ -45,7 +46,7 @@ read_csv(
   char fld_sep   = str_fld_sep[0];
   char fld_delim = str_fld_delim[0];
   char rec_sep   = str_rec_sep[0];
-  if ( infile == NULL ) { 
+  if ( infile != NULL ) { 
     status = rs_mmap(infile, &X, &nX, 0); cBYE(status);
   }
   else {
@@ -83,14 +84,27 @@ read_csv(
           xidx++; 
           if ( xidx >= nX ) { go_BYE(-1); }
           c = X[xidx];
-          if ( c == fld_delim ) {
-            xidx++;
+          if ( c == bslash ) { 
             if ( xidx >= nX ) { go_BYE(-1); }
-            c = X[xidx];
-            if ( c != terminator ) { 
-              go_BYE(-1); }
             xidx++;
-            break;
+            c = X[xidx];
+            if ( ( c == bslash ) || ( c == fld_delim ) ) {
+              // all is well
+            }
+            else {
+              go_BYE(-1);
+            }
+          }
+          else {
+            if ( c == fld_delim ) {
+              xidx++;
+              if ( xidx >= nX ) { go_BYE(-1); }
+              c = X[xidx];
+              if ( c != terminator ) { 
+                go_BYE(-1); }
+              xidx++;
+              break;
+            }
           }
           buf[k] = c;
         }
@@ -203,17 +217,18 @@ read_csv(
         tptr[i].tm_yday = l_tm.tm_yday;
       }
       else if ( strncmp(str_qtypes[j], "SC:", 3) == 0 ) {
-        if ( strncmp(str_qtypes[j], "SC:", strlen("SC:")) == 0 ) { 
-          if ( widths == NULL ) { go_BYE(-1); } 
-          int width = widths[j];
-          if ( width < 1 ) { go_BYE(-1); } 
-          if ( (uint32_t)width < strlen(buf)+1 ) { go_BYE(-1); } 
-          char *cptr = out[j]; cptr += (i*width);
-          memset(cptr, 0, width);
-          memcpy(cptr, buf, strlen(buf));
-        }
+        if ( widths == NULL ) { go_BYE(-1); } 
+        int width = widths[j];
+        if ( width < 1 ) { go_BYE(-1); } 
+        if ( (uint32_t)width < strlen(buf)+1 ) { go_BYE(-1); } 
+        char *cptr = out[j]; cptr += (i*width);
+        memset(cptr, 0, width);
+        memcpy(cptr, buf, strlen(buf));
       }
       else if ( strcmp(str_qtypes[j], "XX") == 0 ) { 
+        go_BYE(-1); // Deprecating this use case. Use Q0 instead
+      }
+      else if ( strcmp(str_qtypes[j], "Q0") == 0 ) { 
         // do nothing, we are ignoring this column
       }
       else {

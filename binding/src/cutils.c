@@ -277,7 +277,7 @@ static int l_cutils_num_lines(
   int status = 0;
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *const file_name = luaL_checkstring(L, 1);
-  int nl = num_lines(file_name); if ( nl < 0 ) { go_BYE(-1); }
+  int nl = num_lines(file_name, NULL, 0); if ( nl < 0 ) { go_BYE(-1); }
   lua_pushnumber(L, nl);
   return 1;
 BYE:

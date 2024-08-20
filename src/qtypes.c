@@ -136,9 +136,7 @@ get_c_qtype(
   if ( strncmp("TM:", str_qtype, 3) == 0 ) { return TM; }  
 
   if ( strcmp("TM1", str_qtype) == 0 ) { return TM1; }  
-  if ( strncmp("TM1:", str_qtype, 3) == 0 ) { return TM1; }  
-
-  if ( strcmp("TM", str_qtype) == 0 ) { return TM; }  
+  if ( strncmp("TM1:", str_qtype, 4) == 0 ) { return TM1; }  
 
   return Q0;
 }
