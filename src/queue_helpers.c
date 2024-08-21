@@ -18,7 +18,7 @@ wait_for_spot(
         __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     // if spot is busy, then skip to next spot
     if ( rslt ) { 
-      printf("Placed data in position %u\n", qidx);
+      // printf("Placed data in position %u\n", qidx);
       break; 
     }
     // wait a bit for an empty spot 
