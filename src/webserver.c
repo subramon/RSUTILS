@@ -10,7 +10,7 @@ handler(
 #include "webserver.h"
 
 // globals 
-_Noreturn void *
+void *
 webserver(
     void *arg
     )
@@ -21,7 +21,8 @@ webserver(
   int port = web_info->port; 
   struct evhttp *httpd = NULL;
   struct event_base *base = NULL;
-  if ( port <= 0 )  { go_BYE(-1); } 
+  if ( ( port <= 0 )  || ( port > 65535 ) ) { go_BYE(-1); } 
+  uint16_t portu16 = (uint16_t)(port);
 
   base = event_base_new();
   httpd = evhttp_new(base);
@@ -34,13 +35,13 @@ webserver(
    *  */
   // Can talk to out of band server only from server where qjit is running
   if ( web_info->is_external ) { 
-    status = evhttp_bind_socket(httpd, "0.0.0.0", port);
+    status = evhttp_bind_socket(httpd, "0.0.0.0", portu16);
   }
   else {
-    status = evhttp_bind_socket(httpd, "127.0.0.1", port);
+    status = evhttp_bind_socket(httpd, "127.0.0.1", portu16);
   }
   if ( status < 0 ) {
-    fprintf(stderr, "Port %d busy \n", port); go_BYE(-1);
+    fprintf(stderr, "portu16 %u busy \n", portu16); go_BYE(-1);
   }
   //---------------------
   web_info->base = base;
