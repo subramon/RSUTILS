@@ -37,7 +37,6 @@ typedef enum {
 
   QF // must be last one 
 } qtype_t;
-// STOP extract_for_qtypes.tex
 typedef struct _tm_t {
   int16_t tm_year;	/* Year	- 1900. */
   int8_t tm_mon;	/* Month.	[0-11] */
