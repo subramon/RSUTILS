@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "line_finder.h"
 
+#undef PRINT_CELLS
 // If you want bslash or dquote in the value, then you MUST 
 // start and stop the value with a dquote 
 typedef enum  {
@@ -40,7 +41,9 @@ static int rs_strcpy(
   int status = 0;
   if ( dst == NULL ) { go_BYE(-1); }
   if ( src == NULL ) { go_BYE(-1); }
-  if ( start >= stop ) { go_BYE(-1); } // TODO > or >= ??
+  if ( start > stop ) { // TODO > or >= ??
+    go_BYE(-1); 
+  } 
   uint32_t didx = 0;
   for ( uint32_t sidx = start; sidx < stop; sidx++, didx++ ) { 
     if ( src[sidx] == '\\' ) { 
@@ -85,7 +88,9 @@ line_finder(
     switch ( state ) {
       case S0 : 
         if ( ( col_idx == ncol-1) && ( c == rec_sep ) ) {
-          // printf("Identified %dth cell = []\n", col_idx);
+#ifdef PRINT_CELLS
+          printf("Identified %dth cell = []\n", col_idx);
+#endif
           *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
           eoln_found = true;
           break;
@@ -94,7 +99,9 @@ line_finder(
           if ( to_write(cells, is_load, col_idx) ) {
             cells[col_idx][0] = '\0';
           }
-          // printf("Identified %dth cell = []\n", col_idx);// empty cell 
+#ifdef PRINT_CELLS
+          printf("Identified %dth cell = []\n", col_idx);// empty cell 
+#endif
           col_idx++;
           break;
         }
@@ -131,13 +138,13 @@ line_finder(
               // Note that max_width needs one spot for nullc
               if ( width >= max_width[col_idx] ) { go_BYE(-1); }
             }
-            /*
+#ifdef PRINT_CELLS
                printf("Identified %dth cell = [", col_idx);
                for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
                printf("%c", X[j]);
                }
                printf("]\n");
-               */
+#endif
             if ( to_write(cells, is_load, col_idx) ) {
               status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
               cBYE(status);
@@ -182,13 +189,13 @@ line_finder(
               go_BYE(-1); 
             }
           }
-          /*
+#ifdef PRINT_CELLS
              printf("Identified %dth cell = [", col_idx);
              for ( uint32_t j = start_idx; j < stop_idx; j++ ) { 
              printf("%c", X[j]);
              }
              printf("]\n");
-             */
+#endif
           if ( to_write(cells, is_load, col_idx) ) {
             status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
             cBYE(status);

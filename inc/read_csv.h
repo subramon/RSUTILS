@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
+//START_FOR_CDEF
 extern int
 read_csv(
     const char * const infile,
@@ -17,3 +18,4 @@ read_csv(
     const char * const str_rec_sep,
     bool is_hdr
     );
+//STOP_FOR_CDEF
