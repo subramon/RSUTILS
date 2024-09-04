@@ -211,14 +211,14 @@ CELL_COMPLETE:
         uiptr[i] = uival;
       }
       //-------------------------------------------
-      else if ( strncmp(str_qtypes[j], "TM1:", 4) == 0 ) {
+      else if ( strncmp(str_qtypes[j], "TM1:", strlen("TM1:")) == 0 ) {
         // TODO: We have to deal with null values properly
         if ( *buf == '\0' ) { // null value 
           tm_t  *tptr = (tm_t *)out[j];
-          memset(tptr, 0, sizeof(tm_t));
+          memset(&(tptr[i]), 0, sizeof(tm_t));
         }
         else {
-          const char * const format = str_qtypes[j] + 4;
+          const char * const format = str_qtypes[j] + strlen("TM1:");
           if ( *format == '\0' ) { go_BYE(-1); }
           tm_t  *tptr = (tm_t *)out[j];
           struct tm l_tm;
