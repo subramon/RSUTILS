@@ -1,3 +1,15 @@
+extern int
+mark_write_done(
+    int *ptr_q_loc
+    );
+extern int
+release_read(
+    int *ptr_q_loc
+    );
+extern int
+mark_read_done(
+    int *ptr_q_loc
+    );
 extern void
 wait_for_spot(
     int *q_loc, 

@@ -1,6 +1,48 @@
 #include "q_incs.h"
 #include "get_time_usec.h"
 #include "queue_helpers.h"
+int
+mark_write_done(
+    int *ptr_q_loc
+    )
+{
+  int status = 0;
+  int l_expected = 1, l_desired = 2;
+  bool rslt = __atomic_compare_exchange(ptr_q_loc,
+      &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
+BYE:
+  return status;
+}
+
+int
+release_read(
+    int *ptr_q_loc
+    )
+{
+  int status = 0;
+  int l_expected = 3, l_desired = 2;
+  bool rslt = __atomic_compare_exchange(ptr_q_loc,
+      &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
+BYE:
+  return status;
+}
+
+int
+mark_read_done(
+    int *ptr_q_loc
+    )
+{
+  int status = 0;
+  int l_expected = 3, l_desired = 0;
+  bool rslt = __atomic_compare_exchange(ptr_q_loc,
+      &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
+BYE:
+  return status;
+}
+
 void
 wait_for_spot(
     int *q_loc, 

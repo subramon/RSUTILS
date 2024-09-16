@@ -350,7 +350,9 @@ static int l_cutils_makepath(
   int status = 0;
   const char *const dir_name = luaL_checkstring(L, 1);
   if ( !isdir(dir_name) ) { 
-    status = mkdir(dir_name, 0777); 
+    // read/write/search permissions for owner and group, 
+    // read/search permissions for others.
+    status = mkdir(dir_name, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     if ( status < 0 ) { 
     fprintf(stderr, "Failed to make directory [%s]\n", dir_name);
     }
