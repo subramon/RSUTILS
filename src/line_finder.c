@@ -111,7 +111,24 @@ line_finder(
           start_idx = idx+1; //+1 skips over dquote
         }
         else if ( c == bslash ) {
-          go_BYE(-1);
+          bool null_cell = false;
+          // START: Logic to handle \N as being a null value 
+
+          if ( idx+2 < nX ) {
+            if ( X[idx+1] == 'N' ) {
+              if ( ( X[idx+2] == fld_sep ) || ( X[idx+2] == rec_sep ) ) {
+                null_cell = true;
+              }
+            }
+          }
+          if ( null_cell ) { 
+            cells[col_idx][0] == '\0';
+            col_idx++;
+            break;
+          }
+          else {
+            go_BYE(-1);
+          }
         }
         else {
           state = S2;

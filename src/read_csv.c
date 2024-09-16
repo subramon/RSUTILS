@@ -134,135 +134,140 @@ read_csv(
 CELL_COMPLETE:
       // now  we have a single cell value
       //-------------------------------------------
-      if ( strcmp(str_qtypes[j], "F8") == 0 ) { 
-        double dval = strtod(buf, &endptr);
-        mcr_chk_endptr(endptr);
-        double *dptr = (double *)out[j];
-        dptr[i] = dval;
-      }
-      else if ( strcmp(str_qtypes[j], "F4") == 0 ) { 
-        double dval = strtod(buf, &endptr);
-        mcr_chk_endptr(endptr);
-        if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
-        float *fptr = (float *)out[j];
-        fptr[i] = dval;
-      }
-      //-------------------------------------------
-      else if ( strcmp(str_qtypes[j], "F2") == 0 ) { 
-        double dval = strtod(buf, &endptr);
-        mcr_chk_endptr(endptr);
-        if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
-        bfloat16 *fptr = (bfloat16 *)out[j];
-        fptr[i] = dval;
-      }
-      else if ( strcmp(str_qtypes[j], "I8") == 0 ) { 
-        long long int ival = strtoll(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        int64_t *iptr = (int64_t *)out[j];
-        iptr[i] = ival;
-      }
-      else if ( strcmp(str_qtypes[j], "I4") == 0 ) { 
-        long int ival = strtol(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
-        int32_t *iptr = (int32_t *)out[j];
-        iptr[i] = ival;
-      }
-      else if ( strcmp(str_qtypes[j], "I1") == 0 ) { 
-        long int ival = strtol(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( ( ival > SCHAR_MAX ) || ( ival < SCHAR_MIN ) ) { go_BYE(-1); }
-        int8_t *iptr = (int8_t *)out[j];
-        iptr[i] = ival;
-      }
-      else if ( strcmp(str_qtypes[j], "I2") == 0 ) { 
-        long int ival = strtol(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( ( ival > SHRT_MAX ) || ( ival < SHRT_MIN ) ) { go_BYE(-1); }
-        int16_t *iptr = (int16_t *)out[j];
-        iptr[i] = ival;
-      }
-      //-------------------------------------------
-      else if ( strcmp(str_qtypes[j], "UI8") == 0 ) { 
-        unsigned long long int uival = strtoull(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        uint64_t *uiptr = (uint64_t *)out[j];
-        uiptr[i] = uival;
-      }
-      else if ( strcmp(str_qtypes[j], "UI4") == 0 ) { 
-        unsigned long int uival = strtol(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( uival > UINT_MAX ) { go_BYE(-1); }
-        uint32_t *uiptr = (uint32_t *)out[j];
-        uiptr[i] = uival;
-      }
-      else if ( strcmp(str_qtypes[j], "UI2") == 0 ) { 
-        unsigned long long int uival = strtoull(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( uival > USHRT_MAX ) { go_BYE(-1); }
-        uint16_t *uiptr = (uint16_t *)out[j];
-        uiptr[i] = uival;
-      }
-      else if ( strcmp(str_qtypes[j], "UI1") == 0 ) { 
-        unsigned long long int uival = strtoull(buf, &endptr, 10);
-        mcr_chk_endptr(endptr);
-        if ( uival > UCHAR_MAX ) { go_BYE(-1); }
-        uint8_t *uiptr = (uint8_t *)out[j];
-        uiptr[i] = uival;
-      }
-      //-------------------------------------------
-      else if ( strncmp(str_qtypes[j], "TM1:", strlen("TM1:")) == 0 ) {
-        // TODO: We have to deal with null values properly
-        if ( *buf == '\0' ) { // null value 
-          tm_t  *tptr = (tm_t *)out[j];
-          memset(&(tptr[i]), 0, sizeof(tm_t));
-        }
-        else {
-          const char * const format = str_qtypes[j] + strlen("TM1:");
-          if ( *format == '\0' ) { go_BYE(-1); }
-          tm_t  *tptr = (tm_t *)out[j];
-          struct tm l_tm;
-          memset(&l_tm, 0, sizeof(struct tm));
-          char *rslt = strptime(buf, format, &l_tm);
-          if ( rslt == NULL ) { 
-            go_BYE(-1); }
-          if ( l_tm.tm_year >= 255 ) { go_BYE(-1); } 
-          if ( l_tm.tm_year <  0 ) { go_BYE(-1); } 
-#ifdef DEBUG
-          if ( ( l_tm.tm_sec < 0 ) || ( l_tm.tm_sec > 59 ) ) { go_BYE(-1); }
-          if ( ( l_tm.tm_min < 0 ) || ( l_tm.tm_min > 59 ) ) { go_BYE(-1); }
-          if ( ( l_tm.tm_hour < 0 ) || ( l_tm.tm_hour > 23 ) ) { go_BYE(-1); }
-          if ( ( l_tm.tm_wday < 0 ) || ( l_tm.tm_wday > 6 ) ) { go_BYE(-1); }
-          if ( ( l_tm.tm_yday < 0 ) || ( l_tm.tm_yday > 365 ) ) { go_BYE(-1); }
-          if ( ( l_tm.tm_mon < 0 ) || ( l_tm.tm_mon > 12 ) ) { go_BYE(-1); }
-#endif
-          tptr[i].tm_year = l_tm.tm_year;
-          tptr[i].tm_mon = l_tm.tm_mon;
-          tptr[i].tm_mday = l_tm.tm_mday;
-          tptr[i].tm_hour = l_tm.tm_hour;
-          // tptr[i].tm_min = l_tm.tm_min;
-          // tptr[i].tm_sec = l_tm.tm_sec;
-          tptr[i].tm_wday = l_tm.tm_wday;
-          tptr[i].tm_yday = l_tm.tm_yday;
-        }
-      }
-      else if ( strncmp(str_qtypes[j], "SC:", 3) == 0 ) {
-        if ( widths == NULL ) { go_BYE(-1); } 
-        int width = widths[j];
-        if ( width < 1 ) { go_BYE(-1); } 
-        if ( (uint32_t)width < strlen(buf)+1 ) { go_BYE(-1); } 
-        char *cptr = out[j]; cptr += (i*width);
-        memset(cptr, 0, width);
-        memcpy(cptr, buf, strlen(buf));
-      }
-      else if ( strcmp(str_qtypes[j], "XX") == 0 ) { 
-        go_BYE(-1); // Deprecating this use case. Use Q0 instead
-      }
-      else if ( strcmp(str_qtypes[j], "Q0") == 0 ) { 
-        // do nothing, we are ignoring this column
+      if ( strncmp(buf, "\\N", 2) == 0 ) { 
+        // null value => nothing to do  TODO P3 correct?
       }
       else {
-        go_BYE(-1);
+        if ( strcmp(str_qtypes[j], "F8") == 0 ) { 
+          double dval = strtod(buf, &endptr);
+          mcr_chk_endptr(endptr);
+          double *dptr = (double *)out[j];
+          dptr[i] = dval;
+        }
+        else if ( strcmp(str_qtypes[j], "F4") == 0 ) { 
+          double dval = strtod(buf, &endptr);
+          mcr_chk_endptr(endptr);
+          if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
+          float *fptr = (float *)out[j];
+          fptr[i] = dval;
+        }
+        //-------------------------------------------
+        else if ( strcmp(str_qtypes[j], "F2") == 0 ) { 
+          double dval = strtod(buf, &endptr);
+          mcr_chk_endptr(endptr);
+          if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
+          bfloat16 *fptr = (bfloat16 *)out[j];
+          fptr[i] = dval;
+        }
+        else if ( strcmp(str_qtypes[j], "I8") == 0 ) { 
+          long long int ival = strtoll(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          int64_t *iptr = (int64_t *)out[j];
+          iptr[i] = ival;
+        }
+        else if ( strcmp(str_qtypes[j], "I4") == 0 ) { 
+          long int ival = strtol(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
+          int32_t *iptr = (int32_t *)out[j];
+          iptr[i] = ival;
+        }
+        else if ( strcmp(str_qtypes[j], "I1") == 0 ) { 
+          long int ival = strtol(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( ( ival > SCHAR_MAX ) || ( ival < SCHAR_MIN ) ) { go_BYE(-1); }
+          int8_t *iptr = (int8_t *)out[j];
+          iptr[i] = ival;
+        }
+        else if ( strcmp(str_qtypes[j], "I2") == 0 ) { 
+          long int ival = strtol(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( ( ival > SHRT_MAX ) || ( ival < SHRT_MIN ) ) { go_BYE(-1); }
+          int16_t *iptr = (int16_t *)out[j];
+          iptr[i] = ival;
+        }
+        //-------------------------------------------
+        else if ( strcmp(str_qtypes[j], "UI8") == 0 ) { 
+          unsigned long long int uival = strtoull(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          uint64_t *uiptr = (uint64_t *)out[j];
+          uiptr[i] = uival;
+        }
+        else if ( strcmp(str_qtypes[j], "UI4") == 0 ) { 
+          unsigned long int uival = strtol(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( uival > UINT_MAX ) { go_BYE(-1); }
+          uint32_t *uiptr = (uint32_t *)out[j];
+          uiptr[i] = uival;
+        }
+        else if ( strcmp(str_qtypes[j], "UI2") == 0 ) { 
+          unsigned long long int uival = strtoull(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( uival > USHRT_MAX ) { go_BYE(-1); }
+          uint16_t *uiptr = (uint16_t *)out[j];
+          uiptr[i] = uival;
+        }
+        else if ( strcmp(str_qtypes[j], "UI1") == 0 ) { 
+          unsigned long long int uival = strtoull(buf, &endptr, 10);
+          mcr_chk_endptr(endptr);
+          if ( uival > UCHAR_MAX ) { go_BYE(-1); }
+          uint8_t *uiptr = (uint8_t *)out[j];
+          uiptr[i] = uival;
+        }
+        //-------------------------------------------
+        else if ( strncmp(str_qtypes[j], "TM1:", strlen("TM1:")) == 0 ) {
+          // TODO: We have to deal with null values properly
+          if ( *buf == '\0' ) { // null value 
+            tm_t  *tptr = (tm_t *)out[j];
+            memset(&(tptr[i]), 0, sizeof(tm_t));
+          }
+          else {
+            const char * const format = str_qtypes[j] + strlen("TM1:");
+            if ( *format == '\0' ) { go_BYE(-1); }
+            tm_t  *tptr = (tm_t *)out[j];
+            struct tm l_tm;
+            memset(&l_tm, 0, sizeof(struct tm));
+            char *rslt = strptime(buf, format, &l_tm);
+            if ( rslt == NULL ) { 
+              go_BYE(-1); }
+            if ( l_tm.tm_year >= 255 ) { go_BYE(-1); } 
+            if ( l_tm.tm_year <  0 ) { go_BYE(-1); } 
+#ifdef DEBUG
+            if ( ( l_tm.tm_sec < 0 ) || ( l_tm.tm_sec > 59 ) ) { go_BYE(-1); }
+            if ( ( l_tm.tm_min < 0 ) || ( l_tm.tm_min > 59 ) ) { go_BYE(-1); }
+            if ( ( l_tm.tm_hour < 0 ) || ( l_tm.tm_hour > 23 ) ) { go_BYE(-1); }
+            if ( ( l_tm.tm_wday < 0 ) || ( l_tm.tm_wday > 6 ) ) { go_BYE(-1); }
+            if ( ( l_tm.tm_yday < 0 ) || ( l_tm.tm_yday > 365 ) ) { go_BYE(-1); }
+            if ( ( l_tm.tm_mon < 0 ) || ( l_tm.tm_mon > 12 ) ) { go_BYE(-1); }
+#endif
+            tptr[i].tm_year = l_tm.tm_year;
+            tptr[i].tm_mon = l_tm.tm_mon;
+            tptr[i].tm_mday = l_tm.tm_mday;
+            tptr[i].tm_hour = l_tm.tm_hour;
+            // tptr[i].tm_min = l_tm.tm_min;
+            // tptr[i].tm_sec = l_tm.tm_sec;
+            tptr[i].tm_wday = l_tm.tm_wday;
+            tptr[i].tm_yday = l_tm.tm_yday;
+          }
+        }
+        else if ( strncmp(str_qtypes[j], "SC:", 3) == 0 ) {
+          if ( widths == NULL ) { go_BYE(-1); } 
+          int width = widths[j];
+          if ( width < 1 ) { go_BYE(-1); } 
+          if ( (uint32_t)width < strlen(buf)+1 ) { go_BYE(-1); } 
+          char *cptr = out[j]; cptr += (i*width);
+          memset(cptr, 0, width);
+          memcpy(cptr, buf, strlen(buf));
+        }
+        else if ( strcmp(str_qtypes[j], "XX") == 0 ) { 
+          go_BYE(-1); // Deprecating this use case. Use Q0 instead
+        }
+        else if ( strcmp(str_qtypes[j], "Q0") == 0 ) { 
+          // do nothing, we are ignoring this column
+        }
+        else {
+          go_BYE(-1);
+        }
       }
       // fprintf(stdout, "(r=%6u:c=%2u:v=%s)\n", i, j,buf);
     }
