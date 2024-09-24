@@ -122,7 +122,7 @@ line_finder(
             }
           }
           if ( null_cell ) { 
-            cells[col_idx][0] == '\0';
+            cells[col_idx][0] = '\0';
             col_idx++;
             break;
           }

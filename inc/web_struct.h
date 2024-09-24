@@ -5,6 +5,7 @@
 #define MAX_LEN_FILE_NAME 63
 // This is used when we want to return something more complex than
 // just text (which is returned in opbuf and/or errbuf)
+
 typedef struct _web_response_t {
   char *file_name;
   bool delete_file;
@@ -19,11 +20,29 @@ typedef struct _web_response_t {
   bool is_err; // default false
 } web_response_t;
 
+typedef int (*get_req_fn_t)(
+    const char *api
+    );
+typedef int (*proc_req_fn_t)( 
+    int req_type,
+    const char *const api,
+    const char *args,
+    const char *body,
+    void *W,
+    char *outbuf, // [sz_outbuf]
+    size_t sz_outbuf,
+    char *errbuf, // [sz_outbuf]
+    size_t sz_errbuf,
+    web_response_t *ptr_web_response
+    );
+
 typedef struct _web_info_t { 
   struct event_base *base;
   bool is_external; // false => accessible only from localhost
   int port;
-  void *args; // anything else we want webserver to have 
+  get_req_fn_t get_req_fn;
+  proc_req_fn_t proc_req_fn;
+  void *W; // anything else we want webserver to have 
 } web_info_t;
 
 #endif //  __WEB_STRUCT_H 

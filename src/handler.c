@@ -8,9 +8,6 @@
 #include "extract_api_args.h"
 #include "get_body.h"
 
-#include "get_req_type.h"
-#include "process_req.h"
-
 #include "handler.h"
 void
 handler(
@@ -45,8 +42,9 @@ handler(
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
   cBYE(status);
-  int req_type = get_req_type(api);
-  if ( req_type  == WebUndefined ) { go_BYE(-1); }
+  get_req_fn_t get_req_fn = web_info->get_req_fn;
+  int req_type = get_req_fn(api);
+  if ( req_type  == 0 ) { go_BYE(-1); }
   if ( strcmp(api, "Halt") == 0 ) {
     // TODO: P4 Need to get loopbreak to wait for these 3 statements
     // evbuffer_add_printf(opbuf, "%s\n", g_rslt);
@@ -56,7 +54,9 @@ handler(
   }
   status = get_body(req, &body); cBYE(status);
 
-  status = process_req(req_type, api, args, body, web_info,
+  void *W = web_info->W; // contains stuff needed by process_req()
+  proc_req_fn_t process_req_fn = web_info->proc_req_fn;
+  status = process_req_fn(req_type, api, args, body, W,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // Handle case when something other than default is to be returned
   if ( web_response.is_set ) {
