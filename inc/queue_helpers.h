@@ -34,3 +34,17 @@ get_free_spot(
     uint64_t max_t_sleep,
     uint64_t *ptr_t_sleep
     );
+extern int 
+acquire_lock(
+    int *ptr_lock,
+    int expected,
+    int desired,
+    int max_wait_msec,
+    bool *ptr_lock_got
+    );
+extern int
+release_lock(
+    int *ptr_lock,
+    int expected,
+    int desired
+    );

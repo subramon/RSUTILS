@@ -134,7 +134,9 @@ read_csv(
 CELL_COMPLETE:
       // now  we have a single cell value
       //-------------------------------------------
-      if ( strncmp(buf, "\\N", 2) == 0 ) { 
+      if ( ( strlen(buf) == 2 ) && 
+          ( strncmp(buf, "\\N", 2) == 0 ) || 
+          ( strncmp(buf, "NA", 2) == 0 ) ) { 
         // null value => nothing to do  TODO P3 correct?
       }
       else {

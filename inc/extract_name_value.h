@@ -4,5 +4,5 @@ extract_name_value(
 		   const char *start,
 		   char delim,
                    char *val, /* [len] */
-                   int maxlen
+                   size_t maxlen
 		   );

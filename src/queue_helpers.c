@@ -140,3 +140,55 @@ get_free_spot(
   }
   return qidx;
 }
+
+int
+acquire_lock(
+    int *ptr_lock,
+    int expected,
+    int desired,
+    int max_wait_msec,
+    bool *ptr_lock_got
+    )
+{
+  int status = 0;
+  int t_sleep = 0; 
+
+  *ptr_lock_got = false;
+  for ( ; ; ) { 
+    bool rslt = __atomic_compare_exchange(
+        ptr_lock, &expected, &desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( rslt ) { 
+      *ptr_lock_got = true;
+      break;
+    }
+    else { // wait a bit and try again
+      uint64_t t1 = get_time_usec();
+      struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 1000000 };
+      nanosleep(&tmspec, NULL);
+      uint64_t t2 = get_time_usec();
+      t_sleep += (t2-t1) / 1000; 
+      if ( ( max_wait_msec > 0 ) && ( t_sleep > max_wait_msec ) ) {
+        *ptr_lock_got = false;
+        break;
+      }
+    }
+  }
+BYE:
+  return status;
+}
+int
+release_lock(
+    int *ptr_lock,
+    int expected,
+    int desired
+    )
+{
+  int status = 0;
+  bool rslt = __atomic_compare_exchange(
+        ptr_lock, &expected, &desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
+BYE:
+  return status;
+}
