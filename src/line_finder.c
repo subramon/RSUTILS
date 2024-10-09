@@ -44,6 +44,10 @@ static int rs_strcpy(
   if ( start > stop ) { // TODO > or >= ??
     go_BYE(-1); 
   } 
+  // clean out dst
+  for ( char *cptr = dst; *cptr != '\0'; cptr++ ) { 
+    *cptr = '\0';
+  }
   uint32_t didx = 0;
   for ( uint32_t sidx = start; sidx < stop; sidx++, didx++ ) { 
     if ( src[sidx] == '\\' ) { 

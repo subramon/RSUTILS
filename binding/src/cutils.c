@@ -23,6 +23,7 @@
 #include "get_bit_u64.h"
 #include "get_file_size.h"
 #include "isdir.h"
+#include "rmtree.h"
 #include "isfile.h"
 #include "isfile_in_dir.h"
 #include "line_breaks.h"
@@ -280,6 +281,24 @@ static int l_cutils_num_lines(
   int nl = num_lines(file_name, NULL, 0); if ( nl < 0 ) { go_BYE(-1); }
   lua_pushnumber(L, nl);
   return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+static int l_cutils_rmtree( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  int nargs = lua_gettop(L);
+  if ( nargs != 1) { go_BYE(-1); }
+  const char * const dir = luaL_checkstring(L, 1); 
+  if ( ( dir == NULL ) || ( *dir == '\0' ) ) { go_BYE(-1); }
+  status = rmtree(dir); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1; 
 BYE:
   lua_pushnil(L);
   lua_pushstring(L, __func__);
@@ -898,6 +917,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "exec",        l_cutils_exec },
     { "file_as_str", l_cutils_file_as_str },
     { "isdir",       l_cutils_isdir },
+    { "rmtree",       l_cutils_rmtree },
     { "isfile",      l_cutils_isfile },
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "is_qtype",    l_cutils_is_qtype },
@@ -939,6 +959,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "get_c_qtype", l_cutils_get_c_qtype },
     { "is_qtype",     l_cutils_is_qtype },
     { "isdir",       l_cutils_isdir },
+    { "rmtree",       l_cutils_rmtree },
     { "isfile",      l_cutils_isfile },
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "line_breaks", l_cutils_line_breaks },
