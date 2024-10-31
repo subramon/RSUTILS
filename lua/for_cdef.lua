@@ -31,11 +31,11 @@ local function for_cdef(
   )
   -- Determine the input file 
   assert(type(infile) == "string")
-  -- TODO P4: What if no forward slash in infile?
-  if ( string.find(infile, "/") ~= 1 ) then
+  if ( string.sub(infile, 1, 1) ~= "/") then 
     -- we do not have fully qualified path
     assert(type(src_root) == "string")
     infile = src_root .. "/" .. infile
+    assert(cutils.isdir(src_root), "Not a directory " .. src_root)
   end
   assert(cutils.isfile(infile), "File not found: " .. infile)
   --=======================================================

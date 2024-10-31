@@ -6,7 +6,7 @@
 #define err_go_BYE() { fprintf(stderr, "Error = %s \n", strerror(errno)); go_BYE(-1); }
 /*-------------------------------------------------------*/
 
-#define cBYE(x) { if ( (x) < 0 ) { go_BYE((x)) } }
+#define cBYE(x) { if ( (x) != 0 ) { go_BYE((x)) } }
 #define fclose_if_non_null(x) { if ( (x) != NULL ) { fclose((x)); (x) = NULL; } } 
 #define free_if_non_null(x) { if ( (x) != NULL ) { free((x)); (x) = NULL; } }
 #define return_if_fopen_failed(fp, file_name, access_mode) { if ( fp == NULL ) { fprintf(stderr, "Unable to open file %s for %s \n", file_name, access_mode); go_BYE(-1); } }

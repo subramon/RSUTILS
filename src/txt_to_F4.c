@@ -9,7 +9,6 @@ txt_to_F4(
 //STOP_FUNC_DECL
 {
   int status = 0;
-  static int n_bad_values = 0; 
   *ptr_out = 0;
   char *endptr;
   double out;
@@ -21,7 +20,6 @@ txt_to_F4(
   *ptr_out = (float)out;
 BYE:
   if ( status < 0 ) {
-    // TODO  printf("bad flt %8d: %s\n", ++n_bad_values, X); 
     *ptr_out = FLT_MAX;
     status = 0;
   }
