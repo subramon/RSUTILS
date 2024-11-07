@@ -1,4 +1,3 @@
--- local plfile = require 'pl.file'
 function write_all(file, str)
   local fp = io.open(file, "w")
   fp:write(str)
@@ -10,7 +9,6 @@ function read_all(file)
     f:close()
     return content
 end
--- local plpath = require 'pl.path'
 function file_exists(name)
    local f=io.open(name,"r")
    if f~=nil then io.close(f) return true else return false end
@@ -26,7 +24,7 @@ local function do_subs(tmpl_file, out_file, replacements)
     out = string.gsub(out, k, v)
   end
   write_all(out_file, out)
-  assert(plpath.isfile(out_file), "file not created " .. out_file)
+  assert(file_exists(out_file), "file not created " .. out_file)
   return true
 end
 return do_subs
