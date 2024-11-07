@@ -41,7 +41,7 @@ local function for_cdef(
   --=======================================================
   local cdef_file
   if ( cache_root ) then 
-    cdef_file, is_cdef_file = is_cdef_cached(infile, src_root, cache_root)
+    local cdef_file, is_cdef_file = is_cdef_cached(infile, src_root, cache_root)
     if ( is_cdef_file ) then 
       return cutils.file_as_str(cdef_file), true, cdef_file
     end

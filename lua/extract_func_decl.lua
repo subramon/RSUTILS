@@ -1,12 +1,19 @@
-local plpath = require 'pl.path'
-local plstr  = require 'pl.stringx'
+-- local plpath = require 'pl.path'
+-- local plstr  = require 'pl.stringx'
+function file_exists(name)
+   local f=io.open(name,"r")
+   if f~=nil then io.close(f) return true else return false end
+end
+local function all_trim(s)
+  return s:match"^%s*(.*)":match"(.-)%s*$"
+end
 -- Assumption that only one function declared in "infile"
 local function extract_func_decl(
   infile,
   opdir
   )
-  assert(plpath.isfile(infile), "Input file not found" .. infile)
-  assert(plpath.isdir(opdir), "Output directory not found" .. opdir)
+  assert(file_exists(infile), "Input file not found" .. infile)
+  -- TODO P2 assert(plpath.isdir(opdir), "Output directory not found" .. opdir)
   io.input(infile)
   local code = io.read("*all")
   --=========================================
@@ -27,7 +34,8 @@ local function extract_func_decl(
   --======
   z = string.gsub(z, "//START_FUNC_DECL", "")
   z = string.gsub(z, "//STOP_FUNC_DECL", "")
-  z = plstr.strip(z)
+  -- z = plstr.strip(z) -- replaced by all_trim
+  z = all_trim(z)
   --=========================================
   local fn = string.gsub(infile, "^.*/", "")
   fn = string.gsub(fn, ".c$", "")

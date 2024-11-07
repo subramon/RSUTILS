@@ -13,7 +13,7 @@ local function do_replacements(subs, lang, src_root)
   local tmpl
   if ( lang == "C" ) then tmpl = assert(subs.tmpl) end 
   if ( lang == "ISPC" ) then tmpl = assert(subs.tmpl_ispc) end 
-  if ( string.find(tmpl, "/") ~= 1 ) then -- TODO P4: What if no '/'? 
+  if ( string.sub(tmpl, 1, 1) ~= "/") then -- TODO P4: What if no '/'? 
     assert(type(src_root) == "string")
     tmpl = src_root .. tmpl
   end
@@ -31,7 +31,7 @@ local _dotfile = function(subs, opdir, lang, ext, src_root)
   assert(#opdir > 0)
   local func_name = subs.fn
   local basic_fname = opdir .. "/" .. func_name .. "." .. ext
-  if ( string.find(opdir, "/") ~= 1 ) then -- TODO P4: What if no '/' ?
+  if ( string.sub(opdir, 1, 1) ~= "/") then -- TODO P4: What if no '/' ?
     assert(type(src_root) == "string")
     opdir = src_root .. opdir
   end
@@ -39,7 +39,7 @@ local _dotfile = function(subs, opdir, lang, ext, src_root)
     assert(cutils.makepath(opdir), "Unable to create dir " .. opdir)
   end
   assert(cutils.isdir(opdir))
-  local T = do_replacements(subs, lang)
+  local T = do_replacements(subs, lang, src_root)
   local dotfile = T(section[ext])
   local fname = opdir .. "/" .. func_name .. "." .. ext
   local f = assert(io.open(fname, "w"))
@@ -69,7 +69,7 @@ fns.ispc = function (subs, srcdir, incdir, src_root)
   -- first, create its name (rather ugly repetition)
   local func_name = subs.fn_ispc
   local h_basic = incdir .. "/" .. func_name .. ".h"
-  if ( string.find(incdir, "/") ~= 1 ) then -- TODO P4: What if no '/' ?
+  if ( string.sub(incdir, 1, 1) ~= "/") then -- TODO P4: What if no '/' ?
     assert(type(src_root) == "string")
     incdir = src_root .. incdir
   end
