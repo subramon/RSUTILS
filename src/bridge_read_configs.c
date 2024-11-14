@@ -9,6 +9,7 @@
 #include <lualib.h>
 #include "q_macros.h"
 #include "mk_lua_state.h"
+#include "isfile.h"
 #include "load_configs.h"
 #include "bridge_read_configs.h"
 
@@ -23,6 +24,10 @@ bridge_read_configs(
   lua_State *L = NULL;
   int  chk; 
   char lcmd[128];
+  // basic checks
+  if ( cfg_file == NULL ) { go_BYE(-1); }
+  if ( !isfile(cfg_file) ) { go_BYE(-1); }
+  if ( lua_fn == NULL ) { go_BYE(-1); }
   // create Lua state
   L = mk_lua_state(); if ( L == NULL ) { go_BYE(-1); }
   // Load the configs into G
