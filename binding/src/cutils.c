@@ -27,6 +27,7 @@
 #include "isfile.h"
 #include "isfile_in_dir.h"
 #include "line_breaks.h"
+#include "ls.h"
 #include "mem_info.h"
 #include "mk_file.h"
 #include "num_lines.h"
@@ -242,6 +243,35 @@ static int l_cutils_is_qtype(
   const char *const str_qtype = luaL_checkstring(L, 1);
   lua_pushboolean(L, is_qtype(str_qtype));
   return 1;
+}
+//----------------------------------------
+static int l_cutils_ls( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  int nargs = lua_gettop(L);
+  char **X = NULL; uint32_t nX = 0;
+  if ( ( nargs != 1) && ( nargs != 2 ) ) { go_BYE(-1); }
+  const char *const dir_name = luaL_checkstring(L, 1);
+  const char *reg_expr = NULL;
+  if ( nargs == 2 ) { 
+    reg_expr  = luaL_checkstring(L, 2);
+  }
+  status = ls(dir_name, true, false, reg_expr, &X, &nX);
+  cBYE(status);
+  lua_newtable(L);
+  for ( uint32_t i = 0; i < nX; i++ ) { 
+    lua_pushnumber(L, i);
+    lua_pushstring(L, X[i]);
+    lua_settable(L, -3);
+  }
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
 }
 //----------------------------------------
 static int l_cutils_isdir( 
@@ -922,6 +952,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "is_qtype",    l_cutils_is_qtype },
     { "line_breaks", l_cutils_line_breaks },
+    { "ls", l_cutils_ls },
     { "makepath",    l_cutils_makepath },
     { "mem_info",    l_cutils_mem_info },
     { "mk_file",     l_cutils_mk_file },
@@ -963,6 +994,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "isfile",      l_cutils_isfile },
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "line_breaks", l_cutils_line_breaks },
+    { "ls", l_cutils_ls },
     { "makepath",    l_cutils_makepath },
     { "mem_info",     l_cutils_mem_info },
     { "mk_file",     l_cutils_mk_file },

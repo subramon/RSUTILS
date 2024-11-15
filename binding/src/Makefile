@@ -18,6 +18,7 @@ SRCS += ../../src/rmtree.c
 SRCS += ../../src/isfile.c 
 SRCS += ../../src/isfile_in_dir.c 
 SRCS += ../../src/line_breaks.c 
+SRCS += ../../src/ls.c 
 SRCS += ../../src/mem_info.c 
 SRCS += ../../src/mk_file.c 
 SRCS += ../../src/num_lines.c 
