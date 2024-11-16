@@ -10,6 +10,7 @@ SRCS += ../../src/file_exists.c
 SRCS += ../../src/cat_to_buf.c 
 SRCS += ../../src/multiple.c 
 SRCS += ../../src/file_as_str.c 
+SRCS += ../../src/file_cat.c 
 SRCS += ../../src/get_bit_u64.c 
 SRCS += ../../src/get_file_size.c 
 SRCS += ../../src/get_time_usec.c 
