@@ -20,7 +20,7 @@ num_dir_entries(
   struct dirent *dir = NULL;
   d = opendir(dir_name); 
   if ( d == NULL ) { 
-    printf("Couldn't open the directory [%s]\n", dir_name);
+    fprintf(stderr, "Couldn't open the directory [%s]\n", dir_name);
     go_BYE(-1); 
   }
   int szX = 0;
@@ -73,14 +73,16 @@ ls(
   d = opendir(dir_name);  if ( d == NULL ) { go_BYE(-1); }
   int xidx = 0;
   while ((dir = readdir(d)) != NULL) {
+    if ( strcmp(dir->d_name, ".") == 0 ) { continue; }
+    if ( strcmp(dir->d_name, "..") == 0 ) { continue; }
     if ( is_regex ) {
       /* Execute regular expression */
       reti = regexec(&regex, dir->d_name, 0, NULL, 0);
       if (!reti) {
-        printf("Match for %s\n ", dir->d_name);
+        // printf("Match for %s\n ", dir->d_name);
       }
       else if (reti == REG_NOMATCH) {
-        printf("No match for %s\n ", dir->d_name);
+        // printf("No match for %s\n ", dir->d_name);
         continue; 
       }
       else {

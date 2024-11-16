@@ -252,17 +252,34 @@ static int l_cutils_ls(
   int status = 0;
   int nargs = lua_gettop(L);
   char **X = NULL; uint32_t nX = 0;
-  if ( ( nargs != 1) && ( nargs != 2 ) ) { go_BYE(-1); }
+  if ( ( nargs <1) || ( nargs > 3 ) ) { go_BYE(-1); }
   const char *const dir_name = luaL_checkstring(L, 1);
   const char *reg_expr = NULL;
-  if ( nargs == 2 ) { 
-    reg_expr  = luaL_checkstring(L, 2);
+  const char *mode = NULL; 
+  if ( nargs > 1 ) { 
+    mode  = luaL_checkstring(L, 2);
   }
-  status = ls(dir_name, true, false, reg_expr, &X, &nX);
+  if ( nargs > 2 ) { 
+    reg_expr  = luaL_checkstring(L, 3);
+  }
+  if ( strcmp(mode, "files") == 0 ) { 
+    status = ls(dir_name, true, false, reg_expr, &X, &nX);
+  }
+  else if ( strcmp(mode, "dirs") == 0 ) { 
+    status = ls(dir_name, false, true, reg_expr, &X, &nX);
+  }
+  else {
+    go_BYE(-1);
+  }
   cBYE(status);
+  if ( nX == 0 ) { 
+    lua_pushnil(L);
+    return 1;
+  }
+  // now we have something to return 
   lua_newtable(L);
   for ( uint32_t i = 0; i < nX; i++ ) { 
-    lua_pushnumber(L, i);
+    lua_pushnumber(L, i+1); // Note the +1 to match Lua 1-based addressing
     lua_pushstring(L, X[i]);
     lua_settable(L, -3);
   }
