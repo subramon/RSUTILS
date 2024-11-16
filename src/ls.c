@@ -27,8 +27,8 @@ num_dir_entries(
   while ((dir = readdir(d)) != NULL) {
     szX++;
   }
-  closedir(d); d = NULL; // Close directory
 BYE:
+  if ( d != NULL ) { closedir(d); d = NULL; {// Close directory
   if ( status < 0 ) { return -1; } else { return szX; }
 }
 //------------------------------------------------------
@@ -104,6 +104,7 @@ ls(
   *ptr_X  =  X;
   *ptr_nX = xidx;
 BYE:
+  if ( d != NULL ) { closedir(d); d = NULL; {// Close directory
   if ( is_regex ) { 
     /* Free memory allocated to the pattern buffer by regcomp() */
     regfree(&regex);
