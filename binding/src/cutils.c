@@ -19,6 +19,7 @@
 #include "lualib.h"
 
 #include "file_as_str.h"
+#include "file_cat.h"
 #include "file_exists.h"
 #include "get_bit_u64.h"
 #include "get_file_size.h"
@@ -430,6 +431,13 @@ BYE:
   lua_pushnil(L);
   lua_pushstring(L, __func__);
   return 2;
+}
+//----------------------------------------
+static int l_cutils_mkdir( 
+    lua_State *L
+    )
+{
+  return l_cutils_makepath(L);
 }
 //----------------------------------------
 static int l_cutils_mk_file( 
@@ -1024,15 +1032,17 @@ static const struct luaL_Reg cutils_functions[] = {
     { "gettime",     l_cutils_gettime },
     { "get_width_qtype",   l_cutils_get_width_qtype },
     { "get_c_qtype", l_cutils_get_c_qtype },
-    { "is_qtype",     l_cutils_is_qtype },
+    { "is_qtype",    l_cutils_is_qtype },
     { "isdir",       l_cutils_isdir },
-    { "rmtree",       l_cutils_rmtree },
+    { "rmtree",      l_cutils_rmtree },
     { "isfile",      l_cutils_isfile },
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "line_breaks", l_cutils_line_breaks },
-    { "ls", l_cutils_ls },
+    { "ls",          l_cutils_ls },
     { "makepath",    l_cutils_makepath },
-    { "mem_info",     l_cutils_mem_info },
+    { "mkdir",       l_cutils_mkdir },
+    { "mem_info",    l_cutils_mem_info },
+    { "mkdir",       l_cutils_mkdir },
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
     { "num_cols",   l_cutils_num_cols },
