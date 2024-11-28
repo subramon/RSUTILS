@@ -252,6 +252,7 @@ SRCS += rdtsc.c
 SRCS += read_csv.c
 SRCS += rmtree.c 
 SRCS += rs_mmap.c 
+SRCS += rs_strcat.c 
 SRCS += SC_to_txt.c 
 SRCS += set_bit_u64.c  
 SRCS += sort1.c 
