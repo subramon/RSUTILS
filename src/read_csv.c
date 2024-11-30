@@ -135,8 +135,8 @@ CELL_COMPLETE:
       // now  we have a single cell value
       //-------------------------------------------
       if ( ( strlen(buf) == 2 ) && 
-          ( strncmp(buf, "\\N", 2) == 0 ) || 
-          ( strncmp(buf, "NA", 2) == 0 ) ) { 
+          ( ( strncmp(buf, "\\N", 2) == 0 ) || 
+          ( strncmp(buf, "NA", 2) == 0 ) ) ) { 
         // null value => nothing to do  TODO P3 correct?
       }
       else {
@@ -173,6 +173,19 @@ CELL_COMPLETE:
           if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
           int32_t *iptr = (int32_t *)out[j];
           iptr[i] = ival;
+        }
+        else if ( strcmp(str_qtypes[j], "BL") == 0 ) { 
+          bool *bptr = (bool *)out[j];
+          if ( ( strcmp(buf, "true") == 0 )| ( strcmp(buf, "1") == 0 ) ) {
+            bptr[i] = true;
+          }
+          else if ( ( strcmp(buf, "false") == 0 )| ( strcmp(buf, "0") == 0 ) ) {
+            bptr[i] = false;
+          }
+          else { 
+            fprintf(stderr, "Invalid value for BL = [%s] \n", buf);
+            go_BYE(-1);
+          }
         }
         else if ( strcmp(str_qtypes[j], "I1") == 0 ) { 
           long int ival = strtol(buf, &endptr, 10);
