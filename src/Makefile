@@ -291,7 +291,7 @@ GEN_OBJS = $(GEN_SRCS:.c=.o)
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
-		${GEN_OBJS} ${OBJS} -o ${MYSO} -levent
+		${GEN_OBJS} ${OBJS} -o ${MYSO} -levent -latomic
 
 ut_task_cpu_time : ut_task_cpu_time.c
 	gcc -I../inc/ ut_task_cpu_time.c -o ut_task_cpu_time ${MYSO} -lpthread -lm

@@ -18,7 +18,11 @@ read_csv(
     size_t in_nX,
 
     char ** const str_qtypes,
+    const bool * const has_nulls, // [ncols] whetther col has nulls
+
     char ** const out, // [ncols][nrows]
+    bool ** const nn_out, // [ncols][nrows]
+
     const uint32_t * const widths, // [ncols] width of a column (needed for SC)
     uint32_t nrows,
     uint32_t ncols,
@@ -138,8 +142,14 @@ CELL_COMPLETE:
           ( ( strncmp(buf, "\\N", 2) == 0 ) || 
           ( strncmp(buf, "NA", 2) == 0 ) ) ) { 
         // null value => nothing to do  TODO P3 correct?
+        if ( ( has_nulls != NULL ) && ( has_nulls[j] ) ) { 
+          nn_out[j][i] = false;
+        }
       }
       else {
+        if ( ( has_nulls != NULL ) && ( has_nulls[j] ) ) { 
+          nn_out[j][i] = true;
+        }
         if ( strcmp(str_qtypes[j], "F8") == 0 ) { 
           double dval = strtod(buf, &endptr);
           mcr_chk_endptr(endptr);

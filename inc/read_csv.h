@@ -9,7 +9,11 @@ read_csv(
     size_t in_nX,
 
     char ** const qtypes,
+    const bool * const has_nulls, // [ncols] whetther col has nulls
+
     char ** const out, // [ncols][nrows]
+    bool ** const nn_out, // [ncols][nrows]
+
     const uint32_t * const width, // [ncols] width of a column (needed for SC)
     uint32_t nrows,
     uint32_t ncols,
