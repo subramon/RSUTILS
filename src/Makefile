@@ -266,6 +266,7 @@ SRCS += trim.c
 SRCS += txt_to_BL.c 
 SRCS += txt_to_SC.c 
 SRCS += unique.c
+SRCS += url.c
 
 OBJS = $(SRCS:.c=.o)
 
@@ -288,6 +289,8 @@ GEN_SRCS += ../src/txt_to_F8.c
 
 GEN_OBJS = $(GEN_SRCS:.c=.o)
 #----------------------------------
+
+read_csv.o : QCFLAGS += -Wno-cast-align # for ARM
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
