@@ -1,0 +1,12 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhistcnt =8
+let g:netrw_dirhist_8='/home/subramon/SITARE/scramble/server/lua'
+let g:netrw_dirhist_7='/home/subramon/Q/local/Q/data'
+let g:netrw_dirhist_6='/home/subramon/LightR/test/case1'
+let g:netrw_dirhist_5='/home/subramon/essays/.git'
+let g:netrw_dirhist_4='/tmp/RBC/setup'
+let g:netrw_dirhist_3='/tmp/RBC'
+let g:netrw_dirhist_2='/tmp/RBC/setup'
+let g:netrw_dirhist_1='/tmp/RBC/setup/class_level'
+let g:netrw_dirhist_0='/home/subramon/CMEM/.git'
+let g:netrw_dirhist_9='/home/subramon/Q/TMPL_FIX_HASHMAP/KEY_COUNTER/test'
