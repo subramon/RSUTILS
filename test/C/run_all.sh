@@ -15,4 +15,6 @@ bash test_isfile.sh
 bash test_rand_file_name.sh
 bash test_trim.sh
 
+bash test_transpose.sh
+
 echo "Completed $0 in $PWD"
