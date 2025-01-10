@@ -1,4 +1,4 @@
 export RSUTILS_SRC_ROOT="${HOME}/RSUTILS/"
 export LUA_PATH="$PWD/../?.lua;;"
 export LUA_CPATH="$RSUTILS_SRC_ROOT/binding/src/?.so;;"
-export QCFLAGS="  -DARM -std=gnu99  -fPIC      -g  -DDEBUG  -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wunused-variable  -Wunused-parameter -Wno-pedantic -fopenmp -Wno-unused-label  -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith  -Wshadow -Wcast-qual -Wcast-align -Wwrite-strings  -Wold-style-definition -Wsuggest-attribute=noreturn"
+export QCFLAGS="  -std=gnu99  -fPIC      -g  -DDEBUG  -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wunused-variable  -Wunused-parameter -Wno-pedantic -fopenmp -Wno-unused-label  -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith  -Wshadow -Wcast-qual -Wcast-align -Wwrite-strings  -Wold-style-definition -Wsuggest-attribute=noreturn"

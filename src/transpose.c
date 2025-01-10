@@ -18,6 +18,11 @@ But, col_offset[1] could be 1 or 2 or 4
 We can't calculate col_offset from col_width alone 
  * */
 
+typedef _key_rec_t { 
+  int i1;
+  double dval;
+} key_rec_t;
+
 //START_FOR_CDEF
 int
 transpose(
@@ -26,7 +31,7 @@ transpose(
     uint32_t *col_offset,
     uint32_t n_cols,
     uint32_t n_rows,
-    char *out // [n_rows] 
+    key_rec_t *out // [n_rows] 
     )
 //STOP_FOR_CDEF
 {

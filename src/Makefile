@@ -234,6 +234,7 @@ SRCS += isfile.c
 SRCS += isfile_in_dir.c 
 SRCS += isdir.c 
 SRCS += line_finder.c
+SRCS += num_lines_safe.c
 SRCS += lookup8.c
 SRCS += ls.c
 SRCS += mk_dir_file_name.c 

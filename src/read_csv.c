@@ -2,7 +2,7 @@
 #include "qtypes.h"
 #include "rs_mmap.h"
 #include <time.h>
-// TODO P4 Why do as an include not obviate need for below
+// TODO P4 strptime should be in time.h. But following still needed
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 #include "read_csv.h"
 
@@ -37,8 +37,11 @@ read_csv(
   int status = 0;
   char bslash = '\\';
   char *X = NULL; size_t nX = 0;
-#define BUFSZ 511 // Good enough for largest cell
+#define BUFSZ 511 // Good enough for largest cell TODO P4 make configurable
   char *buf = NULL;
+
+  // START: Check input arguments 
+  // Provide either infile or in_X, in_nX but not both 
   if ( infile == NULL ) { 
     if ( ( in_X == NULL ) || ( in_nX == 0 ) ) { go_BYE(-1); }
   }
@@ -46,6 +49,14 @@ read_csv(
     if ( ( in_X != NULL ) || ( in_nX != 0 ) ) { go_BYE(-1); }
   }
   if ( out    == NULL ) { go_BYE(-1); }
+  for ( uint32_t i = 0; i < ncols; i++ ) { 
+    if ( ( is_load[i] == true ) && ( has_nulls[i] == true ) ) { 
+      if ( ( nn_out == NULL ) || ( nn_out[i] == NULL ) ) { 
+        go_BYE(-1);
+      }
+    }
+  }
+
 
   if ( str_fld_sep == NULL ) { go_BYE(-1); }
   if ( str_fld_delim == NULL ) { go_BYE(-1); }
@@ -54,6 +65,7 @@ read_csv(
   if ( strlen(str_fld_sep) != 1 ) { go_BYE(-1); }
   if ( strlen(str_fld_delim) != 1 ) { go_BYE(-1); }
   if ( strlen(str_rec_sep) != 1 ) { go_BYE(-1); }
+  // STOP : Check input arguments 
 
   char fld_sep   = str_fld_sep[0];
   char fld_delim = str_fld_delim[0];
@@ -68,12 +80,16 @@ read_csv(
 
   size_t xidx = 0;
   if ( is_hdr ) {  // skip over first line 
-    for ( ; xidx < nX; xidx++ ) { 
-      if ( X[xidx] == rec_sep ) { 
-        xidx++;
+    bool found_eoln = false;
+    for ( uint64_t i = 0; i < nX; i++ ) { 
+      if ( X[i] == '\n' ) { 
+        X += i+1;
+        nX -= i+1;
+        found_eoln = true;
         break;
       }
     }
+    if ( !found_eoln ){ go_BYE(-1); }
   }
   // allocate buffer for a single cell value
   buf = malloc(BUFSZ+1);

@@ -65,18 +65,18 @@ line_finder(
     uint64_t nX,
     int fld_sep,
     int rec_sep,
-    uint32_t ncol, // number of columns 
-    uint32_t *max_width, // [ncol] can be null 
+    uint32_t ncols, // number of columns 
+    uint32_t *max_width, // [ncols] can be null 
     // Note that max_width needs one spot for nullc
-    bool *is_load, // [ncol] can be null 
-    char **cells, // [ncol][max_width[i]] can be null
+    bool *is_load, // [ncols] can be null 
+    char **cells, // [ncols][max_width[i]] can be null
     uint32_t *ptr_eoln_idx
     )
 {
   int status = 0;
   if ( X == NULL ) { go_BYE(-1); } 
   if ( nX == 0 ) { go_BYE(-1); } 
-  if ( ncol == 0 ) { go_BYE(-1); } 
+  if ( ncols == 0 ) { go_BYE(-1); } 
   uint32_t col_idx = 0;
   uint32_t start_idx, stop_idx;
   char dquote = '"';
@@ -91,7 +91,7 @@ line_finder(
     char c = X[idx];
     switch ( state ) {
       case S0 : 
-        if ( ( col_idx == ncol-1) && ( c == rec_sep ) ) {
+        if ( ( col_idx == ncols-1) && ( c == rec_sep ) ) {
 #ifdef PRINT_CELLS
           printf("Identified %dth cell = []\n", col_idx);
 #endif
@@ -99,7 +99,7 @@ line_finder(
           eoln_found = true;
           break;
         }
-        if ( ( col_idx <  ncol-1) && ( c == fld_sep ) ) {
+        if ( ( col_idx <  ncols-1) && ( c == fld_sep ) ) {
           if ( to_write(cells, is_load, col_idx) ) {
             cells[col_idx][0] = '\0';
           }
@@ -157,7 +157,7 @@ line_finder(
             stop_idx = idx;
             if ( max_width != NULL ) { 
               uint32_t width = (stop_idx - start_idx) - num_bslash;
-              if ( col_idx > ncol ) { go_BYE(-1); }
+              if ( col_idx > ncols ) { go_BYE(-1); }
               // Note that max_width needs one spot for nullc
               if ( width >= max_width[col_idx] ) { go_BYE(-1); }
             }
@@ -172,7 +172,7 @@ line_finder(
               status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
               cBYE(status);
             }
-            if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+            if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
               *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
               eoln_found = true;
               break;
@@ -182,9 +182,9 @@ line_finder(
             idx++; // jump over dquote
             if ( idx == nX ) { go_BYE(-1); }
             c = X[idx];
-            if ( ( col_idx <  ncol) && ( c != fld_sep ) ) { go_BYE(-1); }
-            if ( ( col_idx == ncol) && ( c != rec_sep ) ) { go_BYE(-1); }
-            if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+            if ( ( col_idx <  ncols) && ( c != fld_sep ) ) { go_BYE(-1); }
+            if ( ( col_idx == ncols) && ( c != rec_sep ) ) { go_BYE(-1); }
+            if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
               *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
               eoln_found = true;
               break;
@@ -201,12 +201,12 @@ line_finder(
           go_BYE(-1);
         }
         else if ( 
-            ( ( col_idx <  ncol-1) && ( c == fld_sep ) ) || 
-            ( ( col_idx == ncol-1) && ( c == rec_sep ) ) ) {
+            ( ( col_idx <  ncols-1) && ( c == fld_sep ) ) || 
+            ( ( col_idx == ncols-1) && ( c == rec_sep ) ) ) {
           stop_idx = idx;
           if ( max_width != NULL ) { 
             uint32_t width = stop_idx - start_idx;
-            if ( col_idx >= ncol ) { go_BYE(-1); }
+            if ( col_idx >= ncols ) { go_BYE(-1); }
             if ( ( width > max_width[col_idx] ) && 
                 ( max_width[col_idx] > 0 ) ) {
               go_BYE(-1); 
@@ -223,16 +223,16 @@ line_finder(
             status = rs_strcpy(cells[col_idx], X, start_idx, stop_idx);
             cBYE(status);
           }
-          if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+          if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
             *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
             eoln_found = true;
             break;
           }
           col_idx++; // get ready for next cell
           state = S0;
-          if ( ( col_idx <  ncol) && ( c != fld_sep ) ) { go_BYE(-1); }
-          if ( ( col_idx == ncol) && ( c != rec_sep ) ) { go_BYE(-1); }
-          if ( ( col_idx == ncol) && ( c == rec_sep ) ) {
+          if ( ( col_idx <  ncols) && ( c != fld_sep ) ) { go_BYE(-1); }
+          if ( ( col_idx == ncols) && ( c != rec_sep ) ) { go_BYE(-1); }
+          if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
             *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
             eoln_found = true;
             break;
