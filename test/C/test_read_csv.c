@@ -7,6 +7,7 @@
 
 #include "qtypes.h"
 #include "num_lines_safe.h"
+#include "num_lines.h"
 #include "read_csv.h"
 
 int
@@ -46,6 +47,7 @@ main(
     str_fld_sep, str_rec_sep, &nrows);
   cBYE(status);
   if ( nrows != 6 ) { go_BYE(-1); }
+  if ( (uint32_t)num_lines(infile, in_X, in_nX) != nrows ) { go_BYE(-1); }
   if ( is_hdr ) { 
     if ( nrows < 2 ) { go_BYE(-1); }
     nrows--;
