@@ -17,7 +17,7 @@ read_csv(
     char *in_X,
     size_t in_nX,
 
-    const qtype_t * qtypes, // [ncols] 
+    const qtype_t * const qtypes, // [ncols] 
     const uint32_t * const widths, // [ncols] (needed for SC)
     char ** const formats, // [ncols] (needed for TM)
     const bool * const is_load, // [ncols] whether col has nulls
