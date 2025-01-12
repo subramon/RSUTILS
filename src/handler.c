@@ -38,9 +38,43 @@ handler(
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
   //--------------------------------------
+#define VERBOSE
+#ifdef VERBOSE
+  const char* hkeys[] = { 
+    "Accept",
+    "Authorization",
+    "Cookie",
+    "Content-Type",
+    "Host",
+    "Referer",
+    "User-Agent",
+    "X-Forwarded-For", };
+
+  // Parse the query for later lookups
+  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
+  for ( int i = 0; i < 8; i++ ) { 
+    const char *hval = evhttp_find_header(headers, hkeys[i]);
+
+    if ( hval != NULL ) { 
+      fprintf(stderr, "%s:%s \n", hkeys[i], hval);
+    }
+  }
+  const char * host = req->remote_host; 
+  if ( host != NULL ) { 
+    fprintf(stderr, "Host=%s\n", host);
+  }
+  if ( strcmp(host, "127.0.0.1") == 0 ) { 
+    evbuffer_add_printf(opbuf, "BUZZ OFF!!!\n");
+    evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
+  }
+
+#endif
+  //--------------------------------------
   status = extract_api_args(decoded_uri, api, MAX_LEN_API, args, 
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
+  printf("api = %s \n", api);
+  printf("args = %s \n", args);
   cBYE(status);
   get_req_fn_t get_req_fn = web_info->get_req_fn;
   int req_type = get_req_fn(api);
@@ -65,6 +99,8 @@ handler(
     for ( int i = 0; i < web_response.num_headers; i++ ) { 
       evhttp_add_header(evhttp_request_get_output_headers(req),
           web_response.header_key[i], web_response.header_val[i]);
+      printf("Added headeer %s %s \n", 
+          web_response.header_key[i], web_response.header_val[i]);
     }
     // Running into trouble with add_file 
     // open file for reading 
@@ -88,7 +124,7 @@ handler(
   else { 
     // this is default header
     evhttp_add_header(evhttp_request_get_output_headers(req),
-      "Content-Type", "application/json; charset=UTF-8");
+        "Content-Type", "application/json; charset=UTF-8");
   }
   // Following  is to allow CAPI/PAPI interactions
   evhttp_add_header(evhttp_request_get_output_headers(req),
