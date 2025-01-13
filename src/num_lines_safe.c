@@ -13,6 +13,7 @@ num_lines_safe(
 
     uint32_t max_width,
     uint32_t ncols,
+    bool is_hdr,
     const char * const str_fld_sep,
     const char * const str_rec_sep,
 
@@ -58,6 +59,20 @@ num_lines_safe(
   uint32_t nrows = 0;
   uint32_t eoln_idx = 0;
   char *max_X = X + nX;
+  // handle the header line if any 
+  if ( is_hdr ) {  // skip over first line 
+    bool found_eoln = false;
+    for ( uint64_t i = 0; i < nX; i++ ) { 
+      if ( X[i] == '\n' ) { 
+        X += i+1;
+        nX -= i+1;
+        found_eoln = true;
+        break;
+      }
+    }
+    if ( !found_eoln ) { go_BYE(-1); }
+  }
+  // --------------------------
   for ( ; ; ) { 
     status = line_finder( X, nX, fld_sep, rec_sep, ncols,
         widths, is_load, NULL, &eoln_idx);

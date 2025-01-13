@@ -68,6 +68,10 @@ t_assign(
     struct tm *dst, 
     tm_t *src
     );
+extern char *
+get_format(
+    const char * const str_qtype
+    );
 extern uint32_t
 get_width_qtype(
     const char * const str_qtype

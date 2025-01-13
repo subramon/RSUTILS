@@ -61,6 +61,25 @@ get_width_qtype(
   int width = get_width_c_qtype(qtype);
   return width;
 }
+// return string should be freed by caller 
+char *
+get_format(
+    const char * const str_qtype
+    )
+{
+  if ( str_qtype == NULL ) { WHEREAMI; return NULL; }
+  if ( strncmp(str_qtype, "TM1:", strlen("TM1:")) == 0 ) { 
+    const char *cptr = str_qtype + strlen("TM1:");
+    if ( strlen(cptr) == 0 ) { WHEREAMI; return NULL; }
+    return strdup(cptr);
+  }
+  if ( strncmp(str_qtype, "TM:", strlen("TM:")) == 0 ) { 
+    const char *cptr = str_qtype + strlen("TM:");
+    if ( strlen(cptr) == 0 ) { WHEREAMI; return NULL; }
+    return strdup(cptr);
+  }
+  return NULL;
+}
 
 uint32_t
 get_width_c_qtype(

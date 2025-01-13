@@ -36,6 +36,7 @@ read_csv(
 {
   int status = 0;
   char bslash = '\\';
+  bool is_load_j, has_nulls_j;
   char *X = NULL; size_t nX = 0;
 #define BUFSZ 511 // Good enough for largest cell TODO P4 make configurable
   char *buf = NULL;
@@ -50,7 +51,15 @@ read_csv(
   }
   if ( out    == NULL ) { go_BYE(-1); }
   for ( uint32_t i = 0; i < ncols; i++ ) { 
-    if ( ( is_load[i] == true ) && ( has_nulls[i] == true ) ) { 
+    bool is_load_i = true;
+    if ( ( is_load != NULL ) && ( is_load[i] == false ) )  {
+      is_load_i = false;
+    }
+    bool has_nulls_i = false;
+    if ( ( has_nulls != NULL ) && ( has_nulls[i] == true ) )  {
+      has_nulls_i = true;
+    }
+    if ( is_load_i && has_nulls_i ) {
       if ( ( nn_out == NULL ) || ( nn_out[i] == NULL ) ) { 
         go_BYE(-1);
       }
@@ -156,7 +165,16 @@ read_csv(
 CELL_COMPLETE:
       // now  we have a single cell value
       //-------------------------------------------
-      if ( is_load[j] == false ) { continue; }
+    is_load_j = true;
+    if ( ( is_load != NULL ) && ( is_load[j] == false ) )  {
+      is_load_j= false;
+    }
+    if ( is_load_j == false ) { continue; }
+
+    has_nulls_j = false;
+    if ( ( has_nulls != NULL ) && ( has_nulls[j] == false ) )  {
+      has_nulls_j= false;
+    }
       // determine if we have a null value with us 
       bool is_null;
       for ( ; ; ) {
@@ -170,7 +188,7 @@ CELL_COMPLETE:
         nn_out[j][i] = false;
       continue;
       }
-      if ( ( has_nulls != NULL ) && ( has_nulls[j] ) ) { 
+      if ( has_nulls_j ) { 
         nn_out[j][i] = true;
       }
       switch ( qtypes[j] ) {
@@ -214,6 +232,10 @@ CELL_COMPLETE:
         case I4 : 
           {
             long int ival = strtol(buf, &endptr, 10);
+          if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { \
+            printf("hello world\n");
+          }
+
             mcr_chk_endptr(endptr);
             if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
             int32_t *iptr = (int32_t *)out[j];

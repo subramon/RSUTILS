@@ -38,7 +38,7 @@ handler(
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
   //--------------------------------------
-#define VERBOSE
+#undef VERBOSE
 #ifdef VERBOSE
   const char* hkeys[] = { 
     "Accept",
@@ -59,22 +59,25 @@ handler(
       fprintf(stderr, "%s:%s \n", hkeys[i], hval);
     }
   }
-  const char * host = req->remote_host; 
-  if ( host != NULL ) { 
-    fprintf(stderr, "Host=%s\n", host);
+  const char * client = req->remote_host; 
+  if ( client != NULL ) { 
+    fprintf(stderr, "Client IP address=%s\n", client);
   }
+  /*
   if ( strcmp(host, "127.0.0.1") == 0 ) { 
     evbuffer_add_printf(opbuf, "BUZZ OFF!!!\n");
     evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
   }
+   goto BYE;
+  */
 
 #endif
   //--------------------------------------
   status = extract_api_args(decoded_uri, api, MAX_LEN_API, args, 
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
-  printf("api = %s \n", api);
-  printf("args = %s \n", args);
+  // printf("api = %s \n", api);
+  // printf("args = %s \n", args);
   cBYE(status);
   get_req_fn_t get_req_fn = web_info->get_req_fn;
   int req_type = get_req_fn(api);
@@ -98,8 +101,6 @@ handler(
     // send the headers if any
     for ( int i = 0; i < web_response.num_headers; i++ ) { 
       evhttp_add_header(evhttp_request_get_output_headers(req),
-          web_response.header_key[i], web_response.header_val[i]);
-      printf("Added headeer %s %s \n", 
           web_response.header_key[i], web_response.header_val[i]);
     }
     // Running into trouble with add_file 
