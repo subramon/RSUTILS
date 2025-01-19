@@ -6,8 +6,9 @@
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 #include "read_csv.h"
 
-#define mcr_chk_endptr(x) { \
+#define mcr_chk_endptr(x, y) { \
         if ( ( x != NULL ) && ( *x != '\0' ) && ( *x != '\n' ) ) { \
+          fprintf(stderr, "Unable to convert cell [%s]\n", y); \
           go_BYE(-1); \
         } \
 }
@@ -195,7 +196,7 @@ CELL_COMPLETE:
         case F8 : 
           {
             double dval = strtod(buf, &endptr);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             double *dptr = (double *)out[j];
             dptr[i] = dval;
           }
@@ -204,7 +205,7 @@ CELL_COMPLETE:
         case F4 : 
           {
             double dval = strtod(buf, &endptr);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
             float *fptr = (float *)out[j];
             fptr[i] = dval;
@@ -214,7 +215,7 @@ CELL_COMPLETE:
         case F2 : 
           {
             double dval = strtod(buf, &endptr);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
             bfloat16 *fptr = (bfloat16 *)out[j];
             fptr[i] = dval;
@@ -224,7 +225,7 @@ CELL_COMPLETE:
         case I8 : 
           {
             long long int ival = strtoll(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             int64_t *iptr = (int64_t *)out[j];
             iptr[i] = ival;
           }
@@ -236,7 +237,7 @@ CELL_COMPLETE:
             printf("hello world\n");
           }
 
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
             int32_t *iptr = (int32_t *)out[j];
             iptr[i] = ival;
@@ -260,7 +261,7 @@ CELL_COMPLETE:
         case I1 : 
           {
             long int ival = strtol(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( ( ival > SCHAR_MAX ) || ( ival < SCHAR_MIN ) ) { go_BYE(-1); }
             int8_t *iptr = (int8_t *)out[j];
             iptr[i] = ival;
@@ -269,7 +270,7 @@ CELL_COMPLETE:
         case I2 : 
           {
             long int ival = strtol(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( ( ival > SHRT_MAX ) || ( ival < SHRT_MIN ) ) { go_BYE(-1); }
             int16_t *iptr = (int16_t *)out[j];
             iptr[i] = ival;
@@ -279,7 +280,7 @@ CELL_COMPLETE:
         case UI8 : 
           {
             unsigned long long int uival = strtoull(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             uint64_t *uiptr = (uint64_t *)out[j];
             uiptr[i] = uival;
           }
@@ -287,7 +288,7 @@ CELL_COMPLETE:
         case UI4 : 
           {
             unsigned long int uival = strtol(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( uival > UINT_MAX ) { go_BYE(-1); }
             uint32_t *uiptr = (uint32_t *)out[j];
             uiptr[i] = uival;
@@ -296,7 +297,7 @@ CELL_COMPLETE:
         case UI2 : 
           {
             unsigned long long int uival = strtoull(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( uival > USHRT_MAX ) { go_BYE(-1); }
             uint16_t *uiptr = (uint16_t *)out[j];
             uiptr[i] = uival;
@@ -305,7 +306,7 @@ CELL_COMPLETE:
         case UI1 : 
           {
             unsigned long long int uival = strtoull(buf, &endptr, 10);
-            mcr_chk_endptr(endptr);
+            mcr_chk_endptr(endptr, buf);
             if ( uival > UCHAR_MAX ) { go_BYE(-1); }
             uint8_t *uiptr = (uint8_t *)out[j];
             uiptr[i] = uival;
