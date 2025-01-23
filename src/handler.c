@@ -127,9 +127,10 @@ handler(
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Content-Type", "application/json; charset=UTF-8");
   }
-  // Following  is to allow CAPI/PAPI interactions
-  evhttp_add_header(evhttp_request_get_output_headers(req),
-      "Access-Control-Allow-Origin", "*"); 
+  if ( web_info->is_cors ) { 
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Access-Control-Allow-Origin", "*"); 
+  }
   if ( status == 0 ) { 
     evbuffer_add_printf(opbuf, "%s", outbuf); 
     evhttp_send_reply(req, HTTP_OK, "OK", opbuf);

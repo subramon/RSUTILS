@@ -39,6 +39,9 @@ typedef int (*proc_req_fn_t)(
 typedef struct _web_info_t { 
   struct event_base *base;
   bool is_external; // false => accessible only from localhost
+  bool is_cors;  // explained below 
+  /* See https://portswigger.net/web-security/cors/access-control-allow-origin#:~:text=The%20Access%2DControl%2DAllow%2DOrigin%20header%20is%20included%20in,permitted%20origin%20of%20the%20request.
+  */
   int port;
   get_req_fn_t get_req_fn;
   proc_req_fn_t proc_req_fn;
