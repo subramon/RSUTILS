@@ -27,7 +27,7 @@ webserver(
   base = event_base_new();
   httpd = evhttp_new(base);
   evhttp_set_max_headers_size(httpd, 4096); // TODO P4 FIX 
-  evhttp_set_max_body_size(httpd, 4096); // TODO P4 FIX 
+  evhttp_set_max_body_size(httpd, 1048576); // TODO P4 FIX 
 
   /* 
    *  Services will only receive packets from interfaces they listen to. You can commonly specify 0.0.0.0 as listen address in the service, to make it listen on all interfaces.

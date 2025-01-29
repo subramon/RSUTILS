@@ -22,7 +22,7 @@ handler(
   char args[MAX_LEN_ARGS+1]; memset(args, 0, MAX_LEN_ARGS+1);
   char outbuf[MAX_LEN_OUTPUT+1];
   char errbuf[MAX_LEN_ERROR+1];
-  char *body = NULL; 
+  char *body = NULL;  uint32_t n_body = 0;
   memset(outbuf, '\0', MAX_LEN_OUTPUT+1); // TOOD P4 not needed
   memset(errbuf, '\0', MAX_LEN_ERROR+1); // TOOD P4 not needed
   struct evbuffer *opbuf = NULL;
@@ -89,11 +89,12 @@ handler(
     // evbuffer_free(opbuf);
     event_base_loopbreak(base);
   }
-  status = get_body(req, &body); cBYE(status);
+  status = get_body(req, &body, &n_body); cBYE(status);
+  if ( n_body > 0 ) { printf("Size of body = %u \n", n_body); }
 
   void *W = web_info->W; // contains stuff needed by process_req()
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
-  status = process_req_fn(req_type, api, args, body, W,
+  status = process_req_fn(req_type, api, args, body, n_body, W,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // Handle case when something other than default is to be returned
   if ( web_response.is_set ) {

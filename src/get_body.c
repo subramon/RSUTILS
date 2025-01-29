@@ -6,7 +6,8 @@
 int 
 get_body(
     struct evhttp_request *req,
-    char **ptr_body 
+    char **ptr_body,
+    uint32_t *ptr_n_body
     )
 {
   int status = 0;
@@ -23,6 +24,7 @@ get_body(
     if ( n < 0 ) { go_BYE(-1); }
     if ( n != (int)n_body ) { go_BYE(-1); }
     *ptr_body    = body;
+    *ptr_n_body  = n_body;
   }
 BYE:
   return status;

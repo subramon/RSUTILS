@@ -28,6 +28,7 @@ typedef int (*proc_req_fn_t)(
     const char *const api,
     const char *args,
     const char *body,
+    uint32_t n_body,
     void *W,
     char *outbuf, // [sz_outbuf]
     size_t sz_outbuf,
