@@ -96,14 +96,20 @@ handler(
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
   status = process_req_fn(req_type, api, args, body, n_body, W,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
+  // send the headers if any
+  for ( int i = 0; i < web_response.num_headers; i++ ) { 
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+       web_response.header_key[i], web_response.header_val[i]);
+  }
+  // TODO P0 START HACK 
+  if ( strcmp(api, "Pass") == 0 ) { 
+    evhttp_send_reply(req, HTTP_MOVETEMP, "OK", opbuf);
+    goto BYE;
+  }
+  // TODO P0 STOP  HACK 
   // Handle case when something other than default is to be returned
   if ( web_response.is_set ) {
     if ( web_response.file_name == NULL ) { go_BYE(-1); } 
-    // send the headers if any
-    for ( int i = 0; i < web_response.num_headers; i++ ) { 
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-          web_response.header_key[i], web_response.header_val[i]);
-    }
     // Running into trouble with add_file 
     // open file for reading 
     // int wfd = open(web_response.file_name, O_RDONLY); 
