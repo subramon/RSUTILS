@@ -38,7 +38,7 @@ handler(
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
   //--------------------------------------
-#undef VERBOSE
+#define VERBOSE
 #ifdef VERBOSE
   const char* hkeys[] = { 
     "Accept",
