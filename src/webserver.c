@@ -6,11 +6,6 @@ phandler(
     struct evhttp_request *req,
     void *arg
     );
-extern void
-handler(
-    struct evhttp_request *req,
-    void *arg
-    );
 #include "web_struct.h"
 #include "webserver.h"
 
@@ -23,19 +18,28 @@ webserver(
   int status;
   if ( arg == NULL ) { go_BYE(-1); }
   web_info_t *web_info = (web_info_t *)arg;
-  int port = web_info->port; 
   struct evhttp *httpd = NULL;
   struct event_base *base = NULL;
+
+  int port = web_info->port; 
   if ( ( port <= 0 )  || ( port > 65535 ) ) { go_BYE(-1); } 
   uint16_t portu16 = (uint16_t)(port);
 
   base = event_base_new();
   httpd = evhttp_new(base);
-  evhttp_set_max_headers_size(httpd, 4096); // TODO P4 FIX 
-  evhttp_set_max_body_size(httpd, 1048576); // TODO P4 FIX 
-
+  //---------------------------------------------
+  uint32_t sz = web_info->max_headers_size;
+  if ( sz == 0 ) { sz = 4096; } 
+  evhttp_set_max_headers_size(httpd, sz); 
+  //---------------------------------------------
+  sz = web_info->max_body_size;
+  if ( sz == 0 ) { sz = 1048576; } 
+  evhttp_set_max_body_size(httpd, sz); 
+  //---------------------------------------------
   /* 
-   *  Services will only receive packets from interfaces they listen to. You can commonly specify 0.0.0.0 as listen address in the service, to make it listen on all interfaces.
+   *  Services will only receive packets from interfaces they listen to. 
+   *  You can commonly specify 0.0.0.0 as listen address in the service, 
+   *  to make it listen on all interfaces.
    *  https://askubuntu.com/questions/1136377/why-is-port-not-open-not-ufw-service-is-running
    *  */
   if ( web_info->is_external ) { 
@@ -49,7 +53,7 @@ webserver(
   }
   //---------------------
   web_info->base = base;
-  evhttp_set_gencb(httpd, phandler, web_info); // TODO P0
+  evhttp_set_gencb(httpd, phandler, web_info); 
   event_base_dispatch(base);
   evhttp_free(httpd);
   event_base_free(base);

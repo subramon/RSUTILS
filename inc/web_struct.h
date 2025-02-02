@@ -45,6 +45,8 @@ typedef struct _web_info_t {
   /* See https://portswigger.net/web-security/cors/access-control-allow-origin#:~:text=The%20Access%2DControl%2DAllow%2DOrigin%20header%20is%20included%20in,permitted%20origin%20of%20the%20request.
   */
   int port;
+  uint32_t max_headers_size; 
+  uint32_t max_body_size; 
   get_req_fn_t get_req_fn;
   proc_req_fn_t proc_req_fn;
   void *W; // anything else we want webserver to have 
