@@ -1,4 +1,5 @@
 #include "evhttp.h"
+#include "event2/http.h"
 #ifndef __WEB_STRUCT_H 
 #define __WEB_STRUCT_H 
 
@@ -9,7 +10,6 @@
 typedef struct _web_response_t {
   char *file_name;
   bool delete_file;
-  char *suffix;
   // example of a header is Content-Type: image/foo.png
   // example of a header is Content-Type: application/json; charset=UTF-8
   // above is default header 
@@ -18,6 +18,7 @@ typedef struct _web_response_t {
   int num_headers; 
   bool is_set; // default false
   bool is_err; // default false
+  int response_code;  // see http.h
 } web_response_t;
 
 typedef int (*get_req_fn_t)(

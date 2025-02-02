@@ -8,6 +8,8 @@
 #include "extract_api_args.h"
 #include "get_body.h"
 
+#include "extract_name_value.h"
+#define MAX_LEN_SESS_NAME 127
 #include "handler.h"
 void
 handler(
@@ -17,62 +19,68 @@ handler(
 {
   int status = 0;
   char *X = NULL; size_t nX = 0;
-  char *decoded_uri = NULL;
   char  api[MAX_LEN_API+1];
-  char args[MAX_LEN_ARGS+1]; memset(args, 0, MAX_LEN_ARGS+1);
+  memset(api, 0, MAX_LEN_API+1);
+
+  char args[MAX_LEN_ARGS+1]; 
+  memset(args, 0, MAX_LEN_ARGS+1);
+
   char outbuf[MAX_LEN_OUTPUT+1];
-  char errbuf[MAX_LEN_ERROR+1];
-  char *body = NULL;  uint32_t n_body = 0;
   memset(outbuf, '\0', MAX_LEN_OUTPUT+1); // TOOD P4 not needed
+
+  char errbuf[MAX_LEN_ERROR+1];
   memset(errbuf, '\0', MAX_LEN_ERROR+1); // TOOD P4 not needed
+
+  char sess_name[MAX_LEN_SESS_NAME+1];
+  memset(sess_name, 0, MAX_LEN_SESS_NAME+1);
+
+  web_response_t web_response; 
+  memset(&web_response, 0, sizeof(web_response_t));
+
+  char *decoded_uri = NULL;
+  char *body = NULL;  uint32_t n_body = 0;
   struct evbuffer *opbuf = NULL;
+
   if ( arg == NULL ) { go_BYE(-1); } 
   web_info_t *web_info = (web_info_t *)arg;
   struct event_base *base = web_info->base;
   if ( base == NULL ) { go_BYE(-1); }
   opbuf = evbuffer_new();
   if ( opbuf == NULL) { go_BYE(-1); }
-  const char *uri = evhttp_request_uri(req);
-  decoded_uri = evhttp_decode_uri(uri);
-  if ( decoded_uri == NULL ) { go_BYE(-1); }
-  web_response_t web_response; 
-  memset(&web_response, 0, sizeof(web_response_t));
   //--------------------------------------
-#define VERBOSE
-#ifdef VERBOSE
-  const char* hkeys[] = { 
-    "Accept",
-    "Authorization",
-    "Cookie",
-    "Content-Type",
-    "Host",
-    "Referer",
-    "User-Agent",
-    "X-Forwarded-For", };
-
-  // Parse the query for later lookups
-  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
-  for ( int i = 0; i < 8; i++ ) { 
-    const char *hval = evhttp_find_header(headers, hkeys[i]);
-
-    if ( hval != NULL ) { 
-      fprintf(stderr, "%s:%s \n", hkeys[i], hval);
-    }
-  }
+  /*
   const char * client = req->remote_host; 
   if ( client != NULL ) { 
     fprintf(stderr, "Client IP address=%s\n", client);
   }
-  /*
-  if ( strcmp(host, "127.0.0.1") == 0 ) { 
-    evbuffer_add_printf(opbuf, "BUZZ OFF!!!\n");
-    evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
-  }
-   goto BYE;
   */
-
+#ifdef GETCOOKIES
+  // Get Cookie. If none, redirect to login page 
+  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
+  const char *hval = evhttp_find_header(headers, "Cookie");
+  bool is_login = false;
+  if ( hval != NULL ) {
+    status = extract_name_value(hval, "Session=", ';', 
+        sess_name, MAX_LEN_SESS_NAME);
+    if ( *sess_name != '\0' ) { 
+      // Check if valid sess_name 
+      is_login = true;
+    }
+  }
+  if ( is_login == false ) { 
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Location", "/login.html"); 
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
+    // release any resources allocated 
+    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+    return; 
+  }
 #endif
-  //--------------------------------------
+  // Get URI 
+  const char *uri = evhttp_request_uri(req);
+  decoded_uri = evhttp_decode_uri(uri);
+  if ( decoded_uri == NULL ) { go_BYE(-1); }
+  //- Get API 
   status = extract_api_args(decoded_uri, api, MAX_LEN_API, args, 
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
@@ -101,12 +109,15 @@ handler(
     evhttp_add_header(evhttp_request_get_output_headers(req),
        web_response.header_key[i], web_response.header_val[i]);
   }
-  // TODO P0 START HACK 
-  if ( strcmp(api, "Pass") == 0 ) { 
-    evhttp_send_reply(req, HTTP_MOVETEMP, "OK", opbuf);
-    goto BYE;
+  if ( web_response.num_headers == 0 ) { 
+    // this is default header
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Content-Type", "application/json; charset=UTF-8");
   }
-  // TODO P0 STOP  HACK 
+  if ( web_info->is_cors ) { 
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Access-Control-Allow-Origin", "*"); 
+  }
   // Handle case when something other than default is to be returned
   if ( web_response.is_set ) {
     if ( web_response.file_name == NULL ) { go_BYE(-1); } 
@@ -129,15 +140,7 @@ handler(
     }
     goto BYE; 
   }
-  else { 
-    // this is default header
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Content-Type", "application/json; charset=UTF-8");
-  }
-  if ( web_info->is_cors ) { 
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Access-Control-Allow-Origin", "*"); 
-  }
+BYE:
   if ( status == 0 ) { 
     evbuffer_add_printf(opbuf, "%s", outbuf); 
     evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
@@ -146,10 +149,10 @@ handler(
     evbuffer_add_printf(opbuf, "%s", errbuf); 
     evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
   }
-BYE:
-  mcr_rs_munmap(X, nX);
+  // Release resources 
   if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
   free_if_non_null(decoded_uri);
+  mcr_rs_munmap(X, nX);
   // free resources in web response
   if ( web_response.file_name != NULL ) { 
     if ( web_response.delete_file ) { 
