@@ -89,7 +89,13 @@ handler(
   cBYE(status);
   get_req_fn_t get_req_fn = web_info->get_req_fn;
   int req_type = get_req_fn(api);
-  if ( req_type  == 0 ) { go_BYE(-1); }
+  if ( req_type  == 0 ) {  // unknown endpoint: redirect to home
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Location", "Static?home.html"); 
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
+    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+    return;
+  }
   if ( strcmp(api, "Halt") == 0 ) {
     // TODO: P4 Need to get loopbreak to wait for these 3 statements
     // evbuffer_add_printf(opbuf, "%s\n", g_rslt);

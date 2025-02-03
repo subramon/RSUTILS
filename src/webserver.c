@@ -24,7 +24,7 @@ webserver(
   web_info_t *web_info = (web_info_t *)arg;
   struct evhttp *httpd = NULL;
   struct event_base *base = NULL;
-  int n_workers = 2; // TODO P0
+  uint32_t n_workers = web_info->n_workers;
   pthread_t *workers  = NULL;
   pthread_cond_t *condc = NULL; 
   pthread_cond_t *condp = NULL; 
