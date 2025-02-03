@@ -10,8 +10,8 @@ extern void *
 alt_handler(
     void *arg
     );
-typedef struct _core_lhandler_arg_t {
+typedef struct _alt_handler_arg_t {
     struct evhttp_request *req;
     void *arg;
-} core_lhandler_arg_t;
+} alt_handler_arg_t;
 #endif // __ALT_HANDLER_H

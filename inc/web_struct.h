@@ -21,11 +21,7 @@ typedef struct _web_response_t {
   int response_code;  // see http.h
 } web_response_t;
 
-typedef int (*get_req_fn_t)(
-    const char *api
-    );
 typedef int (*proc_req_fn_t)( 
-    int req_type,
     const char *const api,
     const char *args,
     const char *body,
@@ -47,12 +43,9 @@ typedef struct _web_info_t {
   int port;
   uint32_t max_headers_size; 
   uint32_t max_body_size; 
-  get_req_fn_t get_req_fn;
   proc_req_fn_t proc_req_fn;
-  pthread_t *workers; // [n_workers]
-  uint32_t n_workers; 
-  int *wstat; // [n_workers]
   void *W; // anything else we want webserver to have 
+  int halt;  // set to 1 => all threads must halt 
 } web_info_t;
 
 #endif //  __WEB_STRUCT_H 

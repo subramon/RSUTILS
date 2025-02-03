@@ -9,7 +9,7 @@ alt_handler(
     void *in_alt_arg
     )
 {
-  core_lhandler_arg_t *alt_arg = (core_lhandler_arg_t *)in_alt_arg;
+  alt_handler_arg_t *alt_arg = (alt_handler_arg_t *)in_alt_arg;
   handler(alt_arg->req, alt_arg->arg);
   pthread_exit(NULL);
 }

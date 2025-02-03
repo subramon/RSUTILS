@@ -87,8 +87,7 @@ handler(
   // printf("api = %s \n", api);
   // printf("args = %s \n", args);
   cBYE(status);
-  get_req_fn_t get_req_fn = web_info->get_req_fn;
-  int req_type = get_req_fn(api);
+  /* TODO JUst for class 
   if ( req_type  == 0 ) {  // unknown endpoint: redirect to home
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Location", "Static?home.html"); 
@@ -96,11 +95,20 @@ handler(
     if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
     return;
   }
+  */
   if ( strcmp(api, "Halt") == 0 ) {
-    // TODO: P4 Need to get loopbreak to wait for these 3 statements
-    // evbuffer_add_printf(opbuf, "%s\n", g_rslt);
-    // evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
-    // evbuffer_free(opbuf);
+    // Inform all threads that they need to terminate 
+    int l_expected = 0;
+    int l_desired  = 1;
+    bool rslt = __atomic_compare_exchange(&(web_info->halt), 
+        &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( !rslt ) { go_BYE(-1); }
+
+    /* TODO: P4 Need to get loopbreak to wait for these 3 statements
+    evbuffer_add_printf(opbuf, "\{ \"Server\" : \"Halting\"}\n"); 
+    evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
+    evbuffer_free(opbuf);
+    */
     event_base_loopbreak(base);
   }
   status = get_body(req, &body, &n_body); cBYE(status);
@@ -108,7 +116,7 @@ handler(
 
   void *W = web_info->W; // contains stuff needed by process_req()
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
-  status = process_req_fn(req_type, api, args, body, n_body, W,
+  status = process_req_fn(api, args, body, n_body, W,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
