@@ -49,6 +49,9 @@ typedef struct _web_info_t {
   uint32_t max_body_size; 
   get_req_fn_t get_req_fn;
   proc_req_fn_t proc_req_fn;
+  pthread_t *workers; // [n_workers]
+  uint32_t n_workers; 
+  int *wstat; // [n_workers]
   void *W; // anything else we want webserver to have 
 } web_info_t;
 
