@@ -7,7 +7,7 @@ phandler(
     void *arg
     );
 extern void *
-web_worker(
+loop_handler(
     void *
     );
 #include "web_struct.h"
