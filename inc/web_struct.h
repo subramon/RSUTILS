@@ -41,6 +41,7 @@ typedef struct _web_info_t {
   proc_req_fn_t proc_req_fn;
 
   int port;
+  char *docroot; 
   uint32_t max_headers_size; 
   uint32_t max_body_size; 
   bool is_external; // false => accessible only from localhost
@@ -50,7 +51,7 @@ typedef struct _web_info_t {
   uint32_t n_sessions;
   char **users; // [n_users];
   uint32_t n_users;
-  void *C; // anything else we want webserver to have 
+  void *X; // anything else we want webserver to have 
   int halt;  // set to 1 => all threads must halt 
 } web_info_t;
 // STOP_FOR_CDEF

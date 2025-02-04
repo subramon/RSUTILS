@@ -114,9 +114,8 @@ handler(
   status = get_body(req, &body, &n_body); cBYE(status);
   if ( n_body > 0 ) { printf("Size of body = %u \n", n_body); }
 
-  void *C = web_info->C; // contains stuff needed by process_req()
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
-  status = process_req_fn(api, args, body, n_body, C,
+  status = process_req_fn(api, args, body, n_body, web_info,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
