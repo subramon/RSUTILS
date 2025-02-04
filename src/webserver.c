@@ -3,7 +3,6 @@
 #include <pthread.h>
 #include "web_struct.h"
 #include "phandler.h"
-#include "loop_handler.h"
 #include "webserver.h"
 
 // globals 

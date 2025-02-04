@@ -225,6 +225,7 @@ SRCS += file_as_str.c
 SRCS += file_exists.c 
 SRCS += fp32tobf16.c
 SRCS += free_2d_array.c 
+SRCS += free_web_info.c 
 SRCS += get_bit_u64.c  
 SRCS += get_body.c 
 SRCS += get_time_usec.c 

@@ -7,6 +7,7 @@
 // This is used when we want to return something more complex than
 // just text (which is returned in opbuf and/or errbuf)
 
+//START_FOR_CDEF
 typedef struct _web_response_t {
   char *file_name;
   bool delete_file;
@@ -34,29 +35,24 @@ typedef int (*proc_req_fn_t)(
     web_response_t *ptr_web_response
     );
 
+
 typedef struct _web_info_t { 
   struct event_base *base;
-  bool is_external; // false => accessible only from localhost
-  bool is_cors;  // explained below 
-  /* See https://portswigger.net/web-security/cors/access-control-allow-origin#:~:text=The%20Access%2DControl%2DAllow%2DOrigin%20header%20is%20included%20in,permitted%20origin%20of%20the%20request.
-  */
+  proc_req_fn_t proc_req_fn;
+
   int port;
   uint32_t max_headers_size; 
   uint32_t max_body_size; 
-  proc_req_fn_t proc_req_fn;
-  void *W; // anything else we want webserver to have 
+  bool is_external; // false => accessible only from localhost
+  bool is_cors;  // explained below 
+  /* See https://portswigger.net/web-security/cors/access-control-allow-origin#:~:text=The%20Access%2DControl%2DAllow%2DOrigin%20header%20is%20included%20in,permitted%20origin%20of%20the%20request.  */
+
+  uint32_t n_sessions;
+  char **users; // [n_users];
+  uint32_t n_users;
+  void *C; // anything else we want webserver to have 
   int halt;  // set to 1 => all threads must halt 
 } web_info_t;
+// STOP_FOR_CDEF
 
 #endif //  __WEB_STRUCT_H 
-/* TODO 
-    char buf[256]; int blen = sizeof(buf); memset(buf, 0, blen);
-    char *X = NULL; size_t nX = 0;
-    snprintf(buf, blen-1, "image/%s", img_info.suffix); 
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-      "Content-Type", buf);
-
-    status = rs_mmap(img_info.file_name, &X, &nX, 0); 
-    if ( status < 0 ) { WHEREAMI; evbuffer_free(opbuf); return; }
-    memset(buf, 0, blen); snprintf(buf, blen-1, "%u", nX);
-    */
