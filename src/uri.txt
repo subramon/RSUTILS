@@ -1,0 +1,32 @@
+/*
+Appended below (uri.h first, then uri.c) is a zero-allocation URI parser.
+uri_parse() isn't stateful, so you have to pass the whole URI upfront. (I
+figured that was a tad too sophisticated in this case, and in any event
+termination condition is different depending on context anyhow.) But it
+keeps pointers into the buffer you pass it, so if the buffer becomes
+invalid, the contents of the URI structure does as well.
+
+To see how it works, from the commandline do:
+
+$ make uri CPPFLAGS="-DURI_DEBUG"
+$ ./uri 'http://google.com/?foo=bar&bar=#frag'
+$ ./uri 'http://google.com/?foo=bar&bar=#frag' 01 # mask 2nd param
+
+For the scheme, auth, path, params, and fragment you'll see whether it was
+defined, undefined, or an empty string. For the query params, you have to
+loop using uri_next_query()--this one is stateful. See main() for usage.
+
+You can recompose the URI and mask out params by position. I wrote this for
+a zero-copy transparent HTTP/RTSP proxy. I re-write the traffic w/o
+additional allocations (or rather O(1) allocation, independent of content),
+thus the peculiar API.
+
+There's a small bug, I think, w/ setting default parts, like the scheme. But
+it's just a bug w/ the semantics, nothing critical. If you fix anything,
+please send a patch. This bit of code is too small to make a project out of.
+
+Oh, also you need to use a C99 compiler (or GCC in [default] gnu mode). This
+won't compile in Visual Studio w/o re-writing the array initialization and
+perhaps some other bits.
+
+*/

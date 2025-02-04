@@ -38,14 +38,14 @@ handler(
 
   char *decoded_uri = NULL;
   char *body = NULL;  uint32_t n_body = 0;
-  struct evbuffer *opbuf = NULL;
+  struct evbuffer *reply = NULL;
 
   if ( arg == NULL ) { go_BYE(-1); } 
   web_info_t *web_info = (web_info_t *)arg;
   struct event_base *base = web_info->base;
   if ( base == NULL ) { go_BYE(-1); }
-  opbuf = evbuffer_new();
-  if ( opbuf == NULL) { go_BYE(-1); }
+  reply = evbuffer_new();
+  if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
 
   if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
@@ -89,8 +89,8 @@ handler(
   if ( req_type  == 0 ) {  // unknown endpoint: redirect to home
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Location", "Static?home.html"); 
-    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
-    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
+    if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
     return;
   }
   */
@@ -163,9 +163,9 @@ handler(
   if ( uidx < 0 ) { 
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Location", web_info->login_page);
-    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
     // release any resources allocated 
-    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+    if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
     return; 
   }
 
@@ -178,9 +178,9 @@ handler(
     if ( !rslt ) { go_BYE(-1); }
 
     /* TODO: P4 Need to get loopbreak to wait for these 3 statements
-    evbuffer_add_printf(opbuf, "\{ \"Server\" : \"Halting\"}\n"); 
-    evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
-    evbuffer_free(opbuf);
+    evbuffer_add_printf(reply, "\{ \"Server\" : \"Halting\"}\n"); 
+    evhttp_send_reply(req, HTTP_OK, "OK", reply);
+    evbuffer_free(reply);
     */
     event_base_loopbreak(base);
   }
@@ -210,31 +210,31 @@ handler(
     // int wfd = open(web_response.file_name, O_RDONLY); 
     // if ( wfd < 0 ) { go_BYE(-1); } 
     // send data in file 
-    // status = evbuffer_add_file(opbuf, wfd, 0, -1); cBYE(status); 
+    // status = evbuffer_add_file(reply, wfd, 0, -1); cBYE(status); 
     // close(wfd); 
     status = rs_mmap(web_response.file_name, &X, &nX, 0); cBYE(status);
-    status = evbuffer_add(opbuf, X, nX); cBYE(status);
+    status = evbuffer_add(reply, X, nX); cBYE(status);
     mcr_rs_munmap(X, nX);
 
     if ( web_response.is_err ) { 
-      evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
+      evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);
     }
     else {
-      evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
+      evhttp_send_reply(req, HTTP_OK, "OK", reply);
     }
     goto BYE; 
   }
 BYE:
   if ( status == 0 ) { 
-    evbuffer_add_printf(opbuf, "%s", outbuf); 
-    evhttp_send_reply(req, HTTP_OK, "OK", opbuf);
+    evbuffer_add_printf(reply, "%s", outbuf); 
+    evhttp_send_reply(req, HTTP_OK, "OK", reply);
   }
   else {
-    evbuffer_add_printf(opbuf, "%s", errbuf); 
-    evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", opbuf);
+    evbuffer_add_printf(reply, "%s", errbuf); 
+    evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);
   }
   // Release resources 
-  if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+  if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
   free_if_non_null(decoded_uri);
   mcr_rs_munmap(X, nX);
   // free resources in web response

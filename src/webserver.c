@@ -1,9 +1,16 @@
 #include "q_incs.h"
 #include <evhttp.h>
+#include <event2/thread.h>
 #include <pthread.h>
 #include "web_struct.h"
 #include "phandler.h"
 #include "webserver.h"
+
+// TODO EXPERIMENTAL P1 
+#ifdef _EVENT_HAVE_PTHREADS
+int evthread_use_pthreads(void);
+#define EVTHREAD_USE_PTHREADS_IMPLEMENTED
+#endif
 
 // globals 
 __attribute__((noreturn))
@@ -18,6 +25,7 @@ webserver(
   struct evhttp *httpd = NULL;
   struct event_base *base = NULL;
 
+  status = evthread_use_pthreads();
   int port = web_info->port; 
   if ( ( port <= 0 )  || ( port > 65535 ) ) { go_BYE(-1); } 
   uint16_t portu16 = (uint16_t)(port);
@@ -54,6 +62,8 @@ webserver(
   event_base_dispatch(base);
   evhttp_free(httpd);
   event_base_free(base);
+  libevent_global_shutdown();
+
 
 BYE:
   fprintf(stdout, "Web Server terminating\n");
