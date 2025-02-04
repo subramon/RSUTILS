@@ -1,5 +1,6 @@
-#include "evhttp.h"
-#include "event2/http.h"
+#include <lua.h>
+#include <evhttp.h>
+#include <event2/http.h>
 #ifndef __WEB_STRUCT_H 
 #define __WEB_STRUCT_H 
 
@@ -22,12 +23,15 @@ typedef struct _web_response_t {
   int response_code;  // see http.h
 } web_response_t;
 
+// TODO Why doesnt this work? struct web_info_t; // forward declaration
+
 typedef int (*proc_req_fn_t)( 
+    int user_id,
     const char *const api,
     const char *args,
     const char *body,
     uint32_t n_body,
-    void *W,
+    void *W, // information for webserver
     char *outbuf, // [sz_outbuf]
     size_t sz_outbuf,
     char *errbuf, // [sz_outbuf]
@@ -36,20 +40,35 @@ typedef int (*proc_req_fn_t)(
     );
 
 
+typedef struct _sess_state_t {
+  lua_State *L; 
+  uint64_t sess_hash; // sessionID
+  uint64_t t_create; // when created 
+  uint64_t t_touch;  // when last accessed
+  void *aux; // application specific needs
+} sess_state_t;
+
 typedef struct _web_info_t { 
   struct event_base *base;
   proc_req_fn_t proc_req_fn;
 
   int port;
   char *docroot; 
+  char *login_page;  // e.g., login.html
+  char *login_endp;  // e.g., Login
   uint32_t max_headers_size; 
   uint32_t max_body_size; 
   bool is_external; // false => accessible only from localhost
   bool is_cors;  // explained below 
   /* See https://portswigger.net/web-security/cors/access-control-allow-origin#:~:text=The%20Access%2DControl%2DAllow%2DOrigin%20header%20is%20included%20in,permitted%20origin%20of%20the%20request.  */
 
+  char *init_lua_state;
+  uint32_t timeout_sec;
   uint32_t n_sessions;
+  // Currently, there is a 1 to 1 map from user to session
+  // In other words, a user cannot have 2 sessions
   char **users; // [n_users];
+  sess_state_t *sess_state; // [n_users];
   uint32_t n_users;
   void *X; // anything else we want webserver to have 
   int halt;  // set to 1 => all threads must halt 

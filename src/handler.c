@@ -7,9 +7,11 @@
 #include "rs_mmap.h"
 #include "extract_api_args.h"
 #include "get_body.h"
+#include "mk_lua_state.h"
+#include "get_time_usec.h"
+#include "rdtsc.h"
 
 #include "extract_name_value.h"
-#define MAX_LEN_SESS_NAME 127
 #include "handler.h"
 void
 handler(
@@ -31,9 +33,6 @@ handler(
   char errbuf[MAX_LEN_ERROR+1];
   memset(errbuf, '\0', MAX_LEN_ERROR+1); // TOOD P4 not needed
 
-  char sess_name[MAX_LEN_SESS_NAME+1];
-  memset(sess_name, 0, MAX_LEN_SESS_NAME+1);
-
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
 
@@ -47,35 +46,32 @@ handler(
   if ( base == NULL ) { go_BYE(-1); }
   opbuf = evbuffer_new();
   if ( opbuf == NULL) { go_BYE(-1); }
-  //--------------------------------------
-  /*
+  int uidx = -1; 
+
+  if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
+  if ( web_info->login_page == NULL ) { go_BYE(-1); } 
+  // Delete old sessions
+  for ( uint32_t i = 0; i < web_info->n_users; i++ ) { 
+    uint64_t t_touch = web_info->sess_state[i].t_touch;
+    if ( t_touch == 0 ) { continue; }
+    uint64_t t_now = get_time_usec();
+    if ( t_now < t_touch ) { go_BYE(-1); }
+    uint64_t t = (t_now - t_touch)/1000000;
+    if ( web_info->timeout_sec == 0 ) { continue; } // no timeout
+    if ( t > web_info->timeout_sec ) { 
+      lua_State *L = web_info->sess_state[i].L;
+      if ( L != NULL ) { lua_close(L); }
+      // Internals of sess_state should be freed by user
+      memset(&(web_info->sess_state[i]), 0, sizeof(sess_state_t));
+    }
+  }
+  //----------------------------------------------------------
+  /* JUST FOR CLASS 
   const char * client = req->remote_host; 
   if ( client != NULL ) { 
     fprintf(stderr, "Client IP address=%s\n", client);
   }
   */
-#ifdef GETCOOKIES
-  // Get Cookie. If none, redirect to login page 
-  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
-  const char *hval = evhttp_find_header(headers, "Cookie");
-  bool is_login = false;
-  if ( hval != NULL ) {
-    status = extract_name_value(hval, "Session=", ';', 
-        sess_name, MAX_LEN_SESS_NAME);
-    if ( *sess_name != '\0' ) { 
-      // Check if valid sess_name 
-      is_login = true;
-    }
-  }
-  if ( is_login == false ) { 
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Location", "/login.html"); 
-    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
-    // release any resources allocated 
-    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
-    return; 
-  }
-#endif
   // Get URI 
   const char *uri = evhttp_request_uri(req);
   decoded_uri = evhttp_decode_uri(uri);
@@ -84,8 +80,10 @@ handler(
   status = extract_api_args(decoded_uri, api, MAX_LEN_API, args, 
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
+  status = get_body(req, &body, &n_body); cBYE(status);
   // printf("api = %s \n", api);
   // printf("args = %s \n", args);
+  // printf("body = %s \n", body);
   cBYE(status);
   /* TODO JUst for class 
   if ( req_type  == 0 ) {  // unknown endpoint: redirect to home
@@ -96,6 +94,81 @@ handler(
     return;
   }
   */
+  // Deal with what happens when user comes to login page 
+  if ( strcasecmp(api, web_info->login_endp) == 0 ) {
+    const char *info = NULL;
+    if ( ( body != NULL ) && ( *body != '\0' ) ) { 
+      info = body;
+    }
+    else {
+      info = args;
+    }
+    char uname[MAX_LEN_USER_NAME+1]; 
+    memset(uname, 0, MAX_LEN_USER_NAME+1);
+    status = extract_name_value(info, "User=", '&', uname, MAX_LEN_USER_NAME); 
+    cBYE(status);
+    if ( *uname == '\0' ) { go_BYE(-1); } 
+    for ( uint32_t i = 0; i < web_info->n_users; i++ ) { 
+      if ( strcmp(uname, web_info->users[i]) == 0 ) {
+        uidx = (int)i; break;
+      }
+    }
+    if ( uidx < 0 ) { 
+      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}");
+      go_BYE(-1); 
+    }
+    // Create a session for this user if one doesn't exist
+    if ( web_info->sess_state[uidx].L == NULL ) { 
+      lua_State *L = mk_lua_state();
+      web_info->sess_state[uidx].L = L;
+      if ( web_info->init_lua_state != NULL ) { 
+        status = luaL_dostring(L, web_info->init_lua_state);
+        if ( status != 0 ) { 
+          fprintf(stderr, "Error luaL_string=%s\n", lua_tostring(L,-1));
+        }
+        cBYE(status); 
+      }
+      web_info->sess_state[uidx].t_create = 
+        web_info->sess_state[uidx].t_touch = get_time_usec();
+      web_info->sess_state[uidx].sess_hash = RDTSC(); // TODO P1
+    }
+    char cookie[MAX_LEN_COOKIE+1];
+    sprintf(cookie, "sessionID=%" PRIu64 "; ", 
+      web_info->sess_state[uidx].sess_hash);
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Set-Cookie", cookie);
+    sprintf(outbuf, "{ \"%s\" : \"OK\" }", api);
+    goto BYE;
+  }
+  // Get Cookie. If none, redirect to login page 
+  for ( ; ; ) {
+    struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
+    const char *hval = evhttp_find_header(headers, "Cookie");
+    if ( hval == NULL ) { break; }
+    char buf[MAX_LEN_COOKIE+1]; memset(buf, 0, MAX_LEN_COOKIE+1);
+    status = extract_name_value(hval, "sessionID=", ';', 
+        buf, MAX_LEN_COOKIE);
+    if ( *buf == '\0' ) {  break; }
+    char *endptr = NULL; 
+    uint64_t sess_hash = strtoull(buf, &endptr, 10);
+    if ( *endptr != '\0' ) { break; }
+    // Check if valid sess_hash_
+    for ( uint32_t i = 0; i < web_info->n_users; i++ ) { 
+      if ( sess_hash == web_info->sess_state[i].sess_hash ) { 
+        uidx = (int)i; break;
+      }
+    }
+    break;
+  }
+  if ( uidx < 0 ) { 
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Location", web_info->login_page);
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", opbuf);
+    // release any resources allocated 
+    if ( opbuf != NULL ) { evbuffer_free(opbuf); opbuf = NULL; }
+    return; 
+  }
+
   if ( strcmp(api, "Halt") == 0 ) {
     // Inform all threads that they need to terminate 
     int l_expected = 0;
@@ -111,11 +184,9 @@ handler(
     */
     event_base_loopbreak(base);
   }
-  status = get_body(req, &body, &n_body); cBYE(status);
-  if ( n_body > 0 ) { printf("Size of body = %u \n", n_body); }
 
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
-  status = process_req_fn(api, args, body, n_body, web_info,
+  status = process_req_fn(uidx, api, args, body, n_body, web_info,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
