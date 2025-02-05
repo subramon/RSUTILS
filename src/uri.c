@@ -483,7 +483,7 @@ return dst.pos - (unsigned char *)dbuf;
 } /* uri_print() */
 
 
-#if URI_DEBUG
+#ifdef URI_DEBUG
 
 #include <stdio.h> /* printf(3) puts(3) */
 

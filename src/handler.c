@@ -42,8 +42,8 @@ handler(
 
   if ( arg == NULL ) { go_BYE(-1); } 
   web_info_t *web_info = (web_info_t *)arg;
-  struct event_base *base = web_info->base;
-  if ( base == NULL ) { go_BYE(-1); }
+  // TODO P1 THINK struct event_base *base = web_info->base;
+  // TODO P1 THINK if ( base == NULL ) { go_BYE(-1); }
   reply = evbuffer_new();
   if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
@@ -182,7 +182,7 @@ handler(
     evhttp_send_reply(req, HTTP_OK, "OK", reply);
     evbuffer_free(reply);
     */
-    event_base_loopbreak(base);
+    // TODO THINK event_base_loopbreak(base);
   }
 
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
@@ -251,4 +251,10 @@ BYE:
   free_if_non_null(body); 
   free_if_non_null(web_response.header_key); 
   free_if_non_null(web_response.header_val); 
+  /* EXPERIMENTAL 
+  if ( evhttp_request_is_owned(req) ) { 
+    fprintf(stderr, "Deleting req\n");
+    evhttp_request_free(req);
+  }
+  */
 }
