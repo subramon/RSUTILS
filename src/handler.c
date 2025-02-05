@@ -10,6 +10,8 @@
 #include "mk_lua_state.h"
 #include "get_time_usec.h"
 #include "rdtsc.h"
+#include "lookup8.h"
+#include "multiple.h"
 
 #include "extract_name_value.h"
 #include "handler.h"
@@ -130,7 +132,22 @@ handler(
       }
       web_info->sess_state[uidx].t_create = 
         web_info->sess_state[uidx].t_touch = get_time_usec();
-      web_info->sess_state[uidx].sess_hash = RDTSC(); // TODO P1
+
+      // Create a hash for this session
+      pthread_t tid = pthread_self();
+
+      struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
+      const char *dval = evhttp_find_header(headers, "Date");
+      size_t len = 64; 
+      if ( dval != NULL ) { len += strlen(dval); }
+      const char * client = req->remote_host; 
+      if ( client != NULL ) { len += strlen(client); }
+      len = multiple_n(len, 8); // needed for hash2()
+      char *hbuf = malloc(len); memset(hbuf, 0, len);
+      sprintf(hbuf, "%ld_%s_%s_%" PRIu64 "\n", tid, dval, client, RDTSC());
+      uint64_t sess_hash = hash2((ub8 *)hbuf, len/8, 1234566789);
+      web_info->sess_state[uidx].sess_hash = sess_hash;
+      printf("DBG: %s => %" PRIu64 "\n", hbuf, sess_hash);
     }
     char cookie[MAX_LEN_COOKIE+1];
     sprintf(cookie, "sessionID=%" PRIu64 "; ", 
