@@ -177,12 +177,14 @@ handler(
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     if ( !rslt ) { go_BYE(-1); }
 
-    /* TODO: P4 Need to get loopbreak to wait for these 3 statements
-    evbuffer_add_printf(reply, "\{ \"Server\" : \"Halting\"}\n"); 
+    evbuffer_add_printf(reply, "{ \"Server\" : \"Halting\"}\n"); 
     evhttp_send_reply(req, HTTP_OK, "OK", reply);
     evbuffer_free(reply);
-    */
-    // TODO THINK event_base_loopbreak(base);
+    printf("HALTING!!!!\n");
+    for ( int i = 0; i < web_info->n_threads; i++ ) { 
+      event_base_loopbreak(web_info->bases[i]);
+    }
+    return;
   }
 
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;

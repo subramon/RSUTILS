@@ -49,10 +49,11 @@ typedef struct _sess_state_t {
 } sess_state_t;
 
 typedef struct _web_info_t { 
-  struct event_base *base;
+  struct event_base **bases; // [n_threads]
   proc_req_fn_t proc_req_fn;
 
   int port;
+  int n_threads;
   char *docroot; 
   char *login_page;  // e.g., login.html
   char *login_endp;  // e.g., Login

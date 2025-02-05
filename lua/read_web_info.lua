@@ -62,10 +62,17 @@ local function read_web_info(
   end
   cC[0].users, cC[0].n_users = tbl_to_C_2d(users)
   --====================================
+  local n_threads = glC.n_threads
+  if ( n_threads == nil ) then n_threads = 1 end
+  assert(type(n_threads) == "number")
+  assert(n_threads > 0)
+  cC[0].n_threads = n_threads 
+  --====================================
   local n_sessions = glC.n_sessions
   if ( n_sessions == nil ) then n_sessions = 1 end
   assert(type(n_sessions) == "number")
   assert(n_sessions > 0)
+  cC[0].n_sessions = n_sessions 
   --====================================
   local timeout_sec = glC.timeout_sec
   if ( timeout_sec == nil ) then timeout_sec = 30*86400 end
@@ -80,7 +87,6 @@ local function read_web_info(
     cC[0].init_lua_state = stringify(init_lua_state)
   end
   --====================================
-  cC[0].sess_state = ffi.C.malloc(#users * ffi.sizeof("sess_state_t"))
   cC[0].sess_state = ffi.C.malloc(#users * ffi.sizeof("sess_state_t"))
   ffi.fill(cC[0].sess_state, (#users * ffi.sizeof("sess_state_t")), 0)
   --====================================

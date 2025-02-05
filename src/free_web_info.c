@@ -11,19 +11,21 @@ free_web_info(
 {
   int status = 0;
   if ( ptr_W == NULL ) { go_BYE(-1); }
-  free_2d_array(&(ptr_W->users), ptr_W->n_users);
   free_if_non_null(ptr_W->docroot);
   free_if_non_null(ptr_W->login_page);
   free_if_non_null(ptr_W->login_endp);
-  // Internals of sess_state should be freed by user
-  free_if_non_null(ptr_W->sess_state);
   free_if_non_null(ptr_W->init_lua_state);
-  for ( uint32_t i = 0; i < ptr_W->n_users; i++ ) { 
-    lua_State *L = ptr_W->sess_state[i].L;
-    if ( L != NULL ) { lua_close(L); }
-    // NOTE: Anything else in sess_state is application specific
-    // and should be freed by application
+  free_2d_array(&(ptr_W->users), ptr_W->n_users);
+  // Internals of sess_state should be freed by user
+  if ( ptr_W->sess_state != NULL ) { 
+    for ( uint32_t i = 0; i < ptr_W->n_users; i++ ) { 
+      lua_State *L = ptr_W->sess_state[i].L;
+      if ( L != NULL ) { lua_close(L); }
+      // NOTE: Anything else in sess_state is application specific
+      // and should be freed by application
+    }
   }
+  free_if_non_null(ptr_W->sess_state);
   memset(ptr_W, 0, sizeof(web_info_t));
 BYE:
   return status;

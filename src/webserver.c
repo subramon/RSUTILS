@@ -18,7 +18,8 @@
 #include "handler.h"
 #include "webserver.h"
 
-static void* dispatch(
+static void* 
+dispatch(
     void *arg
     ) 
 {
@@ -28,20 +29,24 @@ static void* dispatch(
 
 static int 
 bind_socket(
-    int port
+    int port,
+    int *ptr_nfd
     ) 
 {
+  int status = 0;
   int r;
   int nfd;
   nfd = socket(AF_INET, SOCK_STREAM, 0);
-  if (nfd < 0) return -1;
+  if (nfd < 0) { go_BYE(-1); } 
   int one = 1;
   r = setsockopt(nfd, SOL_SOCKET, SO_REUSEADDR, (char *)&one, sizeof(int));
   struct sockaddr_in addr;
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
-  addr.sin_port = htons(port);
+  if ( ( port < 0 ) || ( port > 65535 ) ) { go_BYE(-1); }
+  unsigned short portu16 = (unsigned short)port; 
+  addr.sin_port = htons(portu16);
   r = bind(nfd, (struct sockaddr*)&addr, sizeof(addr));
   if (r < 0) return -1;
   r = listen(nfd, 10240);
@@ -52,7 +57,9 @@ bind_socket(
     return -1;
   }
   // TODO Bind to 0.0.0.0 or 127.0.0.1
-  return nfd;
+  *ptr_nfd = nfd;
+BYE:
+  return status;
 }
 
 __attribute__((noreturn))
@@ -62,51 +69,76 @@ webserver(
     )
 {
   int status;
+  int nfd;
+  struct event_base **bases = NULL;
+  struct evhttp **httpds = NULL;
+
+  pthread_t *threads = NULL; // [n_threads]
+  int n_threads;
   web_info_t *web_info = (web_info_t *)arg;
-  int nthreads = 4; 
-  pthread_t ths[nthreads];
 
   if ( arg == NULL ) { go_BYE(-1); }
+  n_threads = web_info->n_threads;
+  if ( n_threads < 1 ) { go_BYE(-1); }
+  uint32_t nT = (uint32_t)n_threads;
 
-  status = evthread_use_pthreads();
+  threads = malloc(nT * sizeof(pthread_t));
+  memset(threads, 0,  nT * sizeof(pthread_t));
+
+  bases = malloc(nT * sizeof(struct event_base *));
+  memset(bases, 0,  nT * sizeof(struct event_base *));
+  web_info->bases = bases;
+
+  httpds = malloc(nT * sizeof(struct evhttp *));
+  memset(httpds, 0,  nT * sizeof(struct evhttp *));
+
+  status = evthread_use_pthreads(); cBYE(status);
   int port = web_info->port; 
   if ( ( port <= 0 )  || ( port > 65535 ) ) { go_BYE(-1); } 
 
-  int nfd = bind_socket(port);
-  if ( nfd < 0 ) { go_BYE(-1); }
+  status = bind_socket(port, &nfd); cBYE(status);
 
-  for ( int i = 0; i < nthreads; i++ ) {
-    struct event_base *base = event_init();
-    if ( base == NULL ) { go_BYE(-1); }
-    struct evhttp *httpd  = evhttp_new(base);
-    if ( httpd == NULL ) { go_BYE(-1); }
+  for ( int i = 0; i < n_threads; i++ ) {
+    bases[i] = event_init();
+    if ( bases[i] == NULL ) { go_BYE(-1); }
+    httpds[i]  = evhttp_new(bases[i]);
+    if ( httpds[i] == NULL ) { go_BYE(-1); }
 
     //---------------------------------------------
     uint32_t sz = web_info->max_headers_size;
     if ( sz == 0 ) { sz = 4096; } 
-    evhttp_set_max_headers_size(httpd, sz); 
+    evhttp_set_max_headers_size(httpds[i], sz); 
     //---------------------------------------------
     sz = web_info->max_body_size;
     if ( sz == 0 ) { sz = 1048576; } 
-    evhttp_set_max_body_size(httpd, sz); 
+    evhttp_set_max_body_size(httpds[i], sz); 
     //---------------------------------------------
 
-    status = evhttp_accept_socket(httpd, nfd); cBYE(status);
-    evhttp_set_gencb(httpd, handler, web_info);
-    status = pthread_create(&(ths[i]), NULL, dispatch, base); cBYE(status);
+    status = evhttp_accept_socket(httpds[i], nfd); cBYE(status);
+    evhttp_set_gencb(httpds[i], handler, web_info);
+    status = pthread_create(&(threads[i]), NULL, dispatch, bases[i]); 
+    cBYE(status);
     printf("Forked thread %d \n", i);
   }
-  /* TODO P1 WHAT TO DO ABOUT THE GUYS? 
-  evhttp_free(httpd);
-  event_base_free(base);
-  */
-
-  for (int i = 0; i < nthreads; i++) {
-    pthread_join(ths[i], NULL);
+  for (int i = 0; i < n_threads; i++) {
+    pthread_join(threads[i], NULL);
   }
-  libevent_global_shutdown();
 
 BYE:
+  if ( httpds != NULL ) { 
+    for ( int i = 0; i < n_threads; i++ ) {
+      evhttp_free(httpds[i]);
+    }
+  }
+  if ( bases != NULL ) { 
+    for ( int i = 0; i < n_threads; i++ ) {
+      event_base_free(bases[i]);
+    }
+  }
+  free_if_non_null(threads);
+  free_if_non_null(bases);
+  free_if_non_null(httpds);
+  libevent_global_shutdown();
   fprintf(stdout, "Web Server terminating\n");
   pthread_exit(NULL);
 }
