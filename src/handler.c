@@ -50,6 +50,7 @@ handler(
 
   if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
   if ( web_info->login_page == NULL ) { go_BYE(-1); } 
+  if ( web_info->home_page == NULL ) { go_BYE(-1); } 
   // Delete old sessions
   for ( uint32_t i = 0; i < web_info->n_users; i++ ) {
     uint64_t t_touch = web_info->sess_state[i].t_touch;
@@ -65,13 +66,6 @@ handler(
       memset(&(web_info->sess_state[i]), 0, sizeof(sess_state_t));
     }
   }
-  //----------------------------------------------------------
-  /* JUST FOR CLASS 
-  const char * client = req->remote_host; 
-  if ( client != NULL ) { 
-    fprintf(stderr, "Client IP address=%s\n", client);
-  }
-  */
   // Get URI 
   const char *uri = evhttp_request_uri(req);
   decoded_uri = evhttp_decode_uri(uri);
@@ -85,16 +79,7 @@ handler(
   // printf("args = %s \n", args);
   // printf("body = %s \n", body);
   cBYE(status);
-  /* TODO JUst for class 
-  if ( req_type  == 0 ) {  // unknown endpoint: redirect to home
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Location", "Static?home.html"); 
-    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
-    if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
-    return;
-  }
-  */
-  // Deal with what happens when user comes to login page 
+  // START: Deal with what happens when user comes to login page 
   if ( strcasecmp(api, web_info->login_endp) == 0 ) {
     const char *info = NULL;
     if ( ( body != NULL ) && ( *body != '\0' ) ) { 
@@ -103,24 +88,33 @@ handler(
     else {
       info = args;
     }
+    if ( ( info == NULL ) || ( *info == '\0' ) ) { 
+      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}"); go_BYE(-1); 
+    }
     char uname[MAX_LEN_USER_NAME+1]; 
     memset(uname, 0, MAX_LEN_USER_NAME+1);
     status = extract_name_value(info, "User=", '&', uname, MAX_LEN_USER_NAME); 
     cBYE(status);
-    if ( *uname == '\0' ) { go_BYE(-1); } 
+    if ( *uname == '\0' ) { 
+      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}"); go_BYE(-1); 
+    } 
     for ( uint32_t i = 0; i < web_info->n_users; i++ ) { 
       if ( strcmp(uname, web_info->users[i]) == 0 ) {
         uidx = (int)i; break;
       }
     }
     if ( uidx < 0 ) { 
-      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}");
-      go_BYE(-1); 
+      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}"); go_BYE(-1); 
     }
     // Create a session for this user if one doesn't exist
-    if ( web_info->sess_state[uidx].L == NULL ) { 
+    uint64_t sess_hash = 0;
+    if ( web_info->sess_state[uidx].L == NULL ) {
+      size_t sz = sizeof(sess_state_t);
+      sess_state_t zero; memset(&zero, 0, sz);
+      if ( memcmp(&(web_info->sess_state[uidx]), &zero, sz) != 0 ) { 
+        go_BYE(-1); // Bad logic on our side
+      }
       lua_State *L = mk_lua_state();
-      web_info->sess_state[uidx].L = L;
       if ( web_info->init_lua_state != NULL ) { 
         status = luaL_dostring(L, web_info->init_lua_state);
         if ( status != 0 ) { 
@@ -128,13 +122,13 @@ handler(
         }
         cBYE(status); 
       }
-      // restore state for user if it exists 
-      web_info->sess_state[uidx].t_create = 
-        web_info->sess_state[uidx].t_touch = get_time_usec();
+      web_info->sess_state[uidx].L = L;
+      uint64_t t = get_time_usec();
+      web_info->sess_state[uidx].t_create =  t;
+      web_info->sess_state[uidx].t_touch = t;
 
-      // Create a hash for this session
+      // START: Create a hash for this session
       pthread_t tid = pthread_self();
-
       struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
       const char *dval = evhttp_find_header(headers, "Date");
       size_t len = 64; 
@@ -144,19 +138,29 @@ handler(
       len = multiple_n(len, 8); // needed for hash2()
       char *hbuf = malloc(len); memset(hbuf, 0, len);
       sprintf(hbuf, "%ld_%s_%s_%" PRIu64 "\n", tid, dval, client, RDTSC());
-      uint64_t sess_hash = hash2((ub8 *)hbuf, len/8, 1234566789);
-      web_info->sess_state[uidx].sess_hash = sess_hash;
+      sess_hash = hash2((ub8 *)hbuf, len/8, 1234566789);
       free_if_non_null(hbuf);
+      web_info->sess_state[uidx].sess_hash = sess_hash;
+      // STOP: Create a hash for this session
+    }
+    else {
+      sess_hash = web_info->sess_state[uidx].sess_hash;
+      web_info->sess_state[uidx].t_touch = get_time_usec();
     }
     char cookie[MAX_LEN_COOKIE+1];
     sprintf(cookie, "sessionID=%" PRIu64 "; ", 
       web_info->sess_state[uidx].sess_hash);
     evhttp_add_header(evhttp_request_get_output_headers(req),
           "Set-Cookie", cookie);
-    sprintf(outbuf, "{ \"%s\" : \"OK\" }", api);
-    goto BYE;
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Location", web_info->home_page);
+    evhttp_send_reply(req, HTTP_MOVETEMP, "Login successful", reply);
+    evbuffer_free(reply);
+    return;
   }
+  // STOP : Deal with what happens when user comes to login page 
   // Get Cookie. If none, redirect to login page 
+  uidx = -1; // => we have not recognized user
   for ( ; ; ) {
     struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
     const char *hval = evhttp_find_header(headers, "Cookie");
@@ -174,14 +178,7 @@ handler(
         uidx = (int)i; break;
       }
     }
-    if ( uidx < 0 ) {
-      evhttp_add_header(evhttp_request_get_output_headers(req),
-          "Location", web_info->login_page);
-      evbuffer_add_printf(reply, "{ \"Login\" : \"Invalid\"}\n"); 
-      evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
-      evbuffer_free(reply);
-      return; 
-    }
+    if ( uidx < 0 ) { break; }
     // Check if this user has an active request 
     int l_expected = 0;
     int l_desired  = 1;
@@ -195,6 +192,15 @@ handler(
       return;
     }
     break;
+  }
+  // Do not allow access to any APIs if user not validated 
+  if ( uidx < 0 ) {
+    evhttp_add_header(evhttp_request_get_output_headers(req),
+        "Location", web_info->login_page);
+    evbuffer_add_printf(reply, "{ \"Login\" : \"Invalid\"}\n"); 
+    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
+    evbuffer_free(reply);
+    return; 
   }
 
   if ( strcmp(api, "Halt") == 0 ) {

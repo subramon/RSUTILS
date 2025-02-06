@@ -13,6 +13,7 @@ free_web_info(
   if ( ptr_W == NULL ) { go_BYE(-1); }
   free_if_non_null(ptr_W->docroot);
   free_if_non_null(ptr_W->login_page);
+  free_if_non_null(ptr_W->home);
   free_if_non_null(ptr_W->login_endp);
   free_if_non_null(ptr_W->init_lua_state);
   free_2d_array(&(ptr_W->users), ptr_W->n_users);

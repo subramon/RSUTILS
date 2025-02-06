@@ -15,6 +15,13 @@ local function read_web_info(
   assert(port > 0)
   cC[0].port = port 
   --====================================
+  local home_page = glC.home_page
+  if ( home_page ~= nil ) then 
+    assert(type(home_page) == "string")
+    assert(#home_page > 0)
+    cC[0].home_page = stringify(home_page) 
+  end
+  --====================================
   local login_page = glC.login_page
   if ( login_page ~= nil ) then 
     assert(type(login_page) == "string")
