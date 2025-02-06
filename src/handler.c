@@ -147,7 +147,6 @@ handler(
       sprintf(hbuf, "%ld_%s_%s_%" PRIu64 "\n", tid, dval, client, RDTSC());
       uint64_t sess_hash = hash2((ub8 *)hbuf, len/8, 1234566789);
       web_info->sess_state[uidx].sess_hash = sess_hash;
-      printf("DBG: %s => %" PRIu64 "\n", hbuf, sess_hash);
     }
     char cookie[MAX_LEN_COOKIE+1];
     sprintf(cookie, "sessionID=%" PRIu64 "; ", 
@@ -175,15 +174,27 @@ handler(
         uidx = (int)i; break;
       }
     }
+    if ( uidx < 0 ) {
+      evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Location", web_info->login_page);
+      evbuffer_add_printf(reply, "{ \"Login\" : \"Invalid\"}\n"); 
+      evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
+      evbuffer_free(reply);
+      return; 
+    }
+    // Check if this user has an active request 
+    int l_expected = 0;
+    int l_desired  = 1;
+    printf("Trying to lock user %d \n", uidx);
+    bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
+        &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( !rslt ) { 
+      evbuffer_add_printf(reply, "{ \"Server\" : \"Busy\"}\n"); 
+      evhttp_send_reply(req, HTTP_SERVUNAVAIL, "SERVER_BUSY", reply);
+      evbuffer_free(reply);
+      return;
+    }
     break;
-  }
-  if ( uidx < 0 ) { 
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-        "Location", web_info->login_page);
-    evhttp_send_reply(req, HTTP_MOVETEMP, "ERROR", reply);
-    // release any resources allocated 
-    if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
-    return; 
   }
 
   if ( strcmp(api, "Halt") == 0 ) {
@@ -207,6 +218,14 @@ handler(
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
   status = process_req_fn(uidx, api, args, body, n_body, web_info,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
+  // We can accept a new connection for this user now 
+  // So, free the session state for this user 
+  int l_expected = 1;
+  int l_desired  = 0;
+  printf("Freeing user %d \n", uidx);
+  bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
+        &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
     evhttp_add_header(evhttp_request_get_output_headers(req),

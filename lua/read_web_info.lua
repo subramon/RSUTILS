@@ -90,6 +90,9 @@ local function read_web_info(
   cC[0].sess_state = ffi.C.malloc(#users * ffi.sizeof("sess_state_t"))
   ffi.fill(cC[0].sess_state, (#users * ffi.sizeof("sess_state_t")), 0)
   --====================================
+  cC[0].in_use = ffi.C.malloc(#users * ffi.sizeof("int"))
+  ffi.fill(cC[0].in_use, (#users * ffi.sizeof("int")), 0)
+  --====================================
   return true
 end
 return read_web_info 

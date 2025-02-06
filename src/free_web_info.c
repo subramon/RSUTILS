@@ -26,6 +26,7 @@ free_web_info(
     }
   }
   free_if_non_null(ptr_W->sess_state);
+  free_if_non_null(ptr_W->in_use);
   memset(ptr_W, 0, sizeof(web_info_t));
 BYE:
   return status;

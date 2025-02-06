@@ -70,6 +70,7 @@ typedef struct _web_info_t {
   // In other words, a user cannot have 2 sessions
   char **users; // [n_users];
   sess_state_t *sess_state; // [n_users];
+  int *in_use; // [n_users];
   uint32_t n_users;
   void *X; // anything else we want webserver to have 
   int halt;  // set to 1 => all threads must halt 
