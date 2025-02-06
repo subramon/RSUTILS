@@ -41,11 +41,10 @@ typedef int (*proc_req_fn_t)(
 
 
 typedef struct _sess_state_t {
-  lua_State *L; 
+  lua_State *L;  // all session related info needs to be stored in Lua
   uint64_t sess_hash; // sessionID
   uint64_t t_create; // when created 
   uint64_t t_touch;  // when last accessed
-  void *aux; // application specific needs
 } sess_state_t;
 
 typedef struct _web_info_t { 

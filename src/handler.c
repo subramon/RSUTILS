@@ -44,8 +44,6 @@ handler(
 
   if ( arg == NULL ) { go_BYE(-1); } 
   web_info_t *web_info = (web_info_t *)arg;
-  // TODO P1 THINK struct event_base *base = web_info->base;
-  // TODO P1 THINK if ( base == NULL ) { go_BYE(-1); }
   reply = evbuffer_new();
   if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
@@ -53,7 +51,7 @@ handler(
   if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
   if ( web_info->login_page == NULL ) { go_BYE(-1); } 
   // Delete old sessions
-  for ( uint32_t i = 0; i < web_info->n_users; i++ ) { 
+  for ( uint32_t i = 0; i < web_info->n_users; i++ ) {
     uint64_t t_touch = web_info->sess_state[i].t_touch;
     if ( t_touch == 0 ) { continue; }
     uint64_t t_now = get_time_usec();
@@ -130,6 +128,7 @@ handler(
         }
         cBYE(status); 
       }
+      // restore state for user if it exists 
       web_info->sess_state[uidx].t_create = 
         web_info->sess_state[uidx].t_touch = get_time_usec();
 
@@ -147,6 +146,7 @@ handler(
       sprintf(hbuf, "%ld_%s_%s_%" PRIu64 "\n", tid, dval, client, RDTSC());
       uint64_t sess_hash = hash2((ub8 *)hbuf, len/8, 1234566789);
       web_info->sess_state[uidx].sess_hash = sess_hash;
+      free_if_non_null(hbuf);
     }
     char cookie[MAX_LEN_COOKIE+1];
     sprintf(cookie, "sessionID=%" PRIu64 "; ", 
@@ -204,7 +204,7 @@ handler(
     bool rslt = __atomic_compare_exchange(&(web_info->halt), 
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     if ( !rslt ) { go_BYE(-1); }
-
+    // Save states for each user if one exists
     evbuffer_add_printf(reply, "{ \"Server\" : \"Halting\"}\n"); 
     evhttp_send_reply(req, HTTP_OK, "OK", reply);
     evbuffer_free(reply);
@@ -220,12 +220,14 @@ handler(
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
   // We can accept a new connection for this user now 
   // So, free the session state for this user 
-  int l_expected = 1;
-  int l_desired  = 0;
-  printf("Freeing user %d \n", uidx);
-  bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
+  if ( uidx >= 0 ) { 
+    int l_expected = 1;
+    int l_desired  = 0;
+    printf("Freeing user %d \n", uidx);
+    bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-  if ( !rslt ) { go_BYE(-1); }
+    if ( !rslt ) { go_BYE(-1); }
+  }
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
     evhttp_add_header(evhttp_request_get_output_headers(req),
