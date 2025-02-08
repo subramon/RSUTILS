@@ -154,8 +154,9 @@ handler(
           "Set-Cookie", cookie);
     evhttp_add_header(evhttp_request_get_output_headers(req),
           "Location", web_info->home_page);
+    evbuffer_add_printf(reply, "{ \"Login\" : \"Successful\"}\n"); 
     evhttp_send_reply(req, HTTP_MOVETEMP, "Login successful", reply);
-    evbuffer_free(reply);
+    evbuffer_free(reply); 
     return;
   }
   // STOP : Deal with what happens when user comes to login page 
