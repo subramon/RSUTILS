@@ -80,7 +80,7 @@ handler(
   // printf("body = %s \n", body);
   cBYE(status);
   if ( *api == '\0' ) { 
-    strcpy(errbuf, " \{\"API\" : \"Not found\" } "); go_BYE(-1); 
+    strcpy(errbuf, " {\"API\" : \"Not found\" } "); go_BYE(-1); 
   }
   // START: Deal with what happens when user comes to login page 
   if ( strcasecmp(api, web_info->login_endp) == 0 ) {
@@ -223,6 +223,11 @@ handler(
       event_base_loopbreak(web_info->bases[i]);
     }
     return;
+  }
+  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
+  const char *hval = evhttp_find_header(headers, "Content-Type");
+  if ( hval != NULL ) { 
+    printf("Content tyoe = %s \n", hval);
   }
 
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;

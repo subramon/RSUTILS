@@ -12,7 +12,9 @@ extract_api_args(
 {
   int status = 0;
   const char *cptr = uri; 
-  if ( *cptr != '/' ) { WHEREAMI; goto BYE; } 
+  if ( *cptr != '/' ) { 
+    printf("URI = %s \n", uri); WHEREAMI; goto BYE;
+  }
   cptr++; // jump over forward slash
   memset(api,  '\0', sz_api+1);
   memset(args, '\0', sz_args+1);
