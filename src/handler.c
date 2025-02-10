@@ -79,6 +79,9 @@ handler(
   // printf("args = %s \n", args);
   // printf("body = %s \n", body);
   cBYE(status);
+  if ( *api == '\0' ) { 
+    strcpy(errbuf, " \{\"API\" : \"Not found\" } "); go_BYE(-1); 
+  }
   // START: Deal with what happens when user comes to login page 
   if ( strcasecmp(api, web_info->login_endp) == 0 ) {
     const char *info = NULL;
