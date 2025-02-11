@@ -220,6 +220,7 @@ SRCS += bf16tofp32.c
 SRCS += cat_to_buf.c 
 SRCS += extract_api_args.c 
 SRCS += extract_name_value.c 
+SRCS += extract_json_value.c 
 SRCS += file_cat.c 
 SRCS += file_as_str.c 
 SRCS += file_exists.c 

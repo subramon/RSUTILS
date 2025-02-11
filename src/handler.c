@@ -14,6 +14,7 @@
 #include "multiple.h"
 
 #include "extract_name_value.h"
+#include "extract_json_value.h"
 #include "handler.h"
 void
 handler(
@@ -75,9 +76,9 @@ handler(
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
   status = get_body(req, &body, &n_body); cBYE(status);
-  // printf("api = %s \n", api);
-  // printf("args = %s \n", args);
-  // printf("body = %s \n", body);
+  printf("api = %s \n", api);
+  printf("args = %s \n", args);
+  printf("body = %s \n", body);
   cBYE(status);
   if ( *api == '\0' ) { 
     strcpy(errbuf, " {\"API\" : \"Not found\" } "); go_BYE(-1); 
@@ -85,19 +86,20 @@ handler(
   // START: Deal with what happens when user comes to login page 
   if ( strcasecmp(api, web_info->login_endp) == 0 ) {
     const char *info = NULL;
-    if ( ( body != NULL ) && ( *body != '\0' ) ) { 
-      info = body;
-    }
-    else {
-      info = args;
-    }
-    if ( ( info == NULL ) || ( *info == '\0' ) ) { 
-      strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}"); go_BYE(-1); 
-    }
     char uname[MAX_LEN_USER_NAME+1]; 
     memset(uname, 0, MAX_LEN_USER_NAME+1);
-    status = extract_name_value(info, "User=", '&', uname, MAX_LEN_USER_NAME); 
-    cBYE(status);
+    if ( ( body != NULL ) && ( *body != '\0' ) ) { 
+      info = body;
+      status = extract_json_value(body, "User", uname, MAX_LEN_USER_NAME); 
+      cBYE(status);
+    }
+    else {
+      if ( ( info == NULL ) || ( *info == '\0' ) ) { 
+        strcpy(errbuf, "{\"Error\":\"Invalid Credentials\"}"); go_BYE(-1); 
+      }
+      status = extract_name_value(args, "User=", '&', uname, MAX_LEN_USER_NAME); 
+      cBYE(status);
+    }
     if ( *uname == '\0' ) { 
       strcpy(errbuf, "{\"Error\" : \"Invalid Credentials\"}"); go_BYE(-1); 
     } 
@@ -197,7 +199,9 @@ handler(
     }
     break;
   }
+  /*
   // Do not allow access to any APIs if user not validated 
+  This code has been commented to allows access to some resources
   if ( uidx < 0 ) {
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Location", web_info->login_page);
@@ -206,6 +210,7 @@ handler(
     evbuffer_free(reply);
     return; 
   }
+  */
 
   if ( strcmp(api, "Halt") == 0 ) {
     // Inform all threads that they need to terminate 
