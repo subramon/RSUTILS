@@ -62,7 +62,11 @@ handler(
     if ( web_info->timeout_sec == 0 ) { continue; } // no timeout
     if ( t > web_info->timeout_sec ) { 
       lua_State *L = web_info->sess_state[i].L;
-      if ( L != NULL ) { lua_close(L); }
+      if ( L != NULL ) { 
+        sess_clean_fn_t sess_clean_fn = web_info->sess_clean_fn;
+        sess_clean_fn(L); 
+        lua_close(L); 
+      }
       // Internals of sess_state should be freed by user
       memset(&(web_info->sess_state[i]), 0, sizeof(sess_state_t));
     }
@@ -85,16 +89,14 @@ handler(
   }
   // START: Deal with what happens when user comes to login page 
   if ( strcasecmp(api, web_info->login_endp) == 0 ) {
-    const char *info = NULL;
     char uname[MAX_LEN_USER_NAME+1]; 
     memset(uname, 0, MAX_LEN_USER_NAME+1);
     if ( ( body != NULL ) && ( *body != '\0' ) ) { 
-      info = body;
       status = extract_json_value(body, "User", uname, MAX_LEN_USER_NAME); 
       cBYE(status);
     }
     else {
-      if ( ( info == NULL ) || ( *info == '\0' ) ) { 
+      if ( ( args == NULL ) || ( *args == '\0' ) ) { 
         strcpy(errbuf, "{\"Error\":\"Invalid Credentials\"}"); go_BYE(-1); 
       }
       status = extract_name_value(args, "User=", '&', uname, MAX_LEN_USER_NAME); 

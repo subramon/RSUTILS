@@ -25,6 +25,9 @@ typedef struct _web_response_t {
 
 // TODO Why doesnt this work? struct web_info_t; // forward declaration
 
+typedef int (*sess_clean_fn_t)( 
+    lua_State *L
+    );
 typedef int (*proc_req_fn_t)( 
     int user_id,
     const char *const api,
@@ -50,6 +53,7 @@ typedef struct _sess_state_t {
 typedef struct _web_info_t { 
   struct event_base **bases; // [n_threads]
   proc_req_fn_t proc_req_fn;
+  sess_clean_fn_t sess_clean_fn;
 
   int port;
   int n_threads;
