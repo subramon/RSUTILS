@@ -3,23 +3,54 @@
 
 char *
 mk_temp_file(
-    const char * in_tmpl
+    const char * in_tmpl,
+    const char * const suffix
     )
 {
   int status = 0;
-  const char * template = NULL;
+  char * template = NULL;
+  int fd = -1;
+
+  size_t in_len = strlen(in_tmpl);
+  if ( in_len <= 6 ) { go_BYE(-1); }
+  if ( strcmp(in_tmpl+ (in_len-6), "XXXXXX") != 0 ) { 
+    go_BYE(-1);
+  }
+
   if ( in_tmpl == NULL )  {
-    template = "/tmp/_dataset_XXXXXX";
+    template = "/tmp/_temp_file_XXXXXX";
   }
   else {
-    template = in_tmpl;
+    if ( suffix == NULL ) { 
+      template = strdup(in_tmpl);
+      fd =  mkstemp(template); // modified by mkstemp
+    }
+    else {
+      size_t len = strlen(in_tmpl) + strlen(suffix) + 1; 
+      template = malloc(len);
+      sprintf(template, "%s%s", in_tmpl, suffix);
+      fd =  mkstemps(template, strlen(suffix)); // modified by mkstemps
+    }
   }
-  char *file_name = NULL; 
-  file_name = malloc(strlen(template) + 1);
-  strcpy(file_name, template);
-  int fd =  mkstemp(file_name); 
   if ( fd < 0 ) { go_BYE(-1); }
   close(fd); 
 BYE:
-  if ( status < 0 ) { return NULL; } else { return file_name; }
+  if ( status < 0 ) { return NULL; } else { return template; }
 }
+#undef TEST 
+#ifdef TEST 
+// gcc -g mk_temp_file.c -I../inc/ isfile.c
+#include "isfile.h"
+int
+main()
+{
+  int status = 0;
+  const char *template = "/tmp/_XXXXXX";
+  const char *suffix = ".csv";
+  char *tempf = mk_temp_file(template, suffix);
+  if ( !isfile(tempf) ) { go_BYE(-1); }
+  printf("SUCCESS\n");
+BYE:
+  return status;
+}
+#endif
