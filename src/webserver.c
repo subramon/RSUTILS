@@ -14,7 +14,6 @@
 #include <event2/thread.h>
 #include <pthread.h>
 #include "web_struct.h"
-#include "phandler.h"
 #include "handler.h"
 #include "webserver.h"
 

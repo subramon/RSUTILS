@@ -23,6 +23,9 @@ set_http_headers(
   else if ( strcmp(extension, "css") == 0 )  {
     nH = 1;
   }
+  else if ( strcmp(extension, "csv") == 0 )  {
+    nH = 1;
+  }
   else if ( strcmp(extension, "ico") == 0 )  {
     nH = 1;
   }
@@ -35,27 +38,33 @@ set_http_headers(
   if ( nH == 0 ) { return status; }
   //=============================================
   hdr_key = malloc(nH * sizeof(char *));
+  memset(hdr_key, 0,  nH * sizeof(char *));
   hdr_val = malloc(nH * sizeof(char *));
-  if ( strstr(extension, ".html") != NULL )  {
+  memset(hdr_val, 0,  nH * sizeof(char *));
+  if ( strstr(extension, "html") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/html");
 
     hdr_key[1] =  strdup("charset");
     hdr_val[1] = strdup("utf8");
   }
-  else if ( strstr(extension, ".css") != NULL )  {
+  else if ( strstr(extension, "csv") != NULL )  {
+    hdr_key[0] =  strdup("Content-Type");
+    hdr_val[0] = strdup("text/csv");
+  }
+  else if ( strstr(extension, "css") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/css");
   }
-  else if ( strstr(extension, ".ico") != NULL )  {
+  else if ( strstr(extension, "ico") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("image/png");
   }
-  else if ( strstr(extension, ".js") != NULL )  {
+  else if ( strstr(extension, "js") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/javascript");
   }
-  if ( strstr(extension, ".json") != NULL )  {
+  if ( strstr(extension, "json") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/json");
 

@@ -29,7 +29,6 @@ extract_json_value(
 
 
 BYE:
-  if ( jval != NULL ) { json_decref(jval); }
   if ( jroot != NULL ) { json_decref(jroot); }
   return status;
 }
