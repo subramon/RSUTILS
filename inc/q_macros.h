@@ -11,6 +11,9 @@
 #define free_if_non_null(x) { if ( (x) != NULL ) { free((x)); (x) = NULL; } }
 #define return_if_fopen_failed(fp, file_name, access_mode) { if ( fp == NULL ) { fprintf(stderr, "Unable to open file %s for %s \n", file_name, access_mode); go_BYE(-1); } }
 #define return_if_malloc_failed(x) { if ( x == NULL ) { fprintf(stderr, "Unable to allocate memory\n"); go_BYE(-1); } }
+#define return_if_null_str(x) { if ( ( x == NULL ) ||( *x == '\0' ) ) { \
+  go_BYE(-1); } \
+}
 
 #define mcr_nop(X)  ((X))
 #define mcr_sqr(X)  ((X) * (X))

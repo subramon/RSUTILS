@@ -24,6 +24,7 @@ extract_extension(
 BYE:
   if ( status != 0 ) { return NULL; } else { return Y; }
 }
+#undef TEST
 #ifdef TEST
 int
 main()

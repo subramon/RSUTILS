@@ -81,10 +81,10 @@ handler(
       MAX_LEN_ARGS);
   free_if_non_null(decoded_uri);
   status = get_body(req, &body, &n_body); cBYE(status);
-  printf("api = %s \n", api);
-  printf("args = %s \n", args);
-  printf("body = %s \n", body);
   cBYE(status);
+  // printf("api = %s \n", api);
+  // printf("args = %s \n", args);
+  // printf("body = %s \n", body);
   if ( *api == '\0' ) { 
     strcpy(errbuf, " {\"API\" : \"Not found\" } "); go_BYE(-1); 
   }
@@ -191,7 +191,7 @@ handler(
     // Check if this user has an active request 
     int l_expected = 0;
     int l_desired  = 1;
-    printf("Trying to lock user %d \n", uidx);
+    // printf("Trying to lock user %d \n", uidx);
     bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     if ( !rslt ) { 
@@ -243,7 +243,7 @@ handler(
       }
       int l_expected = 1;
       int l_desired  = 0;
-      printf("Freeing user %d \n", uidx);
+      // printf("Freeing user %d \n", uidx);
       bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
           &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
       if ( !rslt ) { go_BYE(-1); }
@@ -255,7 +255,6 @@ handler(
     }
   }
   // STOP : Deal with logout 
-
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
   status = process_req_fn(uidx, api, args, body, n_body, web_info,
       outbuf, MAX_LEN_OUTPUT, errbuf, MAX_LEN_ERROR, &web_response);
@@ -264,7 +263,7 @@ handler(
   if ( uidx >= 0 ) { 
     int l_expected = 1;
     int l_desired  = 0;
-    printf("Freeing user %d \n", uidx);
+    // printf("Freeing user %d \n", uidx);
     bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     if ( !rslt ) { go_BYE(-1); }
