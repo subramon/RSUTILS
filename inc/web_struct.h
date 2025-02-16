@@ -61,6 +61,7 @@ typedef struct _web_info_t {
   char *login_page;  // e.g., login.html
   char *home_page;  // e.g., home.html
   char *login_endp;  // e.g., Login
+  char *logout_endp;  // e.g., Login
   uint32_t max_headers_size; 
   uint32_t max_body_size; 
   bool is_external; // false => accessible only from localhost

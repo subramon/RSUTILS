@@ -50,6 +50,7 @@ handler(
   int uidx = -1; 
 
   if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
+  if ( web_info->logout_endp == NULL ) { go_BYE(-1); } 
   if ( web_info->login_page == NULL ) { go_BYE(-1); } 
   if ( web_info->home_page == NULL ) { go_BYE(-1); } 
   // Delete old sessions
@@ -231,11 +232,29 @@ handler(
     }
     return;
   }
-  struct evkeyvalq *headers = evhttp_request_get_input_headers(req);
-  const char *hval = evhttp_find_header(headers, "Content-Type");
-  if ( hval != NULL ) { 
-    printf("Content tyoe = %s \n", hval);
+  // START: Deal with logout 
+  if ( strcasecmp(api, web_info->logout_endp) == 0 ) {
+    if ( uidx >= 0 ) { 
+      lua_State *L = web_info->sess_state[uidx].L;
+      if ( L != NULL ) { 
+        sess_clean_fn_t sess_clean_fn = web_info->sess_clean_fn;
+        sess_clean_fn(L); 
+        lua_close(L); 
+      }
+      int l_expected = 1;
+      int l_desired  = 0;
+      printf("Freeing user %d \n", uidx);
+      bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
+          &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+      if ( !rslt ) { go_BYE(-1); }
+      memset(&(web_info->sess_state[uidx]), 0, sizeof(sess_state_t));
+      evbuffer_add_printf(reply, "{ \"Logout\" : \"%d\"}\n", uidx); 
+      evhttp_send_reply(req, HTTP_OK, "OK", reply);
+      evbuffer_free(reply);
+      return;
+    }
   }
+  // STOP : Deal with logout 
 
   proc_req_fn_t process_req_fn = web_info->proc_req_fn;
   status = process_req_fn(uidx, api, args, body, n_body, web_info,

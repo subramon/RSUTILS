@@ -15,6 +15,7 @@ free_web_info(
   free_if_non_null(ptr_W->login_page);
   free_if_non_null(ptr_W->home_page);
   free_if_non_null(ptr_W->login_endp);
+  free_if_non_null(ptr_W->logout_endp);
   free_if_non_null(ptr_W->init_lua_state);
   free_2d_array(&(ptr_W->users), ptr_W->n_users);
   // Internals of sess_state should be freed by user

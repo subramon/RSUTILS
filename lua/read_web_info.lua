@@ -36,6 +36,17 @@ local function read_web_info(
     cC[0].login_endp = stringify(login_endp) 
   end
   --====================================
+  local logout_endp = glC.logout_endp
+  if ( logout_endp ~= nil ) then 
+    assert(type(logout_endp) == "string")
+    assert(#logout_endp > 0)
+    cC[0].logout_endp = stringify(logout_endp) 
+  end
+  --====================================
+  if ( login_endp and logout_endp ) then 
+    assert(login_endp ~= logout_endp)
+  end
+  --====================================
   local docroot = glC.docroot
   if ( docroot ~= nil ) then 
     assert(type(docroot) == "string")
