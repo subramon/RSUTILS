@@ -47,13 +47,13 @@ bind_socket(
   unsigned short portu16 = (unsigned short)port; 
   addr.sin_port = htons(portu16);
   r = bind(nfd, (struct sockaddr*)&addr, sizeof(addr));
-  if (r < 0) return -1;
+  if (r < 0) { go_BYE(-1); } 
   r = listen(nfd, 10240);
-  if (r < 0) return -1;
+  if (r < 0) { go_BYE(-1); } 
   int flags;
   if ( ((flags = fcntl(nfd, F_GETFL, 0)) < 0 ) 
       || ( fcntl(nfd, F_SETFL, flags | O_NONBLOCK) < 0) ) { 
-    return -1;
+    go_BYE(-1); 
   }
   // TODO Bind to 0.0.0.0 or 127.0.0.1
   *ptr_nfd = nfd;
@@ -126,12 +126,16 @@ webserver(
 BYE:
   if ( httpds != NULL ) { 
     for ( int i = 0; i < n_threads; i++ ) {
-      evhttp_free(httpds[i]);
+      if ( httpds[i] != NULL ) { 
+        evhttp_free(httpds[i]);
+      }
     }
   }
   if ( bases != NULL ) { 
     for ( int i = 0; i < n_threads; i++ ) {
+      if ( bases[i] != NULL ) { 
       event_base_free(bases[i]);
+      }
     }
   }
   free_if_non_null(threads);
