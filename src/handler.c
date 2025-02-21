@@ -49,10 +49,6 @@ handler(
   if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
 
-  if ( web_info->login_endp == NULL ) { go_BYE(-1); } 
-  if ( web_info->logout_endp == NULL ) { go_BYE(-1); } 
-  if ( web_info->login_page == NULL ) { go_BYE(-1); } 
-  if ( web_info->home_page == NULL ) { go_BYE(-1); } 
   // Delete old sessions
   for ( uint32_t i = 0; i < web_info->n_users; i++ ) {
     uint64_t t_touch = web_info->sess_state[i].t_touch;
@@ -89,7 +85,8 @@ handler(
     strcpy(errbuf, " {\"API\" : \"Not found\" } "); go_BYE(-1); 
   }
   // START: Deal with what happens when user comes to login page 
-  if ( strcasecmp(api, web_info->login_endp) == 0 ) {
+  if ( ( web_info->login_endp != NULL ) && 
+       ( strcasecmp(api, web_info->login_endp) == 0 ) ) {
     char uname[MAX_LEN_USER_NAME+1]; 
     memset(uname, 0, MAX_LEN_USER_NAME+1);
     if ( ( body != NULL ) && ( *body != '\0' ) ) { 
@@ -160,10 +157,15 @@ handler(
       web_info->sess_state[uidx].sess_hash);
     evhttp_add_header(evhttp_request_get_output_headers(req),
           "Set-Cookie", cookie);
-    evhttp_add_header(evhttp_request_get_output_headers(req),
-          "Location", web_info->home_page);
     evbuffer_add_printf(reply, "{ \"Login\" : \"Successful\"}\n"); 
-    evhttp_send_reply(req, HTTP_MOVETEMP, "Login successful", reply);
+    if ( web_info->home_page != NULL ) { 
+      evhttp_add_header(evhttp_request_get_output_headers(req),
+          "Location", web_info->home_page);
+      evhttp_send_reply(req, HTTP_MOVETEMP, "Login successful", reply);
+    }
+    else {
+      evhttp_send_reply(req, HTTP_OK, "OK", reply);
+    }
     evbuffer_free(reply); 
     return;
   }
@@ -206,6 +208,7 @@ handler(
   // Do not allow access to any APIs if user not validated 
   This code has been commented to allows access to some resources
   if ( uidx < 0 ) {
+    if ( web_info->login_page == NULL ) { go_BYE(-1); } 
     evhttp_add_header(evhttp_request_get_output_headers(req),
         "Location", web_info->login_page);
     evbuffer_add_printf(reply, "{ \"Login\" : \"Invalid\"}\n"); 
@@ -215,25 +218,9 @@ handler(
   }
   */
 
-  if ( strcmp(api, "Halt") == 0 ) {
-    // Inform all threads that they need to terminate 
-    int l_expected = 0;
-    int l_desired  = 1;
-    bool rslt = __atomic_compare_exchange(&(web_info->halt), 
-        &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
-    if ( !rslt ) { go_BYE(-1); }
-    // Save states for each user if one exists
-    evbuffer_add_printf(reply, "{ \"Server\" : \"Halting\"}\n"); 
-    evhttp_send_reply(req, HTTP_OK, "OK", reply);
-    evbuffer_free(reply);
-    printf("HALTING!!!!\n");
-    for ( int i = 0; i < web_info->n_threads; i++ ) { 
-      event_base_loopbreak(web_info->bases[i]);
-    }
-    return;
-  }
   // START: Deal with logout 
-  if ( strcasecmp(api, web_info->logout_endp) == 0 ) {
+  if ( ( web_info->logout_endp != NULL ) &&
+       ( strcasecmp(api, web_info->logout_endp) == 0 ) ) {
     if ( uidx >= 0 ) { 
       lua_State *L = web_info->sess_state[uidx].L;
       if ( L != NULL ) { 
@@ -267,6 +254,28 @@ handler(
     bool rslt = __atomic_compare_exchange(&(web_info->in_use[uidx]), 
         &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
     if ( !rslt ) { go_BYE(-1); }
+  }
+  // IMPORTANT: We deal with Halt in 2 places. 
+  // (1) process_req_fn()
+  // (2) right here. 
+  // The first is used to inform other threads that they should stop
+  // The second is used to terminate the webserver thread 
+  if ( strcmp(api, "Halt") == 0 ) {
+    // Inform all threads that they need to terminate 
+    int l_expected = 0;
+    int l_desired  = 1;
+    bool rslt = __atomic_compare_exchange(&(web_info->halt), 
+        &l_expected, &l_desired, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( !rslt ) { go_BYE(-1); }
+    // Save states for each user if one exists
+    evbuffer_add_printf(reply, "{ \"Server\" : \"Halting\"}\n"); 
+    evhttp_send_reply(req, HTTP_OK, "OK", reply);
+    evbuffer_free(reply);
+    printf("HALTING!!!!\n");
+    for ( int i = 0; i < web_info->n_threads; i++ ) { 
+      event_base_loopbreak(web_info->bases[i]);
+    }
+    return;
   }
   // send the headers if any
   for ( int i = 0; i < web_response.num_headers; i++ ) { 

@@ -50,7 +50,7 @@ typedef struct _sess_state_t {
   uint64_t t_touch;  // when last accessed
 } sess_state_t;
 
-typedef struct _web_info_t { 
+typedef struct _web_info_t {
   struct event_base **bases; // [n_threads]
   proc_req_fn_t proc_req_fn;
   sess_clean_fn_t sess_clean_fn;

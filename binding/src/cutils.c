@@ -637,6 +637,29 @@ static int l_cutils_str_qtype_to_str_ctype(
   return 1;
 }
 //----------------------------------------
+static int l_cutils_get_format( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); } 
+  const char *const str_qtype = luaL_checkstring(L, 1);
+  char *fmt = get_format(str_qtype);
+  if ( fmt == NULL ) { 
+    lua_pushnil(L);
+  }
+  else {
+    lua_pushstring(L, fmt);
+  }
+  return 1;
+  // TODO P2: Do we need to free fmt? 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+//----------------------------------------
 static int l_cutils_get_width_qtype( 
     lua_State *L
     )
@@ -984,6 +1007,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "getsize",     l_cutils_getsize },
     { "gettime",     l_cutils_gettime },
     { "get_width_qtype",   l_cutils_get_width_qtype },
+    { "get_format",   l_cutils_get_format },
     { "get_c_qtype", l_cutils_get_c_qtype },
     { "delete",      l_cutils_delete },
     { "exec",        l_cutils_exec },
@@ -1031,6 +1055,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "getsize",     l_cutils_getsize },
     { "gettime",     l_cutils_gettime },
     { "get_width_qtype",   l_cutils_get_width_qtype },
+    { "get_format",   l_cutils_get_format },
     { "get_c_qtype", l_cutils_get_c_qtype },
     { "is_qtype",    l_cutils_is_qtype },
     { "isdir",       l_cutils_isdir },
