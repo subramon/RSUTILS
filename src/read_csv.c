@@ -166,30 +166,42 @@ read_csv(
 CELL_COMPLETE:
       // now  we have a single cell value
       //-------------------------------------------
-    is_load_j = true;
-    if ( ( is_load != NULL ) && ( is_load[j] == false ) )  {
-      is_load_j= false;
-    }
-    if ( is_load_j == false ) { continue; }
+      is_load_j = true;
+      if ( ( is_load != NULL ) && ( is_load[j] == false ) )  {
+        is_load_j= false;
+      }
+      if ( is_load_j == false ) { continue; }
 
-    has_nulls_j = false;
-    if ( ( has_nulls != NULL ) && ( has_nulls[j] == false ) )  {
-      has_nulls_j= false;
-    }
+      has_nulls_j = false;
+      if ( ( has_nulls != NULL ) && ( has_nulls[j] == true ) )  {
+        has_nulls_j = true;
+        if ( nn_out[j] == NULL ) { go_BYE(-1); } 
+      }
+      else {
+        if ( nn_out[j] != NULL ) { go_BYE(-1); } 
+      }
       // determine if we have a null value with us 
       bool is_null;
       for ( ; ; ) {
         if ( strlen(buf) == 0 ) { is_null = true; break; }
         if ( ( strlen(buf) == 2 ) && 
-          ( ( strncmp(buf, "\\N", 2) == 0 ) || 
-          ( strncmp(buf, "NA", 2) == 0 ) ) ) { is_null = true; break; }
+            ( ( strncmp(buf, "\\N", 2) == 0 ) || 
+              ( strncmp(buf, "NA", 2) == 0 ) ) ) { is_null = true; break; }
         is_null = false; break;
       }
-      if ( ( is_null ) && ( has_nulls != NULL ) && ( has_nulls[j] ) ) { 
-        nn_out[j][i] = false;
-      continue;
+      if ( is_null ) {
+        if ( has_nulls_j == false ) { 
+          printf("Got null value when none expected. ");
+          printf(" for row %d column %d \n", i, j);
+          go_BYE(-1);
+        }
+        else {
+          nn_out[j][i] = false;
+        }
+        continue;
       }
-      if ( has_nulls_j ) { 
+      // Control comes here => value is not null 
+      if ( nn_out[j] != NULL ) { 
         nn_out[j][i] = true;
       }
       switch ( qtypes[j] ) {
@@ -233,9 +245,9 @@ CELL_COMPLETE:
         case I4 : 
           {
             long int ival = strtol(buf, &endptr, 10);
-          if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { \
-            printf("hello world\n");
-          }
+            if ( ( endptr != NULL ) && ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { \
+              printf("hello world\n");
+            }
 
             mcr_chk_endptr(endptr, buf);
             if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }

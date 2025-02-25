@@ -7,7 +7,8 @@ INCDIR=../inc/
 
 MYSO = librsutils.so
 
-all : ${MYSO}  ut_task_cpu_time
+all : ${MYSO}  ut_task_cpu_time \
+	../lua/web_info.lua 
 
 gen_inc_files : \
 	../inc/txt_to_BL.h \
@@ -307,6 +308,14 @@ clean :
 	rm -f *.o
 	rm -f  ${MYSO}
 
+
+../lua/web_info.lua : ${RSUTILS_SRC_ROOT}/inc/web_struct.h
+	echo " return [[ " > _xxx
+	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
+	${RSUTILS_SRC_ROOT}/inc/web_struct.h >> _xxx
+	echo " ]] " >> _xxx
+	cat _xxx | sed s'/lua_State/void/'g > ../lua/web_info.lua
+	rm _xxx
 
 # do not use following unless you absolutely need to
 # else, it breaks the build from UTILS/build/
