@@ -36,7 +36,7 @@ cat_to_buf(
     bufsz = MIN_TO_ADD;
   }
   if ( str_len + buflen + 1 >= bufsz ) { // +1 for nullc
-    bufsz += mcr_max(MIN_TO_ADD, ((str_len + buflen) - bufsz));
+    bufsz += mcr_max(MIN_TO_ADD, ((str_len + buflen + 1) - bufsz));
     bufsz = multiple_n(bufsz, 8);
     char *newbuf = malloc(bufsz);
     return_if_malloc_failed(newbuf);

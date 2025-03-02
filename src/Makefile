@@ -298,7 +298,7 @@ read_csv.o : QCFLAGS += -Wno-cast-align # for ARM
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
-		${GEN_OBJS} ${OBJS} -o ${MYSO} -levent -latomic
+		${GEN_OBJS} ${OBJS} -o ${MYSO} -levent -latomic -ljansson
 
 ut_task_cpu_time : ut_task_cpu_time.c
 	gcc -I../inc/ ut_task_cpu_time.c -o ut_task_cpu_time ${MYSO} -lpthread -lm
