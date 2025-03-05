@@ -271,6 +271,7 @@ SRCS += txt_to_BL.c
 SRCS += txt_to_SC.c 
 SRCS += unique.c
 SRCS += url.c
+SRCS += I4_to_TM1.c
 
 OBJS = $(SRCS:.c=.o)
 
