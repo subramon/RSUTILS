@@ -305,22 +305,17 @@ handler(
     status = evbuffer_add(reply, X, nX); cBYE(status);
     mcr_rs_munmap(X, nX);
 
-    if ( web_response.is_err ) { 
-      evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);
-    }
-    else {
-      evhttp_send_reply(req, HTTP_OK, "OK", reply);
-    }
     goto BYE; 
   }
 BYE:
-  if ( status == 0 ) { 
-    evbuffer_add_printf(reply, "%s", outbuf); 
-    evhttp_send_reply(req, HTTP_OK, "OK", reply);
-  }
-  else {
+  if ( ( status != 0 ) || 
+      ( ( web_response.is_set ) && ( web_response.is_err) ) ) { 
     evbuffer_add_printf(reply, "%s", errbuf); 
     evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);
+  }
+  else {
+    evbuffer_add_printf(reply, "%s", outbuf); 
+    evhttp_send_reply(req, HTTP_OK, "OK", reply);
   }
   // Release resources 
   if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
