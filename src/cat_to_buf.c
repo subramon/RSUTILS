@@ -24,9 +24,7 @@ cat_to_buf(
   if ( str_len == 0  ) {  str_len  = strlen(str); }
   if ( str_len == 0  ) {  return status; } // nothing to do 
 
-  if ( *str == '\0' ) {
-    printf("helo woorld\n"); go_BYE(-1);
-  }
+  if ( *str == '\0' ) { go_BYE(-1); }
   if ( buf == NULL ) { 
     if ( bufsz != 0 ) { go_BYE(-1); } 
     if ( buflen != 0 ) { go_BYE(-1); } 
@@ -35,21 +33,38 @@ cat_to_buf(
     memset(buf, 0, MIN_TO_ADD);
     bufsz = MIN_TO_ADD;
   }
-  if ( str_len + buflen + 1 >= bufsz ) { // +1 for nullc
-    bufsz += mcr_max(MIN_TO_ADD, ((str_len + buflen + 1) - bufsz));
+  if ( (str_len + buflen)  > (bufsz-1) ) { // +1 for nullc
+    uint32_t n1 = str_len + buflen +1; 
+    uint32_t n2 = str_len + bufsz; 
+    bufsz = mcr_max(n1, n2); 
     bufsz = multiple_n(bufsz, 8);
     char *newbuf = malloc(bufsz);
     return_if_malloc_failed(newbuf);
     memset(newbuf, 0, bufsz); 
     if ( buf != NULL ) { 
       memcpy(newbuf, buf, buflen); 
+      if ( newbuf[bufsz-1] != '\0' ) { go_BYE(-1); }
+      if ( newbuf[buflen] != '\0' ) { go_BYE(-1); }
     }
     free_if_non_null(buf); 
     buf = newbuf;
   }
+#ifdef DEBUG
+  if ( buflen != strlen(buf) ) { 
+    uint32_t len = strlen(buf); 
+    WHEREAMI;
+  }
+#endif
   memcpy(buf + buflen, str, str_len);
   buflen += str_len;
+#ifdef DEBUG
+  if ( buflen != strlen(buf) ) { 
+    uint32_t len = strlen(buf); 
+    WHEREAMI;
+  }
+#endif
   if ( buf[buflen] != '\0' ) { go_BYE(-1); } 
+  if ( buf[bufsz-1] != '\0' ) { go_BYE(-1); }
   //---------------------------------------
   *ptr_buf    = buf;
   *ptr_bufsz  = bufsz;
