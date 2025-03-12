@@ -23,6 +23,7 @@ SRCS += ../../src/ls.c
 SRCS += ../../src/mem_info.c 
 SRCS += ../../src/mk_file.c 
 SRCS += ../../src/mk_temp_file.c 
+SRCS += ../../src/mk_temp_file_name.c 
 SRCS += ../../src/num_lines.c 
 SRCS += ../../src/num_cols.c 
 SRCS += ../../src/rand_file_name.c 

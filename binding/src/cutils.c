@@ -1,4 +1,4 @@
-/2/ The original inspiration for this was to replace Penlight
+// The original inspiration for this was to replace Penlight
 // While a wonderful library, I did not want to depend on Penlight
 // for run time. For testing, it is just fine to use Penlight.
 // Hence, some of the names use here are from Penlight. 
@@ -32,6 +32,7 @@
 #include "mem_info.h"
 #include "mk_file.h"
 #include "mk_temp_file.h"
+#include "mk_temp_file_name.h"
 #include "num_lines.h"
 #include "num_cols.h"
 #include "qtypes.h"
@@ -371,6 +372,29 @@ BYE:
   return 3;
 }
 //----------------------------------------
+static int l_cutils_mk_temp_file_name( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  const char *prefix = NULL;
+  const char *suffix = NULL;
+  int ntop = lua_gettop(L);
+  if ( ntop > 2 ) { go_BYE(-1); } 
+  if ( ntop == 1 ) { prefix = luaL_checkstring(L, 1); }
+  if ( ntop == 2 ) { suffix = luaL_checkstring(L, 2); }
+
+  char * temp_file_name = mk_temp_file_name(prefix, suffix);
+  if ( temp_file_name == NULL ) { go_BYE(-1); } 
+  lua_pushstring(L, temp_file_name);
+  free_if_non_null(temp_file_name);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
 static int l_cutils_mk_temp_file( 
     lua_State *L
     )
@@ -1052,6 +1076,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
     { "mk_temp_file",     l_cutils_mk_temp_file },
+    { "mk_temp_file_name",     l_cutils_mk_temp_file_name },
     { "num_cols",   l_cutils_num_cols },
     { "num_lines",   l_cutils_num_lines },
     { "quote_str",   l_cutils_quote_str },
@@ -1098,7 +1123,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "mkdir",       l_cutils_mkdir },
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
-    { "mk_temp_file",     l_cutils_mk_temp_file },
+    { "mk_temp_file_name",     l_cutils_mk_temp_file_name },
     { "num_cols",   l_cutils_num_cols },
     { "num_lines",   l_cutils_num_lines },
     { "omp_get_num_procs",   l_cutils_omp_get_num_procs },
