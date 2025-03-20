@@ -265,6 +265,7 @@ SRCS += split_str.c
 SRCS += spooky_hash.c 
 SRCS += str_as_file.c  
 SRCS += stretch.c  
+SRCS += strnstr.c  
 SRCS += task_cpu_time.c
 SRCS += tm2time.c 
 SRCS += trim.c 

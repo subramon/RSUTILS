@@ -380,9 +380,9 @@ static int l_cutils_mk_temp_file_name(
   const char *prefix = NULL;
   const char *suffix = NULL;
   int ntop = lua_gettop(L);
-  if ( ntop > 2 ) { go_BYE(-1); } 
-  if ( ntop == 1 ) { prefix = luaL_checkstring(L, 1); }
-  if ( ntop == 2 ) { suffix = luaL_checkstring(L, 2); }
+  if ( ( ntop == 0 ) || ( ntop > 2 ) ) { go_BYE(-1); } 
+  if ( ntop >= 1 ) { prefix = luaL_checkstring(L, 1); }
+  if ( ntop >= 2 ) { suffix = luaL_checkstring(L, 2); }
 
   char * temp_file_name = mk_temp_file_name(prefix, suffix);
   if ( temp_file_name == NULL ) { go_BYE(-1); } 
