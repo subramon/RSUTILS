@@ -1,1 +1,8 @@
+Use https://man7.org/linux/man-pages/man2/clock_gettime.2.html
+Don't do that -using yourself directly the RDTSC machine instruction- (because your OS scheduler could reschedule other threads or processes at arbitrary moments, or slow down the clock). Use a function provided by your library or OS.
+
+My main objective is to avoid the need to perform system call every time I want to know the system time
+On Linux, read time(7) then use clock_gettime(2) which is really quick (and does not involve any slow system call) thanks to vdso(7).
+===========================================
+
 gen_files should read .c files from a file and execute in loop
