@@ -496,9 +496,18 @@ static int l_cutils_mk_file(
     )
 {
   int status = 0;
+  char *dir_name = NULL; 
   int nargs = lua_gettop(L);
   if ( ( nargs < 3 ) || ( nargs > 4 ) ) { go_BYE(-1); }
-  const char *const dir_name  = luaL_checkstring(L, 1);
+    if ( lua_isstring(L, 1) ) {
+    dir_name = luaL_checkstring(L, 1);
+  }
+  else if ( lua_isnil(L, 1) ) {
+    dir_name = NULL;
+  }
+  else {
+    go_BYE(-1);
+  }
   const char *const file_name = luaL_checkstring(L, 2);
   uint64_t file_size = luaL_checknumber(L, 3); 
   bool over_write = false;
