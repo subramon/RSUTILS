@@ -258,10 +258,10 @@ CELL_COMPLETE:
         case BL : 
           {
             bool *bptr = (bool *)out[j];
-            if ( ( strcmp(buf, "true") == 0 )| ( strcmp(buf, "1") == 0 ) ) {
+            if ( ( strcasecmp(buf, "true") == 0 )| ( strcasecmp(buf, "1") == 0 ) ) {
               bptr[i] = true;
             }
-            else if ( ( strcmp(buf, "false") == 0 )| ( strcmp(buf, "0") == 0 ) ) {
+            else if ( ( strcasecmp(buf, "false") == 0 )| ( strcasecmp(buf, "0") == 0 ) ) {
               bptr[i] = false;
             }
             else { 
