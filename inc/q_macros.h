@@ -89,4 +89,8 @@
 #define PRI8 PRIi64
 #define PRF4 "lf"
 #define PRF8 "e"
+#define mcr_db_clean(conn, res) { \
+    if ( res != NULL ) { PQclear(res); res = NULL; } \
+    if ( conn != NULL ) { PQfinish(conn); conn = NULL; } \
+}
 #endif
