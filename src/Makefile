@@ -216,7 +216,8 @@ GEN_INC_FILES = \
 
 spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
-SRCS := BL_to_txt.c 
+SRCS := addr_as_hex_string.c 
+SRCS += BL_to_txt.c 
 SRCS += bf16tofp32.c
 SRCS += cat_to_buf.c 
 SRCS += extract_api_args.c 
