@@ -40,6 +40,7 @@
 #include "rdtsc.h"
 #include "rs_mmap.h"
 #include "str_as_file.h"
+#include "trim.h"
 #include "tm2time.h"
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 
@@ -496,7 +497,7 @@ static int l_cutils_mk_file(
     )
 {
   int status = 0;
-  char *dir_name = NULL; 
+  const char *dir_name = NULL; 
   int nargs = lua_gettop(L);
   if ( ( nargs < 3 ) || ( nargs > 4 ) ) { go_BYE(-1); }
     if ( lua_isstring(L, 1) ) {
@@ -583,6 +584,28 @@ static int l_cutils_str_as_file(
   const char *const file_name = luaL_checkstring(L, 2);
   status = str_as_file(str, file_name); cBYE(status);
   lua_pushboolean(L, true);
+  return 1;
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
+}
+//----------------------------------------
+static int l_cutils_trim( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *const inbuf = luaL_checkstring(L, 1);
+  size_t sz = strlen(inbuf) + 1; 
+  char *outbuf = malloc(sz);
+  return_if_malloc_failed(outbuf);
+  memset(outbuf, 0, sz);
+  status = trim(inbuf, outbuf, sz-1); cBYE(status);
+  lua_pushstring(L, inbuf); 
+  free(inbuf); // Lua has taken control. TODO P0 Think
   return 1;
 BYE:
   lua_pushnil(L);
@@ -1098,6 +1121,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
     { "unlink",     l_cutils_unlink },
+    { "trim",     l_cutils_trim },
     { "write",       l_cutils_write },
     { NULL,  NULL         }
 };
@@ -1146,6 +1170,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
     { "unlink",     l_cutils_unlink },
+    { "trim",     l_cutils_trim },
     { "write",       l_cutils_write },
     { NULL,  NULL         }
 };

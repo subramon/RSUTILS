@@ -24,7 +24,7 @@ file_cat(
 
   xdst = realpath(dst, NULL);
   xsrc = realpath(src, NULL);
-  if ( strcmp(xdst, xsrc) == NULL ) { go_BYE(-1); }
+  if ( strcmp(xdst, xsrc) == 0 ) { go_BYE(-1); }
 
   dfp = fopen(dst, "a");
   return_if_fopen_failed(dfp, dst, "a");

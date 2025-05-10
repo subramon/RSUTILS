@@ -31,6 +31,7 @@ SRCS += ../../src/rdtsc.c
 SRCS += ../../src/rs_mmap.c 
 SRCS += ../../src/str_as_file.c 
 SRCS += ../../src/tm2time.c 
+SRCS += ../../src/trim.c 
 
 OBJS = $(SRCS:.c=.o)
 
