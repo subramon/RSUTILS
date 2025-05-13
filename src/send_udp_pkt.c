@@ -38,6 +38,33 @@ send_udp_pkt(
 {
   int status = 0;
   int sockfd = -1; 
+  int serverlen;
+  struct sockaddr_in serveraddr;
+  ssize_t n_send;
+
+  status = send_udp_setup(hostname, portno, &sockfd, &serveraddr);
+  cBYE(status);
+  /* send the message to the server */
+  serverlen = sizeof(serveraddr);
+  n_send = sendto(sockfd, buf, buflen, 0, &serveraddr, serverlen);
+  if (n_send < 0)  {
+    error("ERROR in sendto"); go_BYE(-1);
+  }
+BYE:
+  if ( sockfd >= 0 ) { close(sockfd); }
+  return status;
+}
+
+int 
+send_udp_setup(
+    const char * const hostname, 
+    uint16_t portno,
+    int *ptr_sockfd,
+    struct sockaddr_in *ptr_serveraddr
+    )
+{
+  int status = 0;
+  int sockfd = -1; 
   struct hostent *server;
   int serverlen;
   struct sockaddr_in serveraddr;
@@ -45,8 +72,9 @@ send_udp_pkt(
 
   /* socket: create the socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sockfd < 0) 
-    error("ERROR opening socket");
+  if (sockfd < 0)  { 
+    error("ERROR opening socket"); go_BYE(-1);
+  }
 
   /* gethostbyname: get the server's DNS entry */
   server = gethostbyname(hostname);
@@ -61,13 +89,8 @@ send_udp_pkt(
       (char *)&serveraddr.sin_addr.s_addr, server->h_length);
   serveraddr.sin_port = htons(portno);
 
-  /* send the message to the server */
-  serverlen = sizeof(serveraddr);
-  n_send = sendto(sockfd, buf, buflen, 0, &serveraddr, serverlen);
-  if (n_send < 0)  {
-    error("ERROR in sendto"); go_BYE(-1);
-  }
+  *ptr_serveraddr = serveraddr;
+  *ptr_sockfd = sockfd;
 BYE:
-  if ( sockfd >= 0 ) { close(sockfd); }
   return status;
 }
