@@ -78,6 +78,8 @@ void *udpserver(
       udp_info->t_first_pkt = get_time_usec(); 
       first = false;
     }
+    int l_halt; __atomic_load(&(udp_info->halt), &l_halt, 0);
+    if ( l_halt == 1 ) { break; }
 
     /*
      * recvfrom: receive a UDP datagram from a client
@@ -103,8 +105,13 @@ void *udpserver(
     }
     printf("server received datagram from %s (%s)\n", 
         hostp->h_name, hostaddrp);
-    printf("server received %lu bytes\n", n_recv);
-    udp_info->t_first_pkt = get_time_usec(); 
+    printf("server received %u bytes\n", (uint32_t)n_recv);
+    // Now for the custom processing 
+    status = udp_info->proc_req_fn(buf, (uint32_t)n_recv, udp_info->X); 
+    cBYE(status);
+
+    udp_info->t_last_pkt = get_time_usec(); 
+    udp_info->num_pkts_received++;
   }
   udp_info->t_stop = get_time_usec(); 
 BYE:
