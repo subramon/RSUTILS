@@ -66,9 +66,7 @@ send_udp_setup(
   int status = 0;
   int sockfd = -1; 
   struct hostent *server;
-  int serverlen;
   struct sockaddr_in serveraddr;
-  ssize_t n_send;
 
   /* socket: create the socket */
   sockfd = socket(AF_INET, SOCK_DGRAM, 0);
