@@ -526,7 +526,7 @@ static int l_cutils_mk_file(
     }
   }
   //--------------------------------------
-  if ( *dir_name == '\0' )  {
+  if ( ( dir_name == NULL ) || ( *dir_name == '\0' ) )  {
     status = mk_file(NULL, file_name, file_size);
   }
   else {

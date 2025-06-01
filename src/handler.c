@@ -23,18 +23,14 @@ handler(
     )
 {
   int status = 0;
+  char *outbuf = NULL; 
+  char *errbuf = NULL; 
   char *X = NULL; size_t nX = 0;
   char  api[MAX_LEN_API+1];
   memset(api, 0, MAX_LEN_API+1);
 
   char args[MAX_LEN_ARGS+1]; 
   memset(args, 0, MAX_LEN_ARGS+1);
-
-  char outbuf[MAX_LEN_OUTPUT+1];
-  memset(outbuf, '\0', MAX_LEN_OUTPUT+1); // TOOD P4 not needed
-
-  char errbuf[MAX_LEN_ERROR+1];
-  memset(errbuf, '\0', MAX_LEN_ERROR+1); // TOOD P4 not needed
 
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
@@ -48,6 +44,25 @@ handler(
   reply = evbuffer_new();
   if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
+  //----------------------------------------------
+  if ( web_info->outbuf_size > 0 ) { 
+    outbuf = malloc(web_info->outbuf_size);
+    bzero(outbuf, web_info->outbuf_size);
+  }
+  else {
+    outbuf = malloc(MAX_LEN_OUTPUT+1);
+    bzero(outbuf, MAX_LEN_OUTPUT+1);
+  }
+  //----------------------------------------------
+  if ( web_info->errbuf_size > 0 ) { 
+    errbuf = malloc(web_info->errbuf_size);
+    bzero(errbuf, web_info->errbuf_size);
+  }
+  else {
+    errbuf = malloc(MAX_LEN_ERROR+1);
+    bzero(errbuf, MAX_LEN_ERROR+1);
+  }
+  //----------------------------------------------
 
   // Delete old sessions
   for ( uint32_t i = 0; i < web_info->n_users; i++ ) {
@@ -341,4 +356,6 @@ BYE:
     evhttp_request_free(req);
   }
   */
+  free_if_non_null(outbuf);
+  free_if_non_null(errbuf);
 }

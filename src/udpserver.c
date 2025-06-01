@@ -103,8 +103,10 @@ void *udpserver(
     if (hostaddrp == NULL) {
       perror("ERROR on inet_ntoa\n"); go_BYE(-1);
     }
+    /*
     printf("server received datagram from %s (%s)\n", 
         hostp->h_name, hostaddrp);
+    */
     printf("server received %u bytes\n", (uint32_t)n_recv);
     // Now for the custom processing 
     status = udp_info->proc_req_fn(buf, (uint32_t)n_recv, udp_info->X); 
