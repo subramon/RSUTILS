@@ -370,7 +370,9 @@ CELL_COMPLETE:
             if ( widths == NULL ) { go_BYE(-1); } 
             uint32_t width = widths[j];
             if ( width < 1 ) { go_BYE(-1); } 
-            if ( width < strlen(buf)+1 ) { go_BYE(-1); } 
+            if ( width < strlen(buf)+1 ) { 
+              printf("Cell [%s] too large. Len <= %u\n", buf, width); 
+              go_BYE(-1); } 
             char *cptr = out[j]; cptr += (i*width);
             memset(cptr, 0, width);
             memcpy(cptr, buf, strlen(buf));

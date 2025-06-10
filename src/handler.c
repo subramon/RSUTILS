@@ -23,18 +23,14 @@ handler(
     )
 {
   int status = 0;
+  char *outbuf = NULL; 
+  char *errbuf = NULL; 
   char *X = NULL; size_t nX = 0;
   char  api[MAX_LEN_API+1];
   memset(api, 0, MAX_LEN_API+1);
 
   char args[MAX_LEN_ARGS+1]; 
   memset(args, 0, MAX_LEN_ARGS+1);
-
-  char outbuf[MAX_LEN_OUTPUT+1];
-  memset(outbuf, '\0', MAX_LEN_OUTPUT+1); // TOOD P4 not needed
-
-  char errbuf[MAX_LEN_ERROR+1];
-  memset(errbuf, '\0', MAX_LEN_ERROR+1); // TOOD P4 not needed
 
   web_response_t web_response; 
   memset(&web_response, 0, sizeof(web_response_t));
@@ -48,6 +44,25 @@ handler(
   reply = evbuffer_new();
   if ( reply == NULL) { go_BYE(-1); }
   int uidx = -1; 
+  //----------------------------------------------
+  if ( web_info->outbuf_size > 0 ) { 
+    outbuf = malloc(web_info->outbuf_size);
+    bzero(outbuf, web_info->outbuf_size);
+  }
+  else {
+    outbuf = malloc(MAX_LEN_OUTPUT+1);
+    bzero(outbuf, MAX_LEN_OUTPUT+1);
+  }
+  //----------------------------------------------
+  if ( web_info->errbuf_size > 0 ) { 
+    errbuf = malloc(web_info->errbuf_size);
+    bzero(errbuf, web_info->errbuf_size);
+  }
+  else {
+    errbuf = malloc(MAX_LEN_ERROR+1);
+    bzero(errbuf, MAX_LEN_ERROR+1);
+  }
+  //----------------------------------------------
 
   // Delete old sessions
   for ( uint32_t i = 0; i < web_info->n_users; i++ ) {
@@ -292,19 +307,32 @@ handler(
         "Access-Control-Allow-Origin", "*"); 
   }
   // Handle case when something other than default is to be returned
+  // Can send back contents of a file or outbuf but not both 
   if ( web_response.is_set ) {
-    if ( web_response.file_name == NULL ) { go_BYE(-1); } 
-    // Running into trouble with add_file 
-    // open file for reading 
-    // int wfd = open(web_response.file_name, O_RDONLY); 
-    // if ( wfd < 0 ) { go_BYE(-1); } 
-    // send data in file 
-    // status = evbuffer_add_file(reply, wfd, 0, -1); cBYE(status); 
-    // close(wfd); 
-    status = rs_mmap(web_response.file_name, &X, &nX, 0); cBYE(status);
-    status = evbuffer_add(reply, X, nX); cBYE(status);
-    mcr_rs_munmap(X, nX);
-
+    if ( web_response.file_name != NULL ) {
+      if ( web_response.sz_outbuf == 0 ) { go_BYE(-1); } 
+      // Running into trouble with add_file 
+      // open file for reading 
+      // int wfd = open(web_response.file_name, O_RDONLY); 
+      // if ( wfd < 0 ) { go_BYE(-1); } 
+      // send data in file 
+      // status = evbuffer_add_file(reply, wfd, 0, -1); cBYE(status); 
+      // close(wfd); 
+      status = rs_mmap(web_response.file_name, &X, &nX, 0); cBYE(status);
+      status = evbuffer_add(reply, X, nX); cBYE(status);
+      mcr_rs_munmap(X, nX);
+    }
+    else if ( web_response.sz_outbuf > 0 ) { 
+      if ( web_response.file_name != NULL ) { go_BYE(-1); } 
+      if ( web_response.outbuf == NULL ) { go_BYE(-1); }
+      status = evbuffer_add(reply, web_response.outbuf, 
+          web_response.sz_outbuf);
+      free_if_non_null(web_response.outbuf); 
+      cBYE(status);
+    }
+    else {
+      go_BYE(-1); 
+    }
     goto BYE; 
   }
 BYE:
@@ -341,4 +369,6 @@ BYE:
     evhttp_request_free(req);
   }
   */
+  free_if_non_null(outbuf);
+  free_if_non_null(errbuf);
 }

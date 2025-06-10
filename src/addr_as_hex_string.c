@@ -81,7 +81,7 @@ hex_string_as_addr(
     uint64_t z = h;
     z = z << (uint32_t)((4*i));
     y = y | z;
-    printf("%2d -->  %c %u -> %" PRIu64 "\n", i, digit, h, y);
+    // printf("%2d -->  %c %u -> %" PRIu64 "\n", i, digit, h, y);
   }
   return y;
 }

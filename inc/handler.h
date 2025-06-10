@@ -4,7 +4,7 @@
 
 #define MAX_LEN_API  31
 #define MAX_LEN_ARGS 1023
-#define MAX_LEN_OUTPUT 65535
+#define MAX_LEN_OUTPUT 1048575 // TODO P2 make this configurable
 #define MAX_LEN_ERROR 1023
 #define MAX_LEN_COOKIE 127
 #define MAX_LEN_SESS_NAME 63

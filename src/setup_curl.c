@@ -14,25 +14,29 @@ WriteMemoryCallback(
     void *userp
     )
 {
-  size_t realsize = size * nmemb;
+  size_t bytes_to_write = size * nmemb;
   curl_userdata_t *U = (curl_userdata_t *)userp;
 
-  size_t space_left = U->size - U->offset;
+  if ( U->size == 0 ) { 
+    if ( U->offset != 0 ) { WHEREAMI; return 0; }
+    U->size = 1024; // some initial starting point 
+    U->base = malloc(U->size);
+    memset(U->base, 0, U->size);
+  }
 
-  if ( space_left < realsize ) { 
-    size_t oldsize = U->size; 
-    size_t newsize = oldsize; 
-    if ( newsize == 0 ) { newsize = 1024; } // some  initial start point
-    for ( ; space_left < realsize; ) { 
-      newsize *= 2;
-      space_left = newsize - U->offset;
-    }
+  size_t newsize = U->size; 
+  size_t space_left = newsize - U->offset;
+  while ( space_left < bytes_to_write ) { 
+    newsize*= 2; 
+    space_left = newsize - U->offset;
+  }
+  if ( newsize != U->size ) { 
     U->base = realloc(U->base, newsize);
     U->size = newsize;
   }
-  memcpy(U->base+U->offset, contents, realsize);
-  U->offset += realsize; 
-  return realsize;
+  memcpy(U->base+U->offset, contents, bytes_to_write);
+  U->offset += bytes_to_write; 
+  return bytes_to_write;
 }
 
 int

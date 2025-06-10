@@ -10,6 +10,8 @@
 
 //START_FOR_CDEF
 typedef struct _web_response_t {
+  char *outbuf; // to be deleted by handler
+  uint32_t sz_outbuf; // needed for binary data returned in outbuf
   char *file_name;
   bool delete_file;
   // example of a header is Content-Type: image/foo.png
@@ -56,6 +58,8 @@ typedef struct _web_info_t {
   sess_clean_fn_t sess_clean_fn;
 
   int port;
+  uint32_t outbuf_size; // 
+  uint32_t errbuf_size; // 
   int n_threads;
   char *docroot; 
   char *login_page;  // e.g., login.html

@@ -35,6 +35,8 @@ SRCS += ../../src/trim.c
 
 OBJS = $(SRCS:.c=.o)
 
+CC=gcc
+
 .c.o : 
 	$(CC) -c -o $@ $< ${QCFLAGS} $(INCS) 
 
