@@ -12,6 +12,8 @@ typedef struct _web_response_t {
   bool is_set;
   bool is_err;
   int response_code;
+  char *outbuf;
+  uint32_t sz_outbuf;
 } web_response_t;
 
 
@@ -47,6 +49,8 @@ typedef struct _web_info_t {
   sess_clean_fn_t sess_clean_fn;
 
   int port;
+  uint32_t outbuf_size;
+  uint32_t errbuf_size;
   int n_threads;
   char *docroot;
   char *login_page;
