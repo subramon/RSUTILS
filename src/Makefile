@@ -8,7 +8,11 @@ INCDIR=../inc/
 MYSO = librsutils.so
 
 all : ${MYSO}  ut_task_cpu_time \
-	../lua/web_info.lua 
+	../lua/csv_meta.lua  \
+	../lua/csv_spec.lua   \
+	../lua/qtypes_def.lua  \
+	../lua/web_info.lua  \
+
 
 gen_inc_files : \
 	../inc/txt_to_BL.h \
@@ -220,6 +224,8 @@ SRCS := addr_as_hex_string.c
 SRCS += BL_to_txt.c 
 SRCS += bf16tofp32.c
 SRCS += cat_to_buf.c 
+SRCS += csv_meta_aux.c 
+SRCS += csv_spec_aux.c 
 SRCS += extract_api_args.c 
 SRCS += extract_extension.c 
 SRCS += extract_name_value.c 
@@ -256,7 +262,6 @@ SRCS += queue_helpers.c
 SRCS += rand_file_name.c 
 SRCS += rdtsc.c 
 SRCS += read_csv.c
-SRCS += read_to_eoln.c
 SRCS += rmtree.c 
 SRCS += rs_mmap.c 
 SRCS += rs_strcat.c 
@@ -324,7 +329,35 @@ clean :
 	cat _xxx | sed s'/lua_State/void/'g > ../lua/web_info.lua
 	rm _xxx
 
+../lua/csv_meta.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
+	echo " return [[ " > ../lua/csv_meta.lua 
+	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
+		${RSUTILS_SRC_ROOT}/inc/csv_meta.h \
+		>> ../lua/csv_meta.lua 
+	echo " ]] " >> ../lua/csv_meta.lua 
+
+../lua/csv_spec.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
+	echo " return [[ " > ../lua/csv_spec.lua 
+	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
+		${RSUTILS_SRC_ROOT}/inc/csv_spec.h \
+		>> ../lua/csv_spec.lua 
+	echo " ]] " >> ../lua/csv_spec.lua 
+
+../lua/qtypes_def.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
+	echo " return [[ " > ../lua/qtypes_def.lua 
+	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
+		${RSUTILS_SRC_ROOT}/inc/qtypes.h \
+		>> ../lua/qtypes_def.lua 
+	echo " ]] " >> ../lua/qtypes_def.lua 
+
 # do not use following unless you absolutely need to
 # else, it breaks the build from UTILS/build/
 hardclean :
 	rm -f ${GEN_SRCS} ${GEN_INC_FILES}
+	rm -f  \
+	../lua/csv_meta.lua  \
+	../lua/csv_spec.lua   \
+	../lua/qtypes_def.lua  \
+	../lua/web_info.lua  \
+
+

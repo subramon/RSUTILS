@@ -14,8 +14,6 @@ typedef struct _web_response_t {
   bool is_set;
   bool is_err;
   int response_code;
-  char *outbuf;
-  uint32_t sz_outbuf;
 } web_response_t;
 
 

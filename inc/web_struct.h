@@ -23,8 +23,6 @@ typedef struct _web_response_t {
   bool is_set; // default false
   bool is_err; // default false
   int response_code;  // see http.h
-  char *outbuf;  // allocated inside, freed by handler 
-  uint32_t sz_outbuf;
 } web_response_t;
 
 // TODO Why doesnt this work? struct web_info_t; // forward declaration
@@ -60,8 +58,8 @@ typedef struct _web_info_t {
   sess_clean_fn_t sess_clean_fn;
 
   int port;
-  uint32_t outbuf_size; // allocated by handler outside 
-  uint32_t errbuf_size; // allocated by handler outside
+  uint32_t outbuf_size; // 
+  uint32_t errbuf_size; // 
   int n_threads;
   char *docroot; 
   char *login_page;  // e.g., login.html
