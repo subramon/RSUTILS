@@ -6,6 +6,7 @@ local x           = require 'RSUTILS/lua/csv_spec'; ffi.cdef(x)
 -- lS is the spec in Lua
 -- cS is the spec in C 
 local function read_csv_spec(lS, cS)
+  if ( not M ) then M = glC end
   cS = ffi.cast("csv_spec_t *", cS)
   local T, nT = tbl_to_C_2d(lS.break_cols)
   cS[0].break_cols = T

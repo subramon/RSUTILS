@@ -22,11 +22,14 @@ read_to_eoln(
   if ( outbuf == NULL ) { go_BYE(-1); }
   size_t len = 0;
   for ( uint32_t i = 0; i < inbuf_len; i++ ) {
-    if ( *inbuf == '\n' ) {
+    if ( inbuf[i] == '\n' ) {
+      // need to add eoln to output buffer
+      if ( len >= outbuf_sz ) { go_BYE(-1); }
+      outbuf[len++] = inbuf[i];
       break;
     }
     if ( len >= outbuf_sz ) { go_BYE(-1); }
-    outbuf[len] = *inbuf;
+    outbuf[len++] = inbuf[i];
   }
   *ptr_outbuf_len = len;
 BYE:

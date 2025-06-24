@@ -5,6 +5,14 @@ local tbl_to_C_2d  = require 'RSUTILS/lua/tbl_to_C_2d'
 local x            = require 'RSUTILS/lua/qtypes_def';     ffi.cdef(x)
 local x            = require 'RSUTILS/lua/csv_meta';       ffi.cdef(x)
 
+-- this function is for call from load_configs() to work properly 
+local function alt_read_csv_meta(
+  cM
+  )
+  assert(type(glC) == "table")
+  return read_csv_meta(glC, cM)
+end
+
 local function read_csv_meta(
   M,
   cM
