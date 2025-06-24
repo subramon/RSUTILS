@@ -310,7 +310,8 @@ handler(
   // Can send back contents of a file or outbuf but not both 
   if ( web_response.is_set ) {
     if ( web_response.file_name != NULL ) {
-      if ( web_response.sz_outbuf == 0 ) { go_BYE(-1); } 
+      if ( web_response.sz_outbuf != 0 ) { go_BYE(-1); }
+      if ( web_response.outbuf != NULL ) { go_BYE(-1); }
       // Running into trouble with add_file 
       // open file for reading 
       // int wfd = open(web_response.file_name, O_RDONLY); 
@@ -332,6 +333,22 @@ handler(
     }
     else {
       go_BYE(-1); 
+=======
+      if ( web_response.delete_file ) { 
+        remove(web_response.file_name);
+      }
+      free_if_non_null(web_response.file_name);
+    }
+    else if ( web_response.sz_outbuf != 0 ) { 
+      if ( web_response.outbuf == NULL ) { go_BYE(-1); }
+      if ( web_response.file_name != NULL ) { go_BYE(-1); }
+      status = evbuffer_add(reply, 
+          web_response.outbuf, web_response.sz_outbuf);
+      free_if_non_null(web_response.outbuf); 
+    }
+    else {
+      go_BYE(-1);
+>>>>>>> 14e071da9c99f63765d52bfc9ecdb8c73942d66b
     }
     goto BYE; 
   }
@@ -349,13 +366,6 @@ BYE:
   if ( reply != NULL ) { evbuffer_free(reply); reply = NULL; }
   free_if_non_null(decoded_uri);
   mcr_rs_munmap(X, nX);
-  // free resources in web response
-  if ( web_response.file_name != NULL ) { 
-    if ( web_response.delete_file ) { 
-      remove(web_response.file_name);
-    }
-    free_if_non_null(web_response.file_name);
-  }
   for ( int i = 0; i < web_response.num_headers; i++ ) { 
     free_if_non_null(web_response.header_key[i]);
     free_if_non_null(web_response.header_val[i]);
