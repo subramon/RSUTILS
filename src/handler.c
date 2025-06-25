@@ -338,6 +338,9 @@ handler(
 BYE:
   if ( ( status != 0 ) || 
       ( ( web_response.is_set ) && ( web_response.is_err) ) ) { 
+    if ( *errbuf == '\0' ) { //  generic error message
+      sprintf(errbuf, " { \"%s\" : \"ERROR\"  } ");
+    }
     evbuffer_add_printf(reply, "%s", errbuf); 
     evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);
   }
