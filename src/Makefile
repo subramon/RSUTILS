@@ -8,8 +8,8 @@ INCDIR=../inc/
 MYSO = librsutils.so
 
 all : ${MYSO}  ut_task_cpu_time \
-	../lua/csv_meta.lua  \
-	../lua/csv_spec.lua   \
+	../lua/csv_meta_t.lua  \
+	../lua/csv_spec_t.lua   \
 	../lua/qtypes_def.lua  \
 	../lua/web_info.lua  \
 
@@ -330,19 +330,19 @@ clean :
 	cat _xxx | sed s'/lua_State/void/'g > ../lua/web_info.lua
 	rm _xxx
 
-../lua/csv_meta.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
-	echo " return [[ " > ../lua/csv_meta.lua 
+../lua/csv_meta_t.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
+	echo " return [[ " > ../lua/csv_meta_t.lua 
 	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
-		${RSUTILS_SRC_ROOT}/inc/csv_meta.h \
-		>> ../lua/csv_meta.lua 
-	echo " ]] " >> ../lua/csv_meta.lua 
+		${RSUTILS_SRC_ROOT}/inc/csv_meta_t.h \
+		>> ../lua/csv_meta_t.lua 
+	echo " ]] " >> ../lua/csv_meta_t.lua 
 
-../lua/csv_spec.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
-	echo " return [[ " > ../lua/csv_spec.lua 
+../lua/csv_spec_t.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
+	echo " return [[ " > ../lua/csv_spec_t.lua 
 	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
-		${RSUTILS_SRC_ROOT}/inc/csv_spec.h \
-		>> ../lua/csv_spec.lua 
-	echo " ]] " >> ../lua/csv_spec.lua 
+		${RSUTILS_SRC_ROOT}/inc/csv_spec_t.h \
+		>> ../lua/csv_spec_t.lua 
+	echo " ]] " >> ../lua/csv_spec_t.lua 
 
 ../lua/qtypes_def.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
 	echo " return [[ " > ../lua/qtypes_def.lua 

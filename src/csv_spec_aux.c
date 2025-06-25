@@ -1,7 +1,7 @@
 #include "q_incs.h"
 #include "qtypes.h"
 #include "free_2d_array.h"
-#include "csv_spec.h"
+#include "csv_spec_t.h"
 #include "csv_spec_aux.h"
 
 void

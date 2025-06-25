@@ -2,8 +2,12 @@ local cutils       = require 'libcutils'
 local ffi          = require 'ffi'
 local stringify    = require 'RSUTILS/lua/stringify'
 local tbl_to_C_2d  = require 'RSUTILS/lua/tbl_to_C_2d'
-local x            = require 'RSUTILS/lua/qtypes_def';     ffi.cdef(x)
-local x            = require 'RSUTILS/lua/csv_meta';       ffi.cdef(x)
+local x            = require 'RSUTILS/lua/qtypes_def';     
+local status = pcall(ffi.cdef, x); 
+if not status then print("qtypes_def already cdef'd") end 
+local x            = require 'RSUTILS/lua/csv_meta_t';    
+local status = pcall(ffi.cdef, x); 
+if not status then print("csv_meta_t already cdef'd") end 
 
 -- this function is for call from load_configs() to work properly 
 local function alt_read_csv_meta(

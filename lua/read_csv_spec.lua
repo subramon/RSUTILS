@@ -1,7 +1,9 @@
 local ffi = require 'ffi'
 local tbl_to_C_2d = require 'RSUTILS/lua/tbl_to_C_2d'
 local stringify   = require 'RSUTILS/lua/stringify'
-local x           = require 'RSUTILS/lua/csv_spec'; ffi.cdef(x)
+local x           = require 'RSUTILS/lua/csv_spec_t'; 
+local status = pcall(ffi.cdef, x); 
+if not status then print("csv_spec_t already cdef'd") end 
 
 -- lS is the spec in Lua
 -- cS is the spec in C 
