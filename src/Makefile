@@ -262,6 +262,7 @@ SRCS += queue_helpers.c
 SRCS += rand_file_name.c 
 SRCS += rdtsc.c 
 SRCS += read_csv.c
+SRCS += read_to_eoln.c
 SRCS += rmtree.c 
 SRCS += rs_mmap.c 
 SRCS += rs_strcat.c 
