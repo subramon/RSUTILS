@@ -3,6 +3,7 @@
 #include <time.h>
 #include "q_macros.h"
 #include "qtypes.h"
+#include "I4_to_TM1.h"
 
 int 
 I4_to_TM1(

@@ -215,8 +215,11 @@ GEN_INC_FILES = \
 	../inc/trim.h  \
 #--------
 
+lookup8.o : QCFLAGS += -Wno-implicit-fallthrough # not my code :-(
+
 .c.o :
 	$(CC) -c -o $@ $< $(QCFLAGS)  $(INCS)
+
 
 spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
