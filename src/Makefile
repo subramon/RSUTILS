@@ -280,6 +280,7 @@ SRCS += stretch.c
 SRCS += strnstr.c  
 SRCS += swap_bytes.c  
 SRCS += task_cpu_time.c
+SRCS += proc_info.c
 SRCS += tm2time.c 
 SRCS += trim.c 
 SRCS += txt_to_BL.c 
