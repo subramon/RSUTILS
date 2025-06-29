@@ -1,7 +1,6 @@
--- TODO INDRA  discuss  conditional concatenation
 -- When assertx is used it concats all the args except the condition
--- assertx only conditionally creats the concat string so we dont have to pay
--- the cost always
+-- assertx only conditionally creats the concat string so we dont 
+-- have to pay the cost always
 local assertx = function(a, ...)
   if a then return a, ... end
   if ... ~= nil  then

@@ -39,8 +39,14 @@ read_csv(
   char bslash = '\\';
   bool is_load_j, has_nulls_j;
   char *X = NULL; size_t nX = 0;
-#define BUFSZ 511 // Good enough for largest cell TODO P4 make configurable
+  int bufsz = 511;  // default 
   char *buf = NULL;
+  if ( widths != NULL ) {
+    for ( uint32_t i = 0; i < ncols; i++ ) { 
+      if ( bufsz < 2*widths[i] ) { bufsz = 2*widths[i]; }
+    }
+  }
+
 
   // START: Check input arguments 
   // Provide either infile or in_X, in_nX but not both 
