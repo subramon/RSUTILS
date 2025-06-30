@@ -108,14 +108,14 @@ read_csv(
     if ( !found_eoln ){ go_BYE(-1); }
   }
   // allocate buffer for a single cell value
-  buf = malloc(BUFSZ+1);
+  buf = malloc(bufsz+1);
   return_if_malloc_failed(buf);
-  memset(buf, 0, BUFSZ+1); 
+  memset(buf, 0, bufsz+1); 
   for ( uint32_t i = 0; i < nrows; i++ ) {
     for ( uint32_t j = 0; j < ncols; j++ ) {
       if ( xidx >= nX ) { go_BYE(-1); }
       char c = X[xidx];
-      memset(buf, 0, BUFSZ+1); //  TODO P3 Delete once tested
+      memset(buf, 0, bufsz+1); //  TODO P3 Delete once tested
       char terminator; 
       if ( j == (ncols-1) ) { 
         terminator = rec_sep;
@@ -129,7 +129,7 @@ read_csv(
         goto CELL_COMPLETE;
       }
       if ( c == fld_delim ) { 
-        for ( uint32_t k = 0; k < BUFSZ; k++ ) { 
+        for ( uint32_t k = 0; k < bufsz; k++ ) { 
           xidx++; 
           if ( xidx >= nX ) { go_BYE(-1); }
           c = X[xidx];
@@ -160,7 +160,7 @@ read_csv(
       }
       else {
         buf[0] = c;
-        for ( uint32_t k = 1; k < BUFSZ; k++ ) { 
+        for ( uint32_t k = 1; k < bufsz; k++ ) { 
           xidx++;
           if ( xidx >= nX ) { go_BYE(-1); }
           c = X[xidx];
