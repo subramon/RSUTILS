@@ -3,19 +3,27 @@
 
 -- local simdjson = require 'lua-simdjson'
 local JSON = require 'RSUTILS/lua/JSON'
+local is_in = require 'RSUTILS/lua/is_in'
 
 -- Given an array "data"
--- each 
---   key is a string
---   value is an array
+-- where each element is a table of the form { x = y, .... }
 -- create an HTML representation
 function df_tbl_to_html(data)
   assert(type(data) == "table")
+  local T = {} -- output 
   assert(#data > 0)
+  local K = {} -- names of columns in HTML table 
   for k, v in ipairs(data) do 
     assert(type(v) == "table")
+    for k2, v2 in pairs(v) do
+      if ( not is_in(k2, K) ) then
+        K[#K+1] = k2
+      end
+    end
   end
-  local html = [[
+  assert(#K > 0)
+  -- print preamble 
+  T[#T+1] = [[
   <!DOCTYPE html>
 <html>
 <body>
@@ -25,38 +33,38 @@ function df_tbl_to_html(data)
   border: 1px solid black;
 }
 </style>
+<body>
+<table>
 ]]
-  html = html .. "<table>"
-  html = html .. "<body>"
-
-  -- Assume the data is a table of tables (an array of objects in JSON)
-  -- Create the table header (<th>) using the keys from the first row
-  if data and data[1] and type(data[1]) == "table" then
-    html = html .. "<thead><tr>"
-    for key, _ in pairs(data[1]) do
-      html = html .. "<th>" .. tostring(key) .. "</th>"
-    end
-    html = html .. "</tr></thead>"
-
-    -- Create the table body (<tbody>) with rows (<tr>) and data cells (<td>)
-    html = html .. "<tbody>"
-    for _, row_data in ipairs(data) do
-      html = html .. "<tr>"
-      for key, value in pairs(row_data) do
-        html = html .. "<td>" .. tostring(value) .. "</td>"
-      end
-      html = html .. "</tr>"
-    end
-    html = html .. "</tbody>"
-  else
-    -- Handle cases where the data is not a table of tables or is empty
-    html = html .. "<tr><td>No data available or invalid format.</td></tr>"
+  -- print header line
+  T[#T+1] = "<thead><tr> "
+  for _, k in ipairs(K) do 
+    T[#T+1] = "<td> "
+    T[#T+1] = k
+    T[#T+1] = "</td> "
   end
+  T[#T+1] = "</tr></thead>"
 
-  html = html .. "</table>"
-  html = html .. "</body>"
-  html = html .. "</html>"
-  return html
+  -- Create the table body (<tbody>) with rows (<tr>) and data cells (<td>)
+  T[#T+1] = "<tbody>"
+  for k, v in pairs(data) do 
+    T[#T+1] = "<tr>"
+    for k2, v2 in pairs(K) do 
+      T[#T+1] = "<td>"
+      if ( v[v2] ) then 
+        T[#T+1] = tostring(v[v2])
+      else
+        T[#T+1] = " -- "
+      end
+      T[#T+1] = "</td>"
+    end
+    T[#T+1] = "</tr>"
+  end
+  T[#T+1] = "</tbody>"
+  -- footer
+  T[#T+1] = "</table> </body></html>"
+
+  return table.concat(T, "")
 end
 
 local is_test = false
