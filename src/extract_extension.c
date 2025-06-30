@@ -4,9 +4,10 @@
 #include "q_macros.h"
 #include "extract_extension.h"
 
-char *
+int 
 extract_extension(
-    const char * const X
+    const char * const X,
+    char **ptr_ext
     )
 {
   int status = 0;
@@ -21,8 +22,10 @@ extract_extension(
   len -= dotpos; 
   Y = malloc(len); memset(Y, 0, len);
   strcpy(Y, X+dotpos+1);
+
+  *ptr_ext = Y;
 BYE:
-  if ( status != 0 ) { return NULL; } else { return Y; }
+  return status;
 }
 #undef TEST
 #ifdef TEST
@@ -31,14 +34,15 @@ main()
 {
   int status = 0;
   char *X = "abc.txt";
-  char *Y = extract_extension(X);
+  char *Y = NULL;
+  status = extract_extension(X, &Y);
   if ( strcmp(Y, "txt") != 0 ) { go_BYE(-1); }
   free(Y);
   X = "abctxt";
-  Y = extract_extension(X);
+  status = extract_extension(X, &Y); cBYE(status);
   if ( Y != NULL ) { go_BYE(-1); }
   X = ".txt";
-  Y = extract_extension(X);
+  status = extract_extension(X, &Y); cBYE(status);
   if ( Y != NULL ) { go_BYE(-1); }
   printf("SUCCESS\n");
 BYE:

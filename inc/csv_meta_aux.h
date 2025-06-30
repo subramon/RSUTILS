@@ -3,7 +3,8 @@ extern void
 csv_meta_free(
     csv_meta_t  *ptr_C
     );
-extern char *
+extern int 
 csv_meta_to_json(
-    csv_meta_t  *ptr_M
+    csv_meta_t  *ptr_M,
+    char **ptr_str
     );

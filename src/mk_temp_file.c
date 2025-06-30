@@ -1,10 +1,11 @@
 #include "q_incs.h"
 #include "mk_temp_file.h"
 
-char *
+int
 mk_temp_file(
     const char * in_tmpl,
-    const char * const suffix
+    const char * const suffix,
+    char **ptr_str
     )
 {
   int status = 0;
@@ -34,8 +35,9 @@ mk_temp_file(
   }
   if ( fd < 0 ) { go_BYE(-1); }
   close(fd); 
+  *ptr_str = template;
 BYE:
-  if ( status < 0 ) { return NULL; } else { return template; }
+  return status;
 }
 #undef TEST 
 #ifdef TEST 

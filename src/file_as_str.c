@@ -2,13 +2,15 @@
 #include "rs_mmap.h"
 #include "file_as_str.h"
 //START_FUNC_DECL
-char *
+int
 file_as_str(
-    const char * const infile
+    const char * const infile,
+    char **ptr_str
     )
 //STOP_FUNC_DECL
 {
   int status = 0;
+  *ptr_str = NULL;
   char *X = NULL; size_t nX = 0;
   char * Y = NULL;
   if ( infile == NULL ) { go_BYE(-1); }
@@ -17,7 +19,8 @@ file_as_str(
   return_if_malloc_failed(Y);
   memcpy(Y, X, nX);
   Y[nX] = '\0';
+  *ptr_str = Y;
 BYE:
   if ( X != NULL ) { munmap(X, nX); } 
-  if ( status < 0 ) { WHEREAMI; return NULL; } else { return Y; }
+  return status;
 }

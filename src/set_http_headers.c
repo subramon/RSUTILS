@@ -94,7 +94,7 @@ prep_for_file_return(
   }
   ptr_web_response->is_set = true; 
   ptr_web_response->file_name = file_name; // freed by caller
-  extension = extract_extension(file_name); 
+  status = extract_extension(file_name, &extension); cBYE(status);
   status = set_http_headers(extension, 
       &(ptr_web_response->num_headers),
       &(ptr_web_response->header_key),

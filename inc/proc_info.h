@@ -11,9 +11,10 @@ typedef struct _proc_info_t {
   long rss; // 24
 } proc_info_t;
 
-extern char *
+extern int
 proc_info_as_json(
-    proc_info_t *ptr_info
+    proc_info_t *ptr_info,
+    char **ptr_json
     );
 extern int
 get_proc_info_for_tid(

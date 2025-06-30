@@ -18,12 +18,14 @@ csv_meta_free(
   free_if_non_null(ptr_M->is_load);
 }
 
-char *
+int
 csv_meta_to_json(
-    csv_meta_t  *ptr_M
+    csv_meta_t  *ptr_M,
+    char **ptr_buf
     )
 {
   int status = 0;
+  *ptr_buf = NULL;
   char *buf = NULL; uint32_t bufsz = 1024; uint32_t buflen = 0;
   buf = malloc(bufsz); bzero(buf, bufsz); 
   const char *preamble = 
@@ -106,8 +108,9 @@ csv_meta_to_json(
   const char *postamble = "</table> </body></html>";
   status = cat_to_buf(&buf, &bufsz,  &buflen, postamble, 0); cBYE(status);
 
+  *ptr_buf = buf;
 BYE:
-  if ( status != 0 ) { return NULL; } else { return buf; }
+  return status;
 }
 
 #undef TEST
@@ -139,7 +142,7 @@ main()
     M.has_nulls[i] = i % 2 ; // dangerous but okay for testing 
     M.is_load[i] = (i+1) % 2 ; // dangerous but okay for testing 
   }
-  char *opbuf = csv_meta_as_json(&M);
+  status = csv_meta_as_json(&M, &opbuf); cbYE(status);
   printf("%s\n", opbuf);
 
   csv_meta_free(&M); 

@@ -25,12 +25,14 @@
 // Parse /proc/tid/task/tid/stat to find the execution time of the thread
 // File format is the same as that of /proc/[pid]/stat
 // https://man7.org/linux/man-pages/man5/proc.5.html
-char *
+int
 proc_info_as_json(
-    proc_info_t *ptr_info
+    proc_info_t *ptr_info,
+    char **ptr_json
     )
 {
   int status = 0;
+  *ptr_json = NULL;
   char tmp[64];
   char *buf = NULL; uint32_t bufsz = 1024; uint32_t buflen = 0;
   buf = malloc(bufsz); bzero(buf, bufsz);
@@ -56,8 +58,9 @@ proc_info_as_json(
   sprintf(tmp, ", \"rss\" : %ld ", ptr_info->rss); 
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
+  *ptr_json = buf;
 BYE:
-  if ( status != 0 ) { return NULL; } else { return buf; }
+  return status;
 }
 
 int 

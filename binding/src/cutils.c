@@ -80,7 +80,8 @@ static int l_cutils_exec(
   }
   pclose(ifp);  ifp = NULL; 
   close(fd); fd = -1;
-  char *str = file_as_str(temp_file_name); 
+  char *str = NULL;
+  status = file_as_str(temp_file_name, &str); cBYE(status);
   if ( temp_file_name != NULL ) { unlink(temp_file_name); } 
   free_if_non_null(temp_file_name); 
   lua_pushstring(L, str); 
@@ -380,12 +381,13 @@ static int l_cutils_mk_temp_file_name(
   int status = 0;
   const char *prefix = NULL;
   const char *suffix = NULL;
+  char * temp_file_name = NULL;
   int ntop = lua_gettop(L);
   if ( ( ntop == 0 ) || ( ntop > 2 ) ) { go_BYE(-1); } 
   if ( ntop >= 1 ) { prefix = luaL_checkstring(L, 1); }
   if ( ntop >= 2 ) { suffix = luaL_checkstring(L, 2); }
 
-  char * temp_file_name = mk_temp_file_name(prefix, suffix);
+  status = mk_temp_file_name(prefix, suffix, &temp_file_name); cBYE(status);
   if ( temp_file_name == NULL ) { go_BYE(-1); } 
   lua_pushstring(L, temp_file_name);
   free_if_non_null(temp_file_name);
@@ -402,6 +404,7 @@ static int l_cutils_mk_temp_file(
 {
   int status = 0;
   const char *suffix = NULL;
+  char * temp_file_name = NULL;
   int ntop = lua_gettop(L);
   if ( ( ntop < 1 ) || ( ntop > 2 ) ) { go_BYE(-1); } 
   const char *const template = luaL_checkstring(L, 1);
@@ -410,7 +413,7 @@ static int l_cutils_mk_temp_file(
     suffix =  luaL_checkstring(L, 2);
   }
 
-  char * temp_file_name = mk_temp_file(template, suffix);
+  status = mk_temp_file(template, suffix, &temp_file_name); cBYE(status);
   if ( temp_file_name == NULL ) { go_BYE(-1); } 
   lua_pushstring(L, temp_file_name);
   free_if_non_null(temp_file_name);
@@ -621,7 +624,8 @@ static int l_cutils_file_as_str(
   int status = 0;
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *const file_name = luaL_checkstring(L, 1);
-  char *x  =  file_as_str(file_name);
+  char *x  =  NULL;
+  status = file_as_str(file_name, &x); cBYE(status);
   if ( x == NULL ) { go_BYE(-1); }
   lua_pushstring(L, x); 
   free(x); // Lua has taken control. TODO P0 Thinkl

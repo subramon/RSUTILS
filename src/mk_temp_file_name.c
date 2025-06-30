@@ -8,14 +8,16 @@
 
 // Created because I *suspected* some strange results with mkstemp
 
-char *
+int
 mk_temp_file_name(
     const char * const prefix,
-    const char * const suffix
+    const char * const suffix,
+    char **ptr_name
     )
 {
   int status = 0;
   size_t len = 60;
+  *ptr_name = NULL;
   if ( prefix != NULL ) { len += strlen(prefix); }
   if ( suffix != NULL ) { len += strlen(suffix); }
   len = multiple_n(len, 8);
@@ -40,8 +42,9 @@ mk_temp_file_name(
         RDTSC(), syscall(SYS_gettid), suffix);
     }
   }
+  *ptr_name = x; 
 BYE:
-  if ( status != 0 ) { return NULL; } else { return x; } 
+  return status; 
 }
 
 #undef TEST
