@@ -19,7 +19,7 @@ csv_meta_free(
 }
 
 char *
-csv_meta_as_json(
+csv_meta_to_json(
     csv_meta_t  *ptr_M
     )
 {
@@ -110,7 +110,7 @@ BYE:
   if ( status != 0 ) { return NULL; } else { return buf; }
 }
 
-#define TEST
+#undef TEST
 #ifdef TEST
 int
 main()
