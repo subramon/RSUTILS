@@ -18,7 +18,7 @@ proc_info_as_json(
     );
 extern int
 get_proc_info_for_tid(
-    pid_t tid,
+    long tid,
     proc_info_t *ptr_info
     ) ;
 #endif //  _PROC_INFO_H

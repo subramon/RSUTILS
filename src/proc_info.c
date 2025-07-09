@@ -65,7 +65,7 @@ BYE:
 
 int 
 get_proc_info_for_tid(
-    pid_t tid,
+    long tid,
     proc_info_t *ptr_info
     ) 
 {
@@ -73,7 +73,7 @@ get_proc_info_for_tid(
   int status = 0;
   FILE *fp = NULL;
   char fname[63+1]; // hard coded 
-  snprintf(fname, BUFLEN, "/proc/%d/task/%d/stat", tid, tid);
+  snprintf(fname, BUFLEN, "/proc/%ld/task/%ld/stat", tid, tid);
   fp = fopen(fname, "r");
   return_if_fopen_failed(fp, fname, "r");
 
