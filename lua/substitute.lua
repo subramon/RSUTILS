@@ -4,7 +4,7 @@ local function substitute(infile, instr, outstr, outfile)
   assert(type(instr) == "string")
   assert(type(outfile) == "string")
   assert(type(outstr) == "string")
-  assert(cutils.isfile(infile)
+  assert(cutils.isfile(infile))
   assert(infile ~= outfile)
   assert(#instr > 0)
   --======================================
