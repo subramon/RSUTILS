@@ -58,6 +58,7 @@ proc_info_as_json(
   sprintf(tmp, ", \"rss\" : %ld ", ptr_info->rss); 
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
+  status = cat_to_buf(&buf, &bufsz, &buflen, "}", 1); cBYE(status);
   *ptr_json = buf;
 BYE:
   return status;
