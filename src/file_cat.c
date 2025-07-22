@@ -37,4 +37,5 @@ BYE:
   free_if_non_null(xsrc);
   mcr_rs_munmap(X, nX); 
   fclose_if_non_null(dfp);
+  return status;
 }

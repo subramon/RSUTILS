@@ -21,6 +21,7 @@
  *   * memory use) measured in bytes, or zero if the value cannot be
  *    * determined on this OS.
  *     */
+/*
 static size_t 
 getPeakRSS(void) 
 {
@@ -28,7 +29,7 @@ getPeakRSS(void)
   getrusage(RUSAGE_SELF, &rusage);
   return (size_t)(rusage.ru_maxrss * 1024L);
 }
-
+*/
 /**
  *  * Returns the current resident set size (physical memory use) measured
  *   * in bytes, or zero if the value cannot be determined on this OS.

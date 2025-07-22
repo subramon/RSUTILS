@@ -57,7 +57,7 @@ typedef struct _web_info_t {
   proc_req_fn_t proc_req_fn;
   sess_clean_fn_t sess_clean_fn;
 
-  int port;
+  uint16_t port;
   uint32_t outbuf_size; // 
   uint32_t errbuf_size; // 
   int n_threads;
