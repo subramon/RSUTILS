@@ -12,6 +12,10 @@ all : ${MYSO}  ut_task_cpu_time \
 	../lua/csv_spec_t.lua   \
 	../lua/qtypes_def.lua  \
 	../lua/web_info.lua  \
+	webserver.o \
+	hit_endp.o \
+	setup_curl.o \
+	execute_curl.o \
 
 
 gen_inc_files : \
