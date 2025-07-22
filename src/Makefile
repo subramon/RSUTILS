@@ -16,6 +16,7 @@ all : ${MYSO}  ut_task_cpu_time \
 	hit_endp.o \
 	setup_curl.o \
 	execute_curl.o \
+	cli_hit_endp \
 
 
 gen_inc_files : \
@@ -358,6 +359,20 @@ clean :
 		${RSUTILS_SRC_ROOT}/inc/qtypes.h \
 		>> ../lua/qtypes_def.lua 
 	echo " ]] " >> ../lua/qtypes_def.lua 
+
+cli_hit_endp :  \
+	cli_hit_endp.o \
+	hit_endp.o \
+	isfile.o \
+	setup_curl.o  \
+	execute_curl.o  
+	gcc \
+	cli_hit_endp.o \
+	hit_endp.o \
+	isfile.o \
+	setup_curl.o  \
+	execute_curl.o  \
+		-o cli_hit_endp /usr/local/lib/libcurl.so
 
 # do not use following unless you absolutely need to
 # else, it breaks the build from UTILS/build/
