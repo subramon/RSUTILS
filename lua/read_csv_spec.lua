@@ -10,6 +10,7 @@ if not status then print("csv_spec_t already cdef'd") end
 local function read_csv_spec(lS, cS)
   if ( not M ) then M = glC end
   cS = ffi.cast("csv_spec_t *", cS)
+  ffi.fill(cS, ffi.sizeof("csv_spec_t"), 0)
   local T, nT = tbl_to_C_2d(lS.break_cols)
   cS[0].break_cols = T
   cS[0].nB = nT

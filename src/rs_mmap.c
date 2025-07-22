@@ -37,6 +37,7 @@ rs_mmap(
   status = fstat(fd, &filestat); cBYE(status);
   len = filestat.st_size;
   /* It is okay for file size to be 0 */
+  *ptr_file_size = -1;
   if ( len == 0 ) { 
     *ptr_mmaped_file = NULL;
     *ptr_file_size = 0;

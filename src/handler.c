@@ -310,7 +310,7 @@ handler(
   // Can send back contents of a file or outbuf but not both 
   if ( web_response.is_set ) {
     if ( web_response.file_name != NULL ) {
-      if ( web_response.sz_outbuf == 0 ) { go_BYE(-1); } 
+      if ( web_response.sz_outbuf != 0 ) { go_BYE(-1); } 
       // Running into trouble with add_file 
       // open file for reading 
       // int wfd = open(web_response.file_name, O_RDONLY); 
@@ -339,7 +339,7 @@ BYE:
   if ( ( status != 0 ) || 
       ( ( web_response.is_set ) && ( web_response.is_err) ) ) { 
     if ( *errbuf == '\0' ) { //  generic error message
-      sprintf(errbuf, " { \"%s\" : \"ERROR\"  } ");
+      sprintf(errbuf, " { \"%s\" : \"Error\"  } ", api);
     }
     evbuffer_add_printf(reply, "%s", errbuf); 
     evhttp_send_reply(req, HTTP_BADREQUEST, "ERROR", reply);

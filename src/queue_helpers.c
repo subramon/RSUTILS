@@ -1,4 +1,5 @@
 #include "q_incs.h"
+#include <stdatomic.h>
 #include "get_time_usec.h"
 #include "queue_helpers.h"
 int
@@ -78,7 +79,7 @@ wait_for_spot(
 
 bool
 is_all_done(
-    int *ptr_prod_done, // 1 if producer is done, 0 otherwise
+    _Atomic int *ptr_prod_done, // 1 if producer is done, 0 otherwise
     uint64_t *ptr_num_produced,
     uint64_t *ptr_num_consumed
     )
@@ -143,7 +144,7 @@ get_free_spot(
 
 int
 acquire_lock(
-    int *ptr_lock,
+    _Atomic int *ptr_lock,
     int expected,
     int desired,
     int max_wait_msec,
@@ -179,12 +180,125 @@ BYE:
 }
 int
 release_lock(
-    int *ptr_lock,
+    _Atomic int *ptr_lock,
     int expected,
     int desired
     )
 {
   int status = 0;
+  int l_expected = expected; // experimental
+  int l_desired  = desired; // experimental
+  bool rslt = __atomic_compare_exchange(
+        ptr_lock, &l_expected, &l_desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { go_BYE(-1); }
+BYE:
+  return status;
+}
+int
+acquire_lock64(
+    _Atomic uint64_t *ptr_lock,
+    uint64_t expected,
+    uint64_t desired,
+    int max_wait_msec,
+    bool *ptr_lock_got
+    )
+{
+  int status = 0;
+  int t_sleep = 0; 
+  uint64_t l_expected = expected; // experimental
+  uint64_t l_desired  = desired; // experimental
+
+  *ptr_lock_got = false;
+  for ( ; ; ) { 
+    bool rslt = __atomic_compare_exchange(
+        ptr_lock, &l_expected, &l_desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( rslt ) { 
+      *ptr_lock_got = true;
+      break;
+    }
+    else { // wait a bit and try again
+      uint64_t t1 = get_time_usec();
+      struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 1000000 };
+      nanosleep(&tmspec, NULL);
+      uint64_t t2 = get_time_usec();
+      t_sleep += (t2-t1) / 1000; 
+      if ( ( max_wait_msec > 0 ) && ( t_sleep > max_wait_msec ) ) {
+        *ptr_lock_got = false;
+        break;
+      }
+    }
+  }
+BYE:
+  return status;
+}
+int
+release_lock64(
+    _Atomic uint64_t *ptr_lock,
+    uint64_t expected,
+    uint64_t desired
+    )
+{
+  int status = 0;
+  uint64_t l_expected = expected; // experimental
+  uint64_t l_desired  = desired; // experimental
+  uint64_t l_lock;
+  __atomic_load(ptr_lock, &l_lock, 0);
+  bool rslt = __atomic_compare_exchange(
+        ptr_lock, &l_expected, &l_desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+  if ( !rslt ) { 
+    printf("l_lock = %" PRIu64 "\n", l_lock);
+    printf("desired = %" PRIu64 "\n", desired);
+    printf("expected = %" PRIu64 "\n", expected);
+    printf("l_desired = %" PRIu64 "\n", l_desired);
+    printf("l_expected = %" PRIu64 "\n", l_expected);
+    go_BYE(-1); 
+  }
+BYE:
+  return status;
+}
+int
+lock64(
+    _Atomic uint64_t *ptr_lock
+    )
+{
+  int status = 0;
+  uint64_t l_lock, desired, expected;
+  for ( ; ; ) { 
+    __atomic_load(ptr_lock, &l_lock, 0);
+    expected = l_lock;
+    if ( (l_lock & 0x1) == 1 ) { // odd number => locked
+      struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 1000000 };
+      nanosleep(&tmspec, NULL);
+      continue;
+    }
+    // even number => free
+    desired = expected + 1;
+    bool rslt = __atomic_compare_exchange(
+        ptr_lock, &expected, &desired, false, 
+        __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
+    if ( rslt ) { break; }
+    struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 1000000 };
+    nanosleep(&tmspec, NULL);
+  }
+BYE:
+  return status;
+}
+
+int
+unlock64(
+    _Atomic uint64_t *ptr_lock
+    )
+{
+  int status = 0;
+  uint64_t l_lock, desired, expected;
+
+  __atomic_load(ptr_lock, &l_lock, 0);
+  if ( (l_lock & 0x1) != 1 ) { go_BYE(-1); }
+  expected = l_lock;
+  desired = expected + 1; 
   bool rslt = __atomic_compare_exchange(
         ptr_lock, &expected, &desired, false, 
         __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);

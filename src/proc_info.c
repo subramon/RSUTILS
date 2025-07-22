@@ -59,6 +59,7 @@ proc_info_as_json(
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
   status = cat_to_buf(&buf, &bufsz, &buflen, "}", 1); cBYE(status);
+
   *ptr_json = buf;
 BYE:
   return status;

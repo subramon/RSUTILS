@@ -5,7 +5,8 @@
 int
 file_as_str(
     const char * const infile,
-    char **ptr_str
+    char **ptr_str,
+    size_t *ptr_len
     )
 //STOP_FUNC_DECL
 {
@@ -18,8 +19,9 @@ file_as_str(
   Y = malloc(nX+1);
   return_if_malloc_failed(Y);
   memcpy(Y, X, nX);
-  Y[nX] = '\0';
+  *ptr_len = nX;
   *ptr_str = Y;
+  Y[nX] = '\0';
 BYE:
   if ( X != NULL ) { munmap(X, nX); } 
   return status;

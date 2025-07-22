@@ -21,7 +21,7 @@ wait_for_spot(
     );
 extern bool
 is_all_done(
-    int *ptr_prod_done, // 1 if producer is done, 0 otherwise
+    _Atomic int *ptr_prod_done, // 1 if producer is done, 0 otherwise
     uint64_t *ptr_num_produced,
     uint64_t *ptr_num_consumed
     );
@@ -36,7 +36,7 @@ get_free_spot(
     );
 extern int 
 acquire_lock(
-    int *ptr_lock,
+    _Atomic int *ptr_lock,
     int expected,
     int desired,
     int max_wait_msec,
@@ -44,7 +44,29 @@ acquire_lock(
     );
 extern int
 release_lock(
-    int *ptr_lock,
+    _Atomic int *ptr_lock,
     int expected,
     int desired
+    );
+extern int
+acquire_lock64(
+    _Atomic uint64_t *ptr_lock,
+    uint64_t expected,
+    uint64_t desired,
+    int max_wait_msec,
+    bool *ptr_lock_got
+    );
+extern int
+release_lock64(
+    _Atomic uint64_t *ptr_lock,
+    uint64_t expected,
+    uint64_t desired
+    );
+extern int
+lock64(
+    _Atomic uint64_t *ptr_lock
+    );
+extern int
+unlock64(
+    _Atomic uint64_t *ptr_lock
     );
