@@ -2,6 +2,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "q_macros.h"
 //STOP_INCLUDES
 #include "rs_mmap.h"
@@ -9,16 +14,16 @@
 int
 rs_mmap(
 	const char *file_name,
-	char **ptr_mmaped_file,
+	char **ptr_mmapped_file,
 	size_t *ptr_file_size,
 	bool is_write
 	)
 //STOP_FUNC_DECL
 {
   int status = 0;
-  int fd;
+  int fd = -1;
   struct stat filestat;
-  size_t len;
+  size_t len = 0;
 #define MAX_LEN_DIR_NAME 255
 
   if ( is_write ) { 
@@ -34,24 +39,25 @@ rs_mmap(
     fprintf(stderr, "Currently in dir    [%s] \n", cwd); 
     go_BYE(-1); 
   }
+  // henceforth, fd >= 0
   status = fstat(fd, &filestat); cBYE(status);
   len = filestat.st_size;
   /* It is okay for file size to be 0 */
   *ptr_file_size = -1;
   if ( len == 0 ) { 
-    *ptr_mmaped_file = NULL;
+    *ptr_mmapped_file = NULL;
     *ptr_file_size = 0;
+    goto BYE;
+  }
+  //-----------------------------------------
+  if ( is_write ) { 
+    *ptr_mmapped_file = (void *)mmap(NULL, (size_t) len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
   }
   else {
-    if ( is_write ) { 
-      *ptr_mmaped_file = (void *)mmap(NULL, (size_t) len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-    }
-    else {
-      *ptr_mmaped_file = (void *)mmap(NULL, (size_t) len, PROT_READ, MAP_SHARED, fd, 0);
-    }
-    close(fd);
-    *ptr_file_size = filestat.st_size;
+    *ptr_mmapped_file = (void *)mmap(NULL, (size_t) len, PROT_READ, MAP_SHARED, fd, 0);
   }
- BYE:
+  *ptr_file_size = filestat.st_size;
+BYE:
+  if ( fd >= 0 ) { close(fd); fd = -1; }
   return(status);
 }
