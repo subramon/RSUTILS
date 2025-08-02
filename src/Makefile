@@ -17,6 +17,7 @@ all : ${MYSO}  ut_task_cpu_time \
 	setup_curl.o \
 	execute_curl.o \
 	cli_hit_endp \
+	cli_asc_to_bin \
 
 
 gen_inc_files : \
@@ -329,6 +330,8 @@ clean :
 	rm -f *.so
 	rm -f *.o
 	rm -f  ${MYSO}
+	rm -f cli_asc_to_bin 
+	rm -f cli_hit_endp 
 
 
 ../lua/web_info.lua : ${RSUTILS_SRC_ROOT}/inc/web_struct.h
@@ -359,6 +362,9 @@ clean :
 		${RSUTILS_SRC_ROOT}/inc/qtypes.h \
 		>> ../lua/qtypes_def.lua 
 	echo " ]] " >> ../lua/qtypes_def.lua 
+
+cli_asc_to_bin :  cli_asc_to_bin.c
+	gcc ${QCFLAGS} ${INCS} cli_asc_to_bin.c -o cli_asc_to_bin librsutils.so
 
 cli_hit_endp :  \
 	cli_hit_endp.o \
