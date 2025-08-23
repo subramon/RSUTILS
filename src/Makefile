@@ -232,6 +232,7 @@ spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 SRCS := addr_as_hex_string.c 
 SRCS += BL_to_txt.c 
 SRCS += bf16tofp32.c
+SRCS += bin_search_UI4.c
 SRCS += cat_to_buf.c 
 SRCS += csv_meta_aux.c 
 SRCS += csv_spec_aux.c 
