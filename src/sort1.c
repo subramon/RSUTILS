@@ -32,6 +32,20 @@ fn_sortI2_asc(const void *p1, const void *p2)
   }
 }
 int
+fn_sortUI4_asc(const void *p1, const void *p2)
+{
+  const uint32_t  *u1 = (const uint32_t *)p1;
+  const uint32_t  *u2 = (const uint32_t *)p2;
+  uint32_t v1 = *u1;
+  uint32_t v2 = *u2;
+  if ( v1 < v2 ) { 
+    return -1;
+  }
+  else {
+    return 1;
+  }
+}
+int
 fn_sortI4_asc(const void *p1, const void *p2)
 {
   const int32_t  *u1 = (const int32_t *)p1;

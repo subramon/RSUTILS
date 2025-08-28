@@ -1,6 +1,7 @@
 extern int fn_sortI1_asc(const void *p1, const void *p2); 
 extern int fn_sortI2_asc(const void *p1, const void *p2);
 extern int fn_sortI4_asc(const void *p1, const void *p2);
+extern int fn_sortUI4_asc(const void *p1, const void *p2);
 
 extern int fn_sortI8_asc(const void *p1, const void *p2);
 extern int fn_sortI8_dsc(const void *p1, const void *p2);
