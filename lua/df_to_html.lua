@@ -8,7 +8,7 @@ local is_in = require 'RSUTILS/lua/is_in'
 -- Given an array "data"
 -- where each element is a table of the form { x = y, .... }
 -- create an HTML representation
-function df_tbl_to_html(data)
+function df_tbl_to_html(data, title)
   assert(type(data) == "table")
   local T = {} -- output 
   assert(#data > 0)
@@ -22,10 +22,19 @@ function df_tbl_to_html(data)
     end
   end
   assert(#K > 0)
+  if ( not title ) then title = "TITLE NOT PROVIDED" end 
   -- print preamble 
   T[#T+1] = [[
   <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>
+  ]]
+  .. title ..
+  [[ </title>
+  <link rel="stylesheet" href="Static?styles.css">
+</head>
 <body>
   <center>
 <style>
@@ -33,6 +42,7 @@ function df_tbl_to_html(data)
   border: 1px solid black;
 }
 </style>
+<link rel="stylesheet" href="Static?styles.css">
 <body>
 <table>
 ]]
