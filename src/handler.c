@@ -290,6 +290,9 @@ handler(
     for ( int i = 0; i < web_info->n_threads; i++ ) { 
       event_base_loopbreak(web_info->bases[i]);
     }
+    free_if_non_null(outbuf);
+    free_if_non_null(errbuf);
+    free_if_non_null(decoded_uri);
     return;
   }
   // send the headers if any
