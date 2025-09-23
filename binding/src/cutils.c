@@ -42,6 +42,7 @@
 #include "str_as_file.h"
 #include "trim.h"
 #include "tm2time.h"
+#include "touch.h"
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 
 int luaopen_libcutils (lua_State *L);
@@ -116,6 +117,24 @@ BYE:
   lua_pushnumber(L, status);
   return 3; 
 }
+//----------------------------------------
+static int l_cutils_touch( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *file_name = luaL_checkstring(L, 1);
+  status = touch(file_name); cBYE(status);
+  lua_pusboolean(L, true);
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
+//----------------------------------------
 //----------------------------------------
 static int l_cutils_date_str_to_epoch( 
     lua_State *L
@@ -1125,6 +1144,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
+    { "touch",     l_cutils_touch },
     { "unlink",     l_cutils_unlink },
     { "trim",     l_cutils_trim },
     { "write",       l_cutils_write },
@@ -1174,6 +1194,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
+    { "touch",     l_cutils_touch },
     { "unlink",     l_cutils_unlink },
     { "trim",     l_cutils_trim },
     { "write",       l_cutils_write },
