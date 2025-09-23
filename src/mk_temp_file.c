@@ -39,7 +39,7 @@ mk_temp_file(
 BYE:
   return status;
 }
-#undef TEST 
+#undef  TEST 
 #ifdef TEST 
 // gcc -g mk_temp_file.c -I../inc/ isfile.c
 #include "isfile.h"
@@ -49,9 +49,11 @@ main()
   int status = 0;
   const char *template = "/tmp/_XXXXXX";
   const char *suffix = ".csv";
-  char *tempf = mk_temp_file(template, suffix);
+  char *tempf = NULL;
+  status = mk_temp_file(template, suffix, &tempf); cBYE(status);
   if ( !isfile(tempf) ) { go_BYE(-1); }
-  printf("SUCCESS\n");
+  printf("SUCCESS. Created %s \n", tempf);
+  unlink(tempf); 
 BYE:
   return status;
 }
