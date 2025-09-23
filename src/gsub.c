@@ -50,7 +50,7 @@ BYE:
   if ( status == 0 ) { return result; } else { return NULL; } 
 }
 
-#define TEST
+#undef TEST
 #ifdef TEST
 // Example usage
 int main() {
