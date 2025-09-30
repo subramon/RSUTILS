@@ -4,20 +4,25 @@
 #include "q_macros.h"
 
 // Function to replace all occurrences of b in a with c
-char* 
+int
 gsub(
-    const char* a, 
-    const char* b, 
-    const char* c
-    ) 
+    const char* a,
+    const char* b,
+    const char* c,
+    char **ptr_result
+    )
 {
-  int status = 0; 
-  if (!a || !b || !c) { go_BYE(-1); } 
+  int status = 0;
+  *ptr_result = NULL;
+  if (!a || !b || !c) { go_BYE(-1); }
   size_t len_a = strlen(a);
   size_t len_b = strlen(b);
   size_t len_c = strlen(c);
 
-  if (len_b == 0) return strdup(a); // avoid infinite loop
+  if ( len_b == 0 ) {
+    *ptr_result = strdup(a); // avoid infinite loop
+    goto BYE;
+  }
 
   // First pass: count occurrences of b in a
   size_t count = 0;
@@ -30,7 +35,7 @@ gsub(
   // Allocate memory for new string
   size_t new_len = len_a + count * (len_c - len_b) + 1;
   char* result = malloc(new_len);
-  if (!result) return NULL;
+  if (!result) { go_BYE(-1); }
 
   // Second pass: build the new string
   const char* src = a;
@@ -46,25 +51,31 @@ gsub(
   // Copy the remainder
   strcpy(dst, src);
 
+  *ptr_result = result;
 BYE:
-  if ( status == 0 ) { return result; } else { return NULL; } 
+  return status;
 }
 
 #undef TEST
 #ifdef TEST
 // Example usage
-int main() {
-    const char* a = "the cat sat on the catmat";
-    const char* b = "cat";
-    const char* c = "dog";
+int main(
+    void
+    )
+{
+  int status =  0;
+  const char* a = "the cat sat on the catmat";
+  const char* b = "cat";
+  const char* c = "dog";
+  char *replaced = NULL;
 
-    char* replaced = gsub(a, b, c);
-    if (replaced) {
-        printf("Result: %s\n", replaced);
-        free(replaced);
-    }
-
-    return 0;
+  status = gsub(a, b, c, &replaced);
+  if (replaced) {
+    printf("Result: %s\n", replaced);
+  }
+BYE:
+  free_if_non_null(replaced);
+  return status;
 }
 
 #endif

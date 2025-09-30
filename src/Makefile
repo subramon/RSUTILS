@@ -250,7 +250,6 @@ SRCS += get_body.c
 SRCS += get_time_usec.c 
 SRCS += get_file_size.c 
 SRCS += gsub.c 
-SRCS += touch.c 
 SRCS += is_valid_chars_for_num.c 
 SRCS += isfile.c 
 SRCS += isfile_in_dir.c 
