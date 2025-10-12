@@ -2,19 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include "q_macros.h"
+#include "gsub.h"
 
 // Function to replace all occurrences of b in a with c
 int
 gsub(
-    const char* a,
-    const char* b,
+    const char* a, 
+    const char* b, 
     const char* c,
     char **ptr_result
-    )
+    ) 
 {
-  int status = 0;
+  int status = 0; 
   *ptr_result = NULL;
-  if (!a || !b || !c) { go_BYE(-1); }
+  if (!a || !b || !c) { go_BYE(-1); } 
   size_t len_a = strlen(a);
   size_t len_b = strlen(b);
   size_t len_c = strlen(c);
@@ -51,7 +52,7 @@ gsub(
   // Copy the remainder
   strcpy(dst, src);
 
-  *ptr_result = result;
+  *ptr_result = result; 
 BYE:
   return status;
 }
@@ -61,7 +62,7 @@ BYE:
 // Example usage
 int main(
     void
-    )
+    ) 
 {
   int status =  0;
   const char* a = "the cat sat on the catmat";
