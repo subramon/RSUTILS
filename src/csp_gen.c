@@ -6,6 +6,7 @@
 #include "csp_info.h"
 
 #include "rs_mmap.h"
+#include "cat_to_buf.h"
 #include "csp_gen.h"
 int
 csp_gen(
@@ -25,6 +26,10 @@ csp_gen(
   for ( uint32_t i = 0; i <  ptr_csp_info->n; i++ ) { 
     switch ( ptr_csp_info->csp_frag[i].csp_src ) {
       case csp_static : 
+        status = cat_to_buf(&str, &sz, &len, 
+          ptr_csp_info->csp_frag[i].frag.static_str.str,
+          ptr_csp_info->csp_frag[i].frag.static_str.len);
+        cBYE(status);
         break;
       case csp_Lua_func : 
         break;
