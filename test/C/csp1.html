@@ -1,0 +1,1086 @@
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Data Control & Model Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root{
+      --bg: #0f172a;            /* slate-900 */
+      --panel: #111827;         /* gray-900 */
+      --subpanel: #0b1220;      /* deep blue-ish */
+      --muted: #94a3b8;         /* slate-400 */
+      --text: #e5e7eb;          /* gray-200 */
+      --accent: #38bdf8;        /* sky-400 */
+      --accent-2: #22d3ee;      /* cyan-400 */
+      --ok: #22c55e;            /* green-500 */
+      --warn: #f59e0b;          /* amber-500 */
+      --err: #ef4444;           /* red-500 */
+      --border: #1f2937;        /* gray-800 */
+      --chip: #1e293b;          /* slate-800 */
+      --tab: #0b1327;           /* dark-ish */
+      --tab-active: #172554;    /* indigo-950 */
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 30% -10%, #0b1220 0%, #0f172a 45%, #0b1220 100%);
+      color: var(--text);
+      font: 14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    .app {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 16px 24px;
+    }
+
+    .top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel) 0%, #0c1528 100%);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      position: relative;
+      overflow: clip;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent-2);
+      letter-spacing: .3px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: .2px;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--chip);
+      color: var(--text);
+      outline: none;
+    }
+    select:focus, input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(56,189,248,0.125); }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      appearance: none;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #0ea5e9, #0284c7);
+      color: white;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.05s ease, filter 0.15s ease;
+    }
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
+    button.secondary {
+      background: linear-gradient(180deg, #334155, #1f2937);
+      color: var(--text);
+    }
+    button.ghost {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--muted);
+    }
+    button[disabled]{
+      opacity: .7;
+      cursor: not-allowed;
+    }
+
+    .radio-group{
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      padding: 8px 10px;
+      background: #0b1327;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .radio {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      background: var(--chip);
+      border: 1px solid var(--border);
+    }
+    .radio input { accent-color: var(--accent-2); }
+
+    .status {
+      margin: 14px 0 0 0;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--tab);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .status.ok { color: #bbf7d0; border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.08); }
+    .status.warn { color: #fde68a; border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.08); }
+    .status.err { color: #fecaca; border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.08); }
+
+    /* Tabs */
+    .tabs {
+      margin-top: 18px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel) 0%, #0c1528 100%);
+      border-radius: 14px;
+      overflow: clip;
+      box-shadow: 0 14px 36px rgba(0,0,0,.28);
+    }
+
+    .tab-list {
+      display: flex;
+      gap: 6px;
+      padding: 10px;
+      background: var(--tab);
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: #0a1224;
+      padding: 8px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: .2px;
+    }
+    .tab-btn[aria-selected="true"] {
+      background: radial-gradient(400px 180px at 50% -40%, #0b1327 0%, var(--tab-active) 100%);
+      color: var(--text);
+      border-color: #223055;
+      box-shadow: 0 8px 22px rgba(2,8,23,.35) inset;
+    }
+
+    .tab-toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px dashed var(--border);
+      background: #0a1224;
+    }
+
+    .tab-content {
+      padding: 16px;
+      min-height: 360px;
+      background:
+        radial-gradient(700px 320px at 100% -40%, rgba(34,211,238,0.08), transparent 70%),
+        radial-gradient(700px 300px at 0% 0%, rgba(56,189,248,0.07), transparent 70%),
+        linear-gradient(180deg, #0a1224, #0b1327 40%, #0a1224 100%);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #0b1220;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0f1b34;
+      text-align: left;
+      font-size: 12px;
+      color: #c7d2fe;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 12px;
+    }
+    tbody td {
+      padding: 8px 12px;
+      border-bottom: 1px solid #172138;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    tbody tr:hover td { background: rgba(2,132,199,.06); }
+
+    td[contenteditable="true"] {
+      outline: none;
+      background: #0c1a34;
+      border-radius: 6px;
+    }
+    td.edited {
+      background: rgba(245,158,11,.12) !important;
+      border-bottom-color: rgba(245,158,11,.35);
+    }
+
+    pre.code {
+      margin: 0;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #081022;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #e2e8f0;
+      max-height: 60vh;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: rgba(255,255,255,.8);
+      border-radius: 50%;
+      display: inline-block;
+      animation: spin 0.75s linear infinite;
+      vertical-align: text-bottom;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .caps { text-transform: uppercase; font-size: 11px; letter-spacing: .18em; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top">
+      <!-- Left Panel -->
+      <section class="panel" id="leftPanel" aria-label="Data Selection">
+        <h2>Data Selection</h2>
+        <div class="grid cols-3">
+          <div class="field">
+            <label for="releaseDateSelect">Release Date</label>
+              <select id="releaseDateSelect" name="Week">
+                <?Lua START release_date() { "test" : 123 } ?>
+                <option value="foo">foo</option>
+                <option value="bar" selected>bar</option> 
+                <option value="cat">cat</option>
+                <option value="dog">dog</option>
+                <?Lua STOP release_date() ?>
+             </select>
+          </div>
+          <div class="field">
+            <label for="rearViewSelect">RearView Mirror</label>
+            <select id="rearViewSelect" name="RearView">
+                <?Lua START rearview() [ 1, 2 ] ?>
+                <option value="104">104</option>
+                <option value="156" selected>156</option> 
+                <option value="208">208</option>
+                <?Lua STOP rearview()  ?>
+             </select>
+          </div>
+          <div class="field">
+            <label for="tcinInput">TCIN(s)</label>
+            <?Lua START tcin_textbox()  ?>
+            <input 
+              name = "TCIN" 
+              type="text" 
+              id="tcinInput" 
+              placeholder="e.g., 12345:67890" 
+              value = 0 />
+            <?Lua STOP  tcin_textbox() ?>
+          </div>
+        </div>
+
+        <div class="actions" style="margin-top: 12px;">
+          <button id="loadDataBtn" title="Load Data using Selected Week, RearView, and TCIN(s)">Load Data</button>
+          <span class="caps" id="leftStatusText"></span>
+        </div>
+
+      </section>
+
+      <!-- Right Panel -->
+      <section class="panel" id="rightPanel" aria-label="Server & Mode">
+        <h2>Select Server and Mode</h2>
+        <div class="grid cols-2">
+          <div class="field">
+            <label for="serverSelect">Server</label>
+            <select id="serverSelect" name="Server">
+              <!--START:SERVER -->
+              <?Lua START server_dropdown()  ?>
+              <option value="1">dfelx2007</option>
+              <option value="2" selected>dfelx2008</option> 
+              <option value="3">dfelx2009</option>
+              <?Lua STOP server_dropdown() ?>
+              <!--STOP:SERVER -->
+            </select>
+          </div>
+          <div class="field">
+             <!-- TODO How to place the checked in the right spot? -->
+            <form id="modeForm" role="radiogroup" aria-labelledby="modeLabel">
+              <div class="group">
+              <label for="mode_original"> Original </label>
+              <?Lua START mode_radio_button() { "mode" : "Original"} ?>
+              <input 
+                type="radio" 
+                id="modeOriginal" 
+                name="mode" 
+                value="Original" 
+                checked 
+                />
+              <?Lua STOP mode_radio_button() ?>
+              <label for="mode_modified"> Modified </label >
+              <?Lua START mode_radio_button() { "mode" : "Modified" } ?>
+              <input 
+                type="radio" 
+                id="modeModified" 
+                name="mode" 
+                value="Modified" 
+                /> 
+              <?Lua STOP mode_radio_button() ?>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Tabs -->
+    <section class="tabs" id="tabsSection" aria-label="Data Views">
+      <div class="tab-list" id="tabList" role="tablist" aria-label="Tabs">
+        <!-- START: TAB SELECTOR -->
+        <!-- For Ramesh: Make sure the proper tab has selected = true -->
+        <?Lua START tab_selector()  ?>
+        <button class="tab-btn" role="tab" aria-selected="true" data-tab="Historical" id="tab-Historical">Historical</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="Forward" id="tab-Forward">Forward</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="Model" id="tab-Model">Model</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="Forecast" id="tab-Forecast">Forecast</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="Pass 1 YAML" id="tab-Pass1">Pass 1 YAML</button>
+        <button class="tab-btn" role="tab" aria-selected="false" data-tab="Pass 2 YAML" id="tab-Pass2">Pass 2 YAML</button>
+        <?Lua STOP  tab_selector() ?>
+        <!-- STOP:TAB SELECTOR -->
+      </div>
+
+      <div class="tab-toolbar" id="tabToolbar" hidden>
+        <?Lua START buttons()  ?>
+        <button class="secondary" id="btnModify">Modify</button>
+        <button class="secondary" id="btnTrainScore">Train</button> 
+        <?Lua STOP buttons() ?>
+
+        <span class="caps" id="tabToolbarHint"></span>
+      </div>
+
+        <!-- START Dynamic content goes here -->
+  <!-- Replace action="/modify" with your server endpoint -->
+  <!--  <form id="edit-form" action="/modify" method="post" novalidate> -->
+  <form id="edit-form" action="http://dfelx2026:8080/Ignore" method="post" novalidate>
+
+    <?Lua Following HTML should exist only for mode=Modified, ... "" ?>
+    <p id="table-help" class="controls">
+      <button type="submit" id="submit-btn">Modify</button>
+      <small class="hint">This will POST the table as JSON to 
+        <code>action</code> (<code>/modify</code> by default).</small>
+    </p>
+    <?Lua Above HTML should exist only for mode=Modified, ... "" ?>
+
+    <table id="editable-table" role="grid" aria-describedby="table-help">
+      <caption>Data Table</caption>
+      <?Lua START data_table()  ?>
+      <thead>
+        <tr>
+          <th scope="col" data-key="item">Item</th>
+          <th scope="col" data-key="qty" data-type="number">Qty</th>
+          <th scope="col" data-key="price" data-type="number">Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td contenteditable="false" data-key="item">Apples</td>
+          <td contenteditable="true" data-key="qty">10</td>
+          <td contenteditable="true" data-key="price">1.25</td>
+        </tr>
+        <tr>
+          <td contenteditable="false" data-key="item">Bananas</td>
+          <td contenteditable="true" data-key="qty">6</td>
+          <td contenteditable="true" data-key="price">0.60</td>
+        </tr>
+        <tr>
+          <td contenteditable="true" data-key="item">Cherries</td>
+          <td contenteditable="true" data-key="qty">3</td>
+          <td contenteditable="true" data-key="price">2.50</td>
+        </tr>
+      </tbody>
+    </table>
+        <?Lua STOP data_table() ?>
+
+    <!-- Result / debug output (optional) -->
+     <pre id="result" hidden aria-live="polite"></pre> 
+  </form>
+
+        <!-- STOP Dynamic content goes here -->
+      </div>
+      <div class="tab-content" id="tabContent" role="tabpanel" aria-labelledby="tab-Historical">
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const form   = document.getElementById('edit-form');
+      const table  = document.getElementById('editable-table');
+      const output = document.getElementById('result');
+
+      // Keep contenteditable cells single-line (avoid accidental newlines)
+      table.querySelectorAll('[contenteditable="true"]').forEach((cell) => {
+        cell.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') { e.preventDefault(); cell.blur(); }
+        });
+      });
+
+      function tableToJSON() {
+        const headers = Array.from(table.tHead.rows[0].cells).map(th => ({
+          key:  (th.dataset.key || th.textContent.trim().toLowerCase().replace(/\s+/g, '_')),
+          type: (th.dataset.type || 'string')
+        }));
+
+        const rows = [];
+        for (const tr of table.tBodies[0].rows) {
+          const obj = {};
+          let isEmpty = true;
+
+          Array.from(tr.cells).forEach((td, i) => {
+            const key  = td.dataset.key  || headers[i]?.key  || ('col_' + i);
+            const type = td.dataset.type || headers[i]?.type || 'string';
+            let val = td.textContent.trim();
+
+            if (type === 'number' && val !== '' && !isNaN(val)) {
+              val = Number(val);
+            }
+            if (val !== '') isEmpty = false;
+            obj[key] = val;
+          });
+
+          if (!isEmpty) rows.push(obj);
+        }
+        return rows;
+      }
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const payload = { rows: tableToJSON() }; // Change to tableToJSON() if you want a bare array.
+        output.hidden = false;
+        output.textContent = 'Posting JSON…\n\n' + JSON.stringify(payload, null, 2);
+
+        try {
+          const res = await fetch(form.action || location.href, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json, text/plain, */*' },
+            body: JSON.stringify(payload)
+          });
+
+          const bodyText = await res.text();
+          output.textContent =
+            `Posted to: ${res.url || form.action || location.href}\n` +
+            `Status: ${res.status} ${res.statusText}\n\n` +
+            (bodyText ? `Response:\n${bodyText}` : 'No response body.');
+        } catch (err) {
+          output.textContent += `\n\nPOST failed: ${err.message}`;
+        }
+      });
+    })();
+  </script>
+  <script>
+    (function(){
+      'use strict';
+
+      // === Constants: hosts & endpoints from spec ===
+      const LEFT_BASE  = 'http://dfelx2006:8080';  // top-left + tabs
+      const RIGHT_BASE = 'http://dflex2006:8080';  // top-right
+
+      const ENDPOINTS = {
+        // Left panel (dfelx2006)
+        weeks:       LEFT_BASE + '/GetWeeks',
+        week:        LEFT_BASE + '/GetWeek',
+        rearViews:   LEFT_BASE + '/GetRearViews',
+        rearView:    LEFT_BASE + '/GetRearView',
+        tcin:        LEFT_BASE + '/GetTCIN',
+        loadData:    LEFT_BASE + '/LoadData',
+        setTab:      LEFT_BASE + '/SetTab',
+        getData:     LEFT_BASE + '/GetData',
+        // Right panel (dflex2006)
+        getMode:     RIGHT_BASE + '/GetMode',
+        setMode:     RIGHT_BASE + '/SetMode',
+        getServers:  RIGHT_BASE + '/GetServers',
+        getServer:   RIGHT_BASE + '/GetServer',
+        setServer:   RIGHT_BASE + '/SetServer',
+      };
+
+      // === DOM refs ===
+      const releaseSelect = document.getElementById('releaseDateSelect');
+      const rearViewSelect = document.getElementById('rearViewSelect');
+      const tcinInput = document.getElementById('tcinInput');
+      const loadDataBtn = document.getElementById('loadDataBtn');
+      const leftStatus = document.getElementById('leftStatus');
+      const leftStatusText = document.getElementById('leftStatusText');
+
+      const serverSelect = document.getElementById('serverSelect');
+      const rightStatus = document.getElementById('rightStatus');
+      const modeOriginal = document.getElementById('modeOriginal');
+      const modeModified = document.getElementById('modeModified');
+
+      const tabList = document.getElementById('tabList');
+      const tabContent = document.getElementById('tabContent');
+      const tabToolbar = document.getElementById('tabToolbar');
+      const btnModify = document.getElementById('btnModify');
+      const btnTrainScore = document.getElementById('btnTrainScore');
+      const tabToolbarHint = document.getElementById('tabToolbarHint');
+
+      const TABS = ['Historical', 'Forward', 'Model', 'Forecast', 'Pass 1 YAML', 'Pass 2 YAML'];
+
+      // === Utilities ===
+      function setStatus(el, text, kind='info'){
+        el.textContent = text;
+        el.classList.remove('ok', 'warn', 'err');
+        if (kind === 'ok') el.classList.add('ok');
+        if (kind === 'warn') el.classList.add('warn');
+        if (kind === 'err') el.classList.add('err');
+      }
+
+      function debounce(fn, ms=300){
+        let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+      }
+
+      async function fetchRaw(url, {expect='auto'} = {}){
+        const res = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json, text/plain, */*' },
+          credentials: 'include',
+          cache: 'no-store'
+        });
+        const text = await res.text();
+        let data = text;
+        if (expect === 'json' || (expect === 'auto' && res.headers.get('content-type')?.includes('application/json'))) {
+          try { data = JSON.parse(text); } catch(_){}
+        }
+        return { ok: res.ok, status: res.status, data, text, res };
+      }
+
+      async function fetchJSON(url){
+        const { ok, status, data } = await fetchRaw(url, { expect: 'json' });
+        if (!ok) throw new Error(`GET ${url} failed (${status})`);
+        return data;
+      }
+
+      async function fetchText(url){
+        const { ok, status, text } = await fetchRaw(url, { expect: 'text' });
+        if (!ok) throw new Error(`GET ${url} failed (${status})`);
+        return text;
+      }
+
+      function setOptions(selectEl, items){
+        const prev = selectEl.value;
+        selectEl.innerHTML = '';
+        if (Array.isArray(items)){
+          items.forEach((label, i) => {
+            const opt = document.createElement('option');
+            opt.value = String(label);
+            opt.textContent = String(label);
+            selectEl.appendChild(opt);
+          });
+        }
+        // Try to preserve previous selection if still present
+        if ([...selectEl.options].some(o => o.value === prev)){
+          selectEl.value = prev;
+        }
+      }
+
+      function setSelectToValue(selectEl, valueMaybe){
+        if (valueMaybe == null) return;
+        const val = String(valueMaybe).trim();
+        // If value looks numeric and within range, interpret as 1-based index
+        if (/^\d+$/.test(val)){
+          const idx = parseInt(val, 10);
+          if (idx >= 1 && idx <= selectEl.options.length){
+            selectEl.selectedIndex = idx - 1;
+            return;
+          }
+        }
+        // Otherwise, match by exact option value (case-insensitive)
+        const idx2 = [...selectEl.options].findIndex(o => o.value.trim().toLowerCase() === val.toLowerCase());
+        if (idx2 >= 0){
+          selectEl.selectedIndex = idx2;
+          return;
+        }
+        // If not found, add it explicitly so the UI reflects server state
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        selectEl.appendChild(opt);
+        selectEl.value = val;
+      }
+
+      function buildURL(base, path, params){
+        const u = new URL(base + path);
+        if (params && typeof params === 'object'){
+          for (const [k,v] of Object.entries(params)){
+            if (v !== undefined && v !== null) u.searchParams.set(k, v);
+          }
+        }
+        return u.toString();
+      }
+
+      function clearContent(){
+        tabContent.innerHTML = '';
+      }
+
+      function renderTableFromArrayOfObjects(rows, { editable=false } = {}){
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+
+        // Collect all keys (in order of first appearance)
+        const keys = [];
+        for (const row of rows){
+          if (row && typeof row === 'object' && !Array.isArray(row)){
+            for (const k of Object.keys(row)){
+              if (!keys.includes(k)) keys.push(k);
+            }
+          }
+        }
+        if (keys.length === 0){
+          // Fallback: treat each row as single cell
+          keys.push('value');
+        }
+
+        // Header
+        const trh = document.createElement('tr');
+        for (const k of keys){
+          const th = document.createElement('th');
+          th.textContent = k;
+          trh.appendChild(th);
+        }
+        thead.appendChild(trh);
+
+        // Body
+        rows.forEach((row, rIdx) => {
+          const tr = document.createElement('tr');
+          keys.forEach((k, cIdx) => {
+            const td = document.createElement('td');
+            const val = (row && typeof row === 'object' && !Array.isArray(row)) ? row[k] : row;
+            td.textContent = val == null ? '' : String(val);
+            if (editable){
+              td.setAttribute('contenteditable', 'true');
+              td.dataset.row = String(rIdx);
+              td.dataset.col = String(cIdx);
+              td.addEventListener('input', () => td.classList.add('edited'));
+            }
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        return table;
+      }
+
+      function renderTableFrom2DArray(rows, { editable=false } = {}){
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const tbody = document.createElement('tbody');
+
+        if (rows.length > 0 && Array.isArray(rows[0])){
+          const header = rows[0];
+          const trh = document.createElement('tr');
+          header.forEach(h => {
+            const th = document.createElement('th');
+            th.textContent = String(h);
+            trh.appendChild(th);
+          });
+          thead.appendChild(trh);
+
+          rows.slice(1).forEach((r, rIdx) => {
+            const tr = document.createElement('tr');
+            r.forEach((cell, cIdx) => {
+              const td = document.createElement('td');
+              td.textContent = cell == null ? '' : String(cell);
+              if (editable){
+                td.setAttribute('contenteditable', 'true');
+                td.dataset.row = String(rIdx);
+                td.dataset.col = String(cIdx);
+                td.addEventListener('input', () => td.classList.add('edited'));
+              }
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        }
+
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        return table;
+      }
+
+      function renderJSON(obj){
+        const pre = document.createElement('pre');
+        pre.className = 'code';
+        pre.textContent = JSON.stringify(obj, null, 2);
+        return pre;
+      }
+
+      function renderTextBlock(text){
+        const pre = document.createElement('pre');
+        pre.className = 'code';
+        pre.textContent = text ?? '';
+        return pre;
+      }
+
+      function getCurrentMode(){
+        return modeModified.checked ? 'Modified' : 'Original';
+      }
+
+      function showTabToolbarFor(tabName, mode){
+        const isEditableTab = (tabName === 'Historical' || tabName === 'Forward');
+        const isModified = (mode === 'Modified');
+        const show = (isEditableTab && isModified);
+        tabToolbar.hidden = !show;
+        if (show){
+          btnTrainScore.textContent = (tabName === 'Forward') ? 'Score' : 'Train';
+          tabToolbarHint.textContent = `Table is editable in ${mode} mode.`;
+        } else {
+          tabToolbarHint.textContent = '';
+        }
+      }
+
+      function makeSpinnerText(text){
+        const span = document.createElement('span');
+        span.innerHTML = `<span class="spinner" aria-hidden="true"></span>${text}`;
+        return span;
+      }
+
+      // === Left Panel ===
+      async function initLeftPanel(){
+        try {
+          setStatus(leftStatus, 'Loading lists…');
+          // Options
+          const [weeks, rearViews] = await Promise.all([
+            fetchJSON(ENDPOINTS.weeks),
+            fetchJSON(ENDPOINTS.rearViews)
+          ]);
+          setOptions(releaseSelect, Array.isArray(weeks) ? weeks : []);
+          setOptions(rearViewSelect, Array.isArray(rearViews) ? rearViews : []);
+
+          // Selected values + TCIN(s)
+          const [weekSel, rearSel, tcinVal] = await Promise.all([
+            fetchText(ENDPOINTS.week),
+            fetchText(ENDPOINTS.rearView),
+            fetchText(ENDPOINTS.tcin),
+          ]);
+          setSelectToValue(releaseSelect, weekSel);
+          setSelectToValue(rearViewSelect, rearSel);
+          tcinInput.value = (tcinVal ?? '').toString();
+
+          setStatus(leftStatus, 'Ready.', 'ok');
+        } catch (err) {
+          console.error(err);
+          setStatus(leftStatus, `Left panel init failed: ${err.message}`, 'err');
+        }
+      }
+
+      async function refreshLeftSelectionsAfterLoad(){
+        try {
+          setStatus(leftStatus, 'Refreshing selections after LoadData…');
+          const [weekSel, rearSel, tcinVal] = await Promise.all([
+            fetchText(ENDPOINTS.week),
+            fetchText(ENDPOINTS.rearView),
+            fetchText(ENDPOINTS.tcin),
+          ]);
+          setSelectToValue(releaseSelect, weekSel);
+          setSelectToValue(rearViewSelect, rearSel);
+          tcinInput.value = (tcinVal ?? '').toString();
+          setStatus(leftStatus, 'Selections updated.', 'ok');
+        } catch (err){
+          console.error(err);
+          setStatus(leftStatus, `Refresh failed: ${err.message}`, 'err');
+        }
+      }
+
+      async function handleLoadData(){
+        const tcin = tcinInput.value ?? '';
+        const week = releaseSelect.value ?? '';
+        const rear = rearViewSelect.value ?? '';
+        const url = buildURL(LEFT_BASE, '/LoadData', {
+          TCIN: tcin,
+          Week: week,
+          Rearview: rear
+        });
+
+        try {
+          loadDataBtn.disabled = true;
+          leftStatusText.replaceChildren(makeSpinnerText('Loading…'));
+          setStatus(leftStatus, `GET ${url}`);
+
+          const { res } = await fetchRaw(url, { expect: 'text' });
+          if (res.ok){
+            setStatus(leftStatus, `LoadData completed (200).`, 'ok');
+            await refreshLeftSelectionsAfterLoad();
+          } else {
+            setStatus(leftStatus, `LoadData failed (${res.status}).`, 'err');
+          }
+        } catch (err){
+          console.error(err);
+          setStatus(leftStatus, `LoadData error: ${err.message}`, 'err');
+        } finally {
+          loadDataBtn.disabled = false;
+          leftStatusText.textContent = '';
+        }
+      }
+
+      // === Right Panel ===
+      async function initRightPanel(){
+        try {
+          setStatus(rightStatus, 'Loading server list & mode…');
+
+          // Server list and selected server
+          const servers = await fetchJSON(ENDPOINTS.getServers).catch(() => []);
+          if (Array.isArray(servers)) setOptions(serverSelect, servers);
+
+          const selectedServer = await fetchRaw(ENDPOINTS.getServer, { expect: 'auto' });
+          let selVal = selectedServer.data;
+          if (typeof selVal === 'object' && selVal !== null) selVal = selVal.value ?? selVal.selected ?? selVal.index ?? '';
+          setSelectToValue(serverSelect, selVal);
+
+          // Mode
+          const modeValRaw = await fetchText(ENDPOINTS.getMode).catch(() => 'Original');
+          const modeVal = String(modeValRaw).trim();
+          if (/^modified$/i.test(modeVal)) {
+            modeModified.checked = true;
+          } else {
+            modeOriginal.checked = true;
+          }
+          applyModeToUI();
+
+          setStatus(rightStatus, 'Ready.', 'ok');
+        } catch (err){
+          console.error(err);
+          setStatus(rightStatus, `Right panel init failed: ${err.message}`, 'err');
+        }
+      }
+
+      async function setMode(mode){
+        const url = buildURL(RIGHT_BASE, '/SetMode', { Mode: mode });
+        try {
+          setStatus(rightStatus, `Setting mode: ${mode}…`);
+          const { res } = await fetchRaw(url, { expect: 'text' });
+          if (res.ok){
+            setStatus(rightStatus, `Mode set to ${mode}.`, 'ok');
+            applyModeToUI();
+          } else {
+            setStatus(rightStatus, `SetMode failed (${res.status}).`, 'err');
+            // Undo selection
+            if (mode === 'Modified') modeOriginal.checked = true;
+            else modeModified.checked = true;
+          }
+        } catch (err){
+          console.error(err);
+          setStatus(rightStatus, `SetMode error: ${err.message}`, 'err');
+        }
+      }
+
+      async function setServerByIndex(oneBasedIndex){
+        // Try three plausible endpoint shapes, stop on first success.
+        const attempts = [
+          `${RIGHT_BASE}/SetServer?Server=${oneBasedIndex}`,
+          `${RIGHT_BASE}/SetServer/Server=${oneBasedIndex}`,
+          `${RIGHT_BASE}/SetServer/${oneBasedIndex}`
+        ];
+        for (const url of attempts){
+          try {
+            const { res } = await fetchRaw(url, { expect: 'text' });
+            if (res.ok){
+              setStatus(rightStatus, `Server set (index ${oneBasedIndex}).`, 'ok');
+              return true;
+            }
+          } catch(_) { /* try next */ }
+        }
+        setStatus(rightStatus, `Failed to set server (tried ${attempts.length} forms).`, 'err');
+        return false;
+      }
+
+      function applyModeToUI(){
+        // Update toolbar visibility based on current tab + mode
+        const activeTab = document.querySelector('.tab-btn[aria-selected="true"]')?.dataset.tab ?? 'Historical';
+        showTabToolbarFor(activeTab, getCurrentMode());
+
+        // If content is table and mode changed, re-render to switch editability
+        // (We simply reload the current tab to keep it consistent with server state.)
+        void loadTab(activeTab, { skipSetTab: true });
+      }
+
+      // === Tabs ===
+      async function loadTab(tabName, { skipSetTab = false } = {}){
+        clearContent();
+
+        // Visually indicate loading
+        const loading = document.createElement('div');
+        loading.className = 'caps';
+        loading.appendChild(makeSpinnerText(`Loading "${tabName}"…`));
+        tabContent.appendChild(loading);
+
+        if (!skipSetTab){
+          // Tell server which tab is active
+          const urlSet = buildURL(LEFT_BASE, '/SetTab', { Tab: tabName });
+          try { await fetchRaw(urlSet, { expect: 'text' }); } catch(_) {}
+        }
+
+        // Fetch the data for this tab
+        const urlData = buildURL(LEFT_BASE, '/GetData', { Tab: tabName });
+        try {
+          const { ok, data, text, res } = await fetchRaw(urlData, { expect: 'auto' });
+          tabContent.innerHTML = ''; // clear loading
+
+          if (!ok){
+            const pre = renderTextBlock(`GET ${urlData} failed (${res.status}).`);
+            tabContent.appendChild(pre);
+            showTabToolbarFor(tabName, getCurrentMode());
+            return;
+          }
+
+          const mode = getCurrentMode();
+          const editable = (mode === 'Modified') && (tabName === 'Historical' || tabName === 'Forward');
+
+          // Render by tab rules
+          if (tabName === 'Model'){
+            const obj = (typeof data === 'object') ? data : safeParseJSON(text);
+            tabContent.appendChild(renderJSON(obj ?? { message: text ?? '' }));
+          } else if (tabName === 'Pass 1 YAML' || tabName === 'Pass 2 YAML'){
+            // Treat as plain text/YAML
+            const txt = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+            tabContent.appendChild(renderTextBlock(txt));
+          } else {
+            // Historical / Forward / Forecast -> tables
+            if (Array.isArray(data)){
+              if (data.length && Array.isArray(data[0])){
+                tabContent.appendChild(renderTableFrom2DArray(data, { editable }));
+              } else {
+                tabContent.appendChild(renderTableFromArrayOfObjects(data, { editable }));
+              }
+            } else {
+              // If server sent CSV or plain text, show it raw as a fallback
+              tabContent.appendChild(renderTextBlock(typeof data === 'string' ? data : text));
+            }
+          }
+
+          showTabToolbarFor(tabName, mode);
+        } catch (err){
+          console.error(err);
+          tabContent.innerHTML = '';
+          tabContent.appendChild(renderTextBlock(`Error loading ${tabName}: ${err.message}`));
+          showTabToolbarFor(tabName, getCurrentMode());
+        }
+      }
+
+      function safeParseJSON(s){
+        try { return JSON.parse(s); } catch { return null; }
+      }
+
+      function setActiveTabButton(tabName){
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          const isActive = (btn.dataset.tab === tabName);
+          btn.setAttribute('aria-selected', String(isActive));
+          if (isActive) tabContent.setAttribute('aria-labelledby', btn.id);
+        });
+      }
+
+      // === Event wiring ===
+      RAMESH loadDataBtn.addEventListener('click', handleLoadData);
+      tcinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleLoadData();
+      });
+
+      serverSelect.addEventListener('change', async () => {
+        const index1 = serverSelect.selectedIndex + 1; // send 1-based index
+        await setServerByIndex(index1);
+      });
+
+      modeOriginal.addEventListener('change', () => {
+        if (modeOriginal.checked) setMode('Original');
+      });
+      modeModified.addEventListener('change', () => {
+        if (modeModified.checked) setMode('Modified');
+      });
+
+      tabList.addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        const tabName = btn.dataset.tab;
+        if (!tabName) return;
+        setActiveTabButton(tabName);
+        void loadTab(tabName);
+      });
+
+      // Toolbar buttons (spec only requires displaying them; no endpoints given)
+      btnModify.addEventListener('click', () => {
+        // Collect edited cells and log them
+        const edited = [];
+        tabContent.querySelectorAll('td.edited').forEach(td => {
+          edited.push({
+            row: Number(td.dataset.row ?? -1),
+            col: Number(td.dataset.col ?? -1),
+            value: td.textContent
+          });
+        });
+        const msg = edited.length
+          ? `Collected ${edited.length} modified cell(s). (No submit endpoint specified.)`
+          : 'No edits detected.';
+        alert(msg);
+      });
+
+      btnTrainScore.addEventListener('click', () => {
+        const activeTab = document.querySelector('.tab-btn[aria-selected="true"]')?.dataset.tab ?? 'Historical';
+        const action = (activeTab === 'Forward') ? 'Score' : 'Train';
+        alert(`${action} clicked for "${activeTab}". (No endpoint specified in spec.)`);
+      });
+
+      // === Boot ===
+      (async function start(){
+        // Initialize both panels in parallel, then open default tab
+        await Promise.allSettled([initLeftPanel(), initRightPanel()]);
+        setActiveTabButton('Historical');
+        await loadTab('Historical');
+      })();
+    })();
+  </script>
+</body>
+</html>
+

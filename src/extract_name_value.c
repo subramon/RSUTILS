@@ -45,7 +45,7 @@ extract_name_value(
   }
   if ( len > maxlen ) { 
     WHEREAMI;
-    fprintf(stderr, "Input string = [%s], start=[%s], exceeded len = %d \n", in_str, start, maxlen);
+    fprintf(stderr, "Input string = [%s], start=[%s], exceeded len = %lu \n", in_str, start, maxlen);
     go_BYE(-1); 
   }
   memset(val, '\0', maxlen);

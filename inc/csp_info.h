@@ -14,6 +14,7 @@ typedef struct _csp_static_t {
 typedef struct _csp_dynamic_t {
   char *func;
   char *args;
+  char *dummy; // sample code 
 } csp_dynamic_t;
 
 typedef struct _csp_frag_t { // frag == fragment
@@ -27,5 +28,6 @@ typedef struct _csp_frag_t { // frag == fragment
 typedef struct _csp_info_t {
   csp_frag_t *csp_frag; // [n]
   int n;
+  int sz; // sz >= n
 } csp_info_t;
 #endif //  __CSP_INFO_H

@@ -1,3 +1,4 @@
+#include "csp_info.h"
 extern int
 csp_parse(
     const char * const csp_file,
