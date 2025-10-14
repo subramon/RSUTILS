@@ -7,6 +7,7 @@
 
 #include "rs_mmap.h"
 #include "cat_to_buf.h"
+#include "bridge_csp.h"
 #include "csp_gen.h"
 int
 csp_gen(
@@ -32,8 +33,21 @@ csp_gen(
         cBYE(status);
         break;
       case csp_Lua_func : 
+        {
+        char *str = NULL; 
+        status = bridge_csp(L, 
+          ptr_csp_info->csp_frag[i].frag.Lua_str.func,
+          ptr_csp_info->csp_frag[i].frag.Lua_str.args,
+          &str);
+        cBYE(status);
+        status = cat_to_buf(&str, &sz, &len, str, 0);
+        cBYE(status);
+        free_if_non_null(str);
+        }
         break;
       case csp_C_func : 
+        // TODO To be implemented
+        go_BYE(-1); 
         break;
       default :
         go_BYE(-1);

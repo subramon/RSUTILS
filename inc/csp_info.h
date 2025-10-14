@@ -12,14 +12,14 @@ typedef struct _csp_static_t {
 } csp_static_t;
 
 typedef struct _csp_dynamic_t {
-  char *str;
-  uint32_t len;
+  char *func;
+  char *args;
 } csp_dynamic_t;
 
 typedef struct _csp_frag_t { // frag == fragment
   union { 
     csp_static_t static_str;
-    csp_dynamic_t lua_str;
+    csp_dynamic_t Lua_str;
     csp_dynamic_t C_str;
   } frag;
   csp_src_t csp_src;
