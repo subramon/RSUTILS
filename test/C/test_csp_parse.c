@@ -5,6 +5,7 @@
 #include "csp_info.h"
 #include "csp_parse.h"
 #include "csp_synthesize.h"
+#include "csp_aux.h"
 #include "str_as_file.h"
 #include "q_macros.h"
 
@@ -23,12 +24,15 @@ main(
   const char * csp_file = argv[1]; 
   const char * out_csp_file = argv[2]; 
   status = csp_parse(csp_file, &csp_info); cBYE(status);
-  status = csp_synthesize(&csp_info, &str, &len); cBYE(status);
+  bool use_dummy = true;
+  bool use_cache = false;
+  status = csp_synthesize(NULL, &csp_info, use_dummy, use_cache, &str, &len); 
+  cBYE(status);
   status = str_as_file(str, out_csp_file); cBYE(status);
 
   printf("SUCCESS\n");
 BYE:
   free_if_non_null(str);
-  // TODO free_csp(&csp_info);
+  csp_free(&csp_info);
   return status;
 }

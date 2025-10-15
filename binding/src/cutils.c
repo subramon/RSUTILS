@@ -126,7 +126,7 @@ static int l_cutils_touch(
   if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   const char *file_name = luaL_checkstring(L, 1);
   status = touch(file_name); cBYE(status);
-  lua_pusbhoolean(L, true);
+  lua_pushboolean(L, true);
   return 1; 
 BYE:
   lua_pushnil(L);

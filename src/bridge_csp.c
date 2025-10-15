@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
 #include "q_macros.h"
 #include "csp_info.h"
 
@@ -17,28 +16,23 @@ bridge_csp(
     )
 {
   int status = 0;
+  int ntop;
   if ( L == NULL ) { WHEREAMI; return -1; } 
   if ( lua_gettop(L) != 0 ) { go_BYE(-1); }
   //---------------------------------------------------------
-  lua_getglobal(L, func);
-  status = lua_pcall(L, 0, 1, 0);
-  if ( status != 0 ) { 
-    fprintf(stderr, "get_mode() failed: %s\n", lua_tostring(L, -1));
-    go_BYE(-1);
-  }
-  //---------------------------------------------------------
   if ( func == NULL ) { go_BYE(-1); }
-  lua_pushstring(L, func); 
+  lua_getglobal(L, func);
+  //---------------------------------------------------------
   if ( args == NULL ) { 
     lua_pushnil(L);
   }
   else {
-  lua_pushstring(L, args); 
+    lua_pushstring(L, args); 
   }
   //---------------------------------------------------------
-  status = lua_pcall(L, 2, 1, 0);
+  status = lua_pcall(L, 1, 1, 0);
   if ( status != 0 ) { 
-    fprintf(stderr, "get_mode() failed: %s\n", lua_tostring(L, -1));
+    fprintf(stderr, "%s() failed: %s\n", func, lua_tostring(L, -1));
     go_BYE(-1);
   }
   //---------------------------------------------------------

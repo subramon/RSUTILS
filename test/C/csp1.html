@@ -289,34 +289,34 @@
           <div class="field">
             <label for="releaseDateSelect">Release Date</label>
               <select id="releaseDateSelect" name="Week">
-                <?Lua START release_date() { "test" : 123 } ?>
+                <?Lua START LABEL[A] FUNC[release_date] ARGS: { "test" : 123 } ?>
                 <option value="foo">foo</option>
                 <option value="bar" selected>bar</option> 
                 <option value="cat">cat</option>
                 <option value="dog">dog</option>
-                <?Lua STOP release_date() ?>
+                <?Lua STOP ?>
              </select>
           </div>
           <div class="field">
             <label for="rearViewSelect">RearView Mirror</label>
             <select id="rearViewSelect" name="RearView">
-                <?Lua START rearview() [ 1, 2 ] ?>
+                <?Lua START LABEL[B] FUNC[rearview] ARGS: [ 1, 2 ] ?>
                 <option value="104">104</option>
                 <option value="156" selected>156</option> 
                 <option value="208">208</option>
-                <?Lua STOP rearview()  ?>
+                <?Lua STOP  ?>
              </select>
           </div>
           <div class="field">
             <label for="tcinInput">TCIN(s)</label>
-            <?Lua START tcin_textbox()  ?>
+            <?Lua START LABEL[C] FUNC[tcin_textbox] ?>
             <input 
               name = "TCIN" 
               type="text" 
               id="tcinInput" 
               placeholder="e.g., 12345:67890" 
               value = 0 />
-            <?Lua STOP  tcin_textbox() ?>
+            <?Lua STOP  ?>
           </div>
         </div>
 
@@ -335,11 +335,11 @@
             <label for="serverSelect">Server</label>
             <select id="serverSelect" name="Server">
               <!--START:SERVER -->
-              <?Lua START server_dropdown()  ?>
+              <?Lua START LABEL[D] FUNC[server_dropdown  ?>
               <option value="1">dfelx2007</option>
               <option value="2" selected>dfelx2008</option> 
               <option value="3">dfelx2009</option>
-              <?Lua STOP server_dropdown() ?>
+              <?Lua STOP ?>
               <!--STOP:SERVER -->
             </select>
           </div>
@@ -348,7 +348,7 @@
             <form id="modeForm" role="radiogroup" aria-labelledby="modeLabel">
               <div class="group">
               <label for="mode_original"> Original </label>
-              <?Lua START mode_radio_button() { "mode" : "Original"} ?>
+              <?Lua LABEL[E] START mode_radio_button() { "mode" : "Original"} ?>
               <input 
                 type="radio" 
                 id="modeOriginal" 
@@ -356,16 +356,16 @@
                 value="Original" 
                 checked 
                 />
-              <?Lua STOP mode_radio_button() ?>
+              <?Lua STOP ?>
               <label for="mode_modified"> Modified </label >
-              <?Lua START mode_radio_button() { "mode" : "Modified" } ?>
+              <?Lua LABEL[F] START mode_radio_button() { "mode" : "Modified" } ?>
               <input 
                 type="radio" 
                 id="modeModified" 
                 name="mode" 
                 value="Modified" 
                 /> 
-              <?Lua STOP mode_radio_button() ?>
+              <?Lua STOP ?>
               </div>
             </form>
           </div>
@@ -378,22 +378,22 @@
       <div class="tab-list" id="tabList" role="tablist" aria-label="Tabs">
         <!-- START: TAB SELECTOR -->
         <!-- For Ramesh: Make sure the proper tab has selected = true -->
-        <?Lua START tab_selector()  ?>
+        <?Lua LABEL[G] START tab_selector() ?>
         <button class="tab-btn" role="tab" aria-selected="true" data-tab="Historical" id="tab-Historical">Historical</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Forward" id="tab-Forward">Forward</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Model" id="tab-Model">Model</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Forecast" id="tab-Forecast">Forecast</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Pass 1 YAML" id="tab-Pass1">Pass 1 YAML</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Pass 2 YAML" id="tab-Pass2">Pass 2 YAML</button>
-        <?Lua STOP  tab_selector() ?>
+        <?Lua STOP  ?>
         <!-- STOP:TAB SELECTOR -->
       </div>
 
       <div class="tab-toolbar" id="tabToolbar" hidden>
-        <?Lua START buttons()  ?>
+        <?Lua LABEL[H] START buttons()  ?>
         <button class="secondary" id="btnModify">Modify</button>
         <button class="secondary" id="btnTrainScore">Train</button> 
-        <?Lua STOP buttons() ?>
+        <?Lua STOP ?>
 
         <span class="caps" id="tabToolbarHint"></span>
       </div>
@@ -413,7 +413,7 @@
 
     <table id="editable-table" role="grid" aria-describedby="table-help">
       <caption>Data Table</caption>
-      <?Lua START data_table()  ?>
+      <?Lua LABEL[I] START data_table() ?>
       <thead>
         <tr>
           <th scope="col" data-key="item">Item</th>
@@ -439,7 +439,7 @@
         </tr>
       </tbody>
     </table>
-        <?Lua STOP data_table() ?>
+        <?Lua STOP ?>
 
     <!-- Result / debug output (optional) -->
      <pre id="result" hidden aria-live="polite"></pre> 

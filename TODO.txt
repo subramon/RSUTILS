@@ -1,3 +1,6 @@
+split_str in Lua/
+
+
 Consider whether this should change the way I handle atomics
 
 An atomic int in C, declared using _Atomic int or atomic_int_t (from <stdatomic.h>), is an integer type that guarantees atomic operations.Atomic operations are indivisible and uninterruptible, ensuring that when one thread modifies an atomic variable, other threads will see either the old value or the new value, but nothing in between. This prevents data races and ensures thread safety in concurrent programming.

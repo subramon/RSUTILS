@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 #include "q_macros.h"
 #include "csp_info.h"
 
-#include "rs_mmap.h"
 #include "file_as_str.h"
 #include "extract_name_value.h"
 #include "trim.h"
+#include "str_between.h"
 #include "csp_parse.h"
 
 // Parsing is very brittle TODO P3
@@ -19,14 +20,15 @@ csp_parse(
     )
 {
   int status = 0;
-  char *X = NULL; size_t nX = 0;
   char *str = NULL, *bak_str = NULL; size_t len = 0, bak_len = 0;
-  size_t loc = 0;
 
+  if ( csp_file == NULL ) { go_BYE(-1); }
   // allocate space to store fragments 
   ptr_csp_info->sz = 1024; // over-allocation  TODO P3 
   csp_frag_t *l_csp_frag = malloc(ptr_csp_info->sz * sizeof(csp_frag_t));
   memset(l_csp_frag, 0, ptr_csp_info->sz * sizeof(csp_frag_t));
+  char **l_frag_label = malloc(ptr_csp_info->sz * sizeof(char *));
+  memset(l_frag_label, 0, ptr_csp_info->sz * sizeof(char *));
 
   // read in file to be fragmented 
   status = file_as_str(csp_file, &str, &len); cBYE(status);
@@ -73,32 +75,26 @@ csp_parse(
       tmp_str = malloc(llen+1);
       memset(tmp_str, 0,  (llen+1));
       strncpy(tmp_str, str, llen);
-      //-- Now we need to break tmp_str into func and args 
-      char *func = NULL; char *args = NULL; 
-      char inbuf[32]; memset(inbuf, 0, 32);
-      char opbuf[32]; memset(opbuf, 0, 32);
-      char *zstr = strstr(tmp_str, "START"); 
-      if ( zstr == NULL ) { go_BYE(-1); }
-      status = extract_name_value(zstr, "START", '(', inbuf, 32-1);
-      cBYE(status);
-      if ( *inbuf == '\0' ) { go_BYE(-1); }
-      status = trim(inbuf, opbuf, 32); cBYE(status);
-      if ( *opbuf == '\0' ) { go_BYE(-1); }
-      func = strdup(opbuf);
+      //-- Now we need to break tmp_str into func and args and label 
+      // --------------------------------------------------
+      char *func = NULL; 
+      status = str_between(tmp_str, "FUNC=[", "]", &func); cBYE(status);
+      if ( func == NULL ) { go_BYE(-1); }
 
-      char *wstr = strstr(zstr, "()");
-      if ( wstr == NULL ) { 
-        go_BYE(-1); }
-      
-      char *vstr = wstr + strlen("()");
-      size_t vlen = strlen(vstr);
-      char *ustr = malloc(vlen+1);
-      memset(ustr, 0, vlen+1);
-      status = trim(vstr, ustr, vlen+1); cBYE(status);
+      char *label = NULL; 
+      status = str_between(tmp_str, "LABEL=[", "]", &label); cBYE(status);
+      if ( label == NULL ) { go_BYE(-1); }
 
-      if ( *ustr != '\0' ) {
-        args = strdup(ustr);
+      char *tmp_args = NULL; char *args = NULL; 
+      status = str_between(tmp_str, "ARGS ", "?>", &tmp_args); cBYE(status);
+      // okay for args to be null 
+      if ( tmp_args != NULL ) { 
+        args = strdup(tmp_args);
+        status = trim(args, tmp_args, strlen(args)+1); cBYE(status);
+        if ( *args == '\0' )  { free_if_non_null(args); }
       }
+      free_if_non_null(tmp_args);
+
       free_if_non_null(tmp_str);
       // START capture the dummy section if any 
       char *dummy = NULL, *tmp_dummy = NULL;
@@ -109,15 +105,14 @@ csp_parse(
       dummy = malloc(dlen+1); memset(dummy, 0, dlen+1);
       strncpy(tmp_dummy, yptr, dlen);
       status = trim(tmp_dummy, dummy, dlen+1);
-      if ( *dummy == '\0' )  {
-        free_if_non_null(dummy);
-      }
+      if ( *dummy == '\0' )  { free_if_non_null(dummy); }
       free_if_non_null(tmp_dummy);
       // STOP  capture the dummy section if any 
       l_csp_frag[frag_idx].csp_src = csp_Lua_func;
-      l_csp_frag[frag_idx].frag.Lua_str.func = func;
-      l_csp_frag[frag_idx].frag.Lua_str.args = args;
-      l_csp_frag[frag_idx].frag.Lua_str.dummy = dummy;
+      l_csp_frag[frag_idx].frag.Lua_str.func = func; func = NULL; 
+      l_csp_frag[frag_idx].frag.Lua_str.args = args; args = NULL; 
+      l_csp_frag[frag_idx].frag.Lua_str.dummy = dummy; dummy = NULL; 
+      l_frag_label[frag_idx] = label; label = NULL; 
       frag_idx++;
       // skip over the dynamic section
       
@@ -132,14 +127,19 @@ csp_parse(
   }
   ptr_csp_info->n = frag_idx;
   ptr_csp_info->csp_frag = l_csp_frag;
+  ptr_csp_info->frag_label = l_frag_label;
+
   for ( int i = 0; i < ptr_csp_info->n; i++ ) { 
     if ( l_csp_frag[i].csp_src == csp_Lua_func ) { 
-      printf("%d:%s\nargs=\t%s\ndummy=\t%s\n", i,
+      printf("%d:label=%s\nfunc=%s\nargs=\t%s\ndummy=\t%s\n", i,
+      l_frag_label[i], 
         l_csp_frag[i].frag.Lua_str.func,
         l_csp_frag[i].frag.Lua_str.args,
         l_csp_frag[i].frag.Lua_str.dummy);
     }
   }
+
 BYE:
+  free_if_non_null(bak_str);
   return status;
 }
