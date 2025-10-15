@@ -289,7 +289,7 @@
           <div class="field">
             <label for="releaseDateSelect">Release Date</label>
               <select id="releaseDateSelect" name="Week">
-                <?Lua START LABEL[A] FUNC[release_date] ARGS: { "test" : 123 } ?>
+                <?Lua START LABEL=[A] FUNC=[release_date] ARGS: { "test" : 123 } ?>
                 <option value="foo">foo</option>
                 <option value="bar" selected>bar</option> 
                 <option value="cat">cat</option>
@@ -300,7 +300,7 @@
           <div class="field">
             <label for="rearViewSelect">RearView Mirror</label>
             <select id="rearViewSelect" name="RearView">
-                <?Lua START LABEL[B] FUNC[rearview] ARGS: [ 1, 2 ] ?>
+                <?Lua START LABEL=[B] FUNC=[rearview] ARGS: [ 1, 2 ] ?>
                 <option value="104">104</option>
                 <option value="156" selected>156</option> 
                 <option value="208">208</option>
@@ -309,7 +309,7 @@
           </div>
           <div class="field">
             <label for="tcinInput">TCIN(s)</label>
-            <?Lua START LABEL[C] FUNC[tcin_textbox] ?>
+            <?Lua START LABEL=[C] FUNC=[tcin_textbox] ?>
             <input 
               name = "TCIN" 
               type="text" 
@@ -335,7 +335,7 @@
             <label for="serverSelect">Server</label>
             <select id="serverSelect" name="Server">
               <!--START:SERVER -->
-              <?Lua START LABEL[D] FUNC[server_dropdown  ?>
+              <?Lua START LABEL=[D] FUNC=[server_dropdown]  ?>
               <option value="1">dfelx2007</option>
               <option value="2" selected>dfelx2008</option> 
               <option value="3">dfelx2009</option>
@@ -348,7 +348,7 @@
             <form id="modeForm" role="radiogroup" aria-labelledby="modeLabel">
               <div class="group">
               <label for="mode_original"> Original </label>
-              <?Lua LABEL[E] START mode_radio_button() { "mode" : "Original"} ?>
+              <?Lua LABEL=[E] START mode_radio_button() { "mode" : "Original"} ?>
               <input 
                 type="radio" 
                 id="modeOriginal" 
@@ -358,7 +358,7 @@
                 />
               <?Lua STOP ?>
               <label for="mode_modified"> Modified </label >
-              <?Lua LABEL[F] START mode_radio_button() { "mode" : "Modified" } ?>
+              <?Lua LABEL=[F] START mode_radio_button() { "mode" : "Modified" } ?>
               <input 
                 type="radio" 
                 id="modeModified" 
@@ -378,7 +378,7 @@
       <div class="tab-list" id="tabList" role="tablist" aria-label="Tabs">
         <!-- START: TAB SELECTOR -->
         <!-- For Ramesh: Make sure the proper tab has selected = true -->
-        <?Lua LABEL[G] START tab_selector() ?>
+        <?Lua START LABEL=[G] FUNC=[tab_selector] ?>
         <button class="tab-btn" role="tab" aria-selected="true" data-tab="Historical" id="tab-Historical">Historical</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Forward" id="tab-Forward">Forward</button>
         <button class="tab-btn" role="tab" aria-selected="false" data-tab="Model" id="tab-Model">Model</button>
@@ -390,7 +390,7 @@
       </div>
 
       <div class="tab-toolbar" id="tabToolbar" hidden>
-        <?Lua LABEL[H] START buttons()  ?>
+        <?Lua START LABEL=[H] FUNC=[buttons]  ?>
         <button class="secondary" id="btnModify">Modify</button>
         <button class="secondary" id="btnTrainScore">Train</button> 
         <?Lua STOP ?>
@@ -413,7 +413,7 @@
 
     <table id="editable-table" role="grid" aria-describedby="table-help">
       <caption>Data Table</caption>
-      <?Lua LABEL[I] START data_table() ?>
+      <?Lua START LABEL=[I] FUNC=[data_table] ?>
       <thead>
         <tr>
           <th scope="col" data-key="item">Item</th>

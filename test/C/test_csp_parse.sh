@@ -13,6 +13,7 @@ gcc -g -O0 -std=gnu99 $QCFLAGS -I${RSUTILS_SRC_ROOT}/inc/ \
   ${RSUTILS_SRC_ROOT}/src/bridge_csp.c \
   ${RSUTILS_SRC_ROOT}/src/file_as_str.c \
   ${RSUTILS_SRC_ROOT}/src/str_as_file.c \
+  ${RSUTILS_SRC_ROOT}/src/str_between.c \
   ${RSUTILS_SRC_ROOT}/src/extract_name_value.c \
   ${RSUTILS_SRC_ROOT}/src/trim.c \
   ${RSUTILS_SRC_ROOT}/src/rs_mmap.c \

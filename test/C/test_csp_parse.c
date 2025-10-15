@@ -24,6 +24,17 @@ main(
   const char * csp_file = argv[1]; 
   const char * out_csp_file = argv[2]; 
   status = csp_parse(csp_file, &csp_info); cBYE(status);
+
+  for ( int i = 0; i < csp_info.n; i++ ) { 
+    if ( csp_info.csp_frag[i].csp_src == csp_Lua_func ) { 
+      printf("%d:label=%s\nfunc=%s\nargs=\t%s\ndummy=\t%s\n", i,
+      csp_info.frag_label[i], 
+        csp_info.csp_frag[i].frag.Lua_str.func,
+        csp_info.csp_frag[i].frag.Lua_str.args,
+        csp_info.csp_frag[i].frag.Lua_str.dummy);
+    }
+  }
+
   bool use_dummy = true;
   bool use_cache = false;
   status = csp_synthesize(NULL, &csp_info, use_dummy, use_cache, &str, &len); 
