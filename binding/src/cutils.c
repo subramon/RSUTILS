@@ -23,6 +23,7 @@
 #include "file_exists.h"
 #include "get_bit_u64.h"
 #include "get_file_size.h"
+#include "html_escape.h"
 #include "isdir.h"
 #include "rmtree.h"
 #include "isfile.h"
@@ -160,6 +161,25 @@ BYE:
   return 3; 
 }
 //----------------------------------------
+static int l_cutils_html_escape( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
+  const char *input_string = luaL_checkstring(L, 1);
+  char *escaped_string = NULL;
+  status = html_escape(input_string, &escaped_string); cBYE(status);
+  lua_pushstring(L, escaped_string);
+  free_if_non_null(escaped_string);
+  return 1; 
+BYE:
+  free_if_non_null(escaped_string);
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
 //----------------------------------------
 static int l_cutils_dirname( 
     lua_State *L
@@ -1120,8 +1140,9 @@ static const struct luaL_Reg cutils_methods[] = {
     { "exec",        l_cutils_exec },
     { "file_as_str", l_cutils_file_as_str },
     { "file_cat",    l_cutils_file_cat },
+    { "html_escape", l_cutils_html_escape },
     { "isdir",       l_cutils_isdir },
-    { "rmtree",       l_cutils_rmtree },
+    { "rmtree",      l_cutils_rmtree },
     { "isfile",      l_cutils_isfile },
     { "isfile_in_dir",      l_cutils_isfile_in_dir },
     { "is_qtype",    l_cutils_is_qtype },
@@ -1138,15 +1159,15 @@ static const struct luaL_Reg cutils_methods[] = {
     { "quote_str",   l_cutils_quote_str },
     { "read",        l_cutils_read },
     { "rand_file_name",       l_cutils_rand_file_name },
-    { "realpath",       l_cutils_realpath },
-    { "qtypes",       l_cutils_qtypes },
+    { "realpath",    l_cutils_realpath },
+    { "qtypes",      l_cutils_qtypes },
     { "rdtsc",       l_cutils_rdtsc },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
-    { "touch",     l_cutils_touch },
-    { "unlink",     l_cutils_unlink },
-    { "trim",     l_cutils_trim },
+    { "touch",       l_cutils_touch },
+    { "unlink",      l_cutils_unlink },
+    { "trim",        l_cutils_trim },
     { "write",       l_cutils_write },
     { NULL,  NULL         }
 };
@@ -1168,6 +1189,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "get_width_qtype",   l_cutils_get_width_qtype },
     { "get_format",   l_cutils_get_format },
     { "get_c_qtype", l_cutils_get_c_qtype },
+    { "html_escape",       l_cutils_html_escape },
     { "is_qtype",    l_cutils_is_qtype },
     { "isdir",       l_cutils_isdir },
     { "rmtree",      l_cutils_rmtree },

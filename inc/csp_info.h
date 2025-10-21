@@ -16,8 +16,6 @@ typedef struct _csp_dynamic_t {
   char *func;
   char *args;
   char *dummy; // sample code 
-  char *cache;  // length of cache provided by len below 
-  uint32_t len;
 } csp_dynamic_t;
 
 typedef struct _csp_frag_t { // frag == fragment

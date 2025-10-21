@@ -99,7 +99,9 @@ csp_parse(
       // START capture the dummy section if any 
       char *dummy = NULL, *tmp_dummy = NULL;
       char *yptr = xptr + strlen("?>");
+      if ( yptr == NULL ) { go_BYE(-1); }
       char *zptr = strstr(yptr, "<?Lua STOP"); 
+      if ( zptr == NULL ) { go_BYE(-1); }
       size_t dlen = zptr - yptr;
       tmp_dummy = malloc(dlen+1); memset(tmp_dummy, 0, dlen+1);
       dummy = malloc(dlen+1); memset(dummy, 0, dlen+1);

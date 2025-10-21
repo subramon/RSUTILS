@@ -14,6 +14,7 @@ SRCS += ../../src/file_cat.c
 SRCS += ../../src/get_bit_u64.c 
 SRCS += ../../src/get_file_size.c 
 SRCS += ../../src/get_time_usec.c 
+SRCS += ../../src/html_escape.c 
 SRCS += ../../src/isdir.c 
 SRCS += ../../src/rmtree.c 
 SRCS += ../../src/isfile.c 
