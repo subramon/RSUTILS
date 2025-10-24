@@ -172,7 +172,7 @@ handler(
       web_info->sess_state[uidx].sess_hash);
     evhttp_add_header(evhttp_request_get_output_headers(req),
           "Set-Cookie", cookie);
-    evbuffer_add_printf(reply, "{ \"Login\" : \"Successful\"}\n"); 
+    evbuffer_add_printf(reply, "{ \"Login\" : \"OK\"}\n"); 
     if ( web_info->home_page != NULL ) { 
       evhttp_add_header(evhttp_request_get_output_headers(req),
           "Location", web_info->home_page);

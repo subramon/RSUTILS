@@ -2,6 +2,7 @@
 extern int
 set_http_headers(
     const char * const extension,
+    bool is_cache,
     int *ptr_nH,
     char ***ptr_hdr_key,
     char ***ptr_hdr_val
@@ -9,5 +10,6 @@ set_http_headers(
 extern int
 prep_for_file_return(
     char * file_name, 
+    bool is_cache,
     web_response_t *ptr_web_response
     );

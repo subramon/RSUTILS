@@ -7,6 +7,7 @@
 int
 set_http_headers(
     const char * const extension,
+    bool is_cache,
     int *ptr_nH,
     char ***ptr_hdr_key,
     char ***ptr_hdr_val
@@ -35,7 +36,11 @@ set_http_headers(
   else if ( strcmp(extension, "json") == 0 )  {
     nH = 2; 
   }
+  else if ( strcmp(extension, "qdf") == 0 )  {
+    nH = 1; 
+  }
   if ( nH == 0 ) { return status; }
+  if ( is_cache ) { nH++; } 
   //=============================================
   hdr_key = malloc(nH * sizeof(char *));
   memset(hdr_key, 0,  nH * sizeof(char *));
@@ -64,12 +69,20 @@ set_http_headers(
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/javascript");
   }
+  else if ( strstr(extension, "qdf") != NULL )  {
+    hdr_key[0] =  strdup("Content-Type");
+    hdr_val[0] = strdup("application/octet-stream");
+  }
   if ( strstr(extension, "json") != NULL )  {
     hdr_key[0] =  strdup("Content-Type");
     hdr_val[0] = strdup("text/json");
 
     hdr_key[1] =  strdup("charset");
     hdr_val[1] = strdup("utf8");
+  }
+  if ( is_cache ) { 
+    hdr_key[nH-1] = strdup("Cache-Control");
+    hdr_val[nH-1] = strdup("public, max-age=31536000, immutable");
   }
   *ptr_nH = nH;
   *ptr_hdr_key = hdr_key;
@@ -83,6 +96,7 @@ BYE:
 int
 prep_for_file_return(
     char * file_name, 
+    bool is_cache, 
     web_response_t *ptr_web_response
     )
 {
@@ -95,7 +109,7 @@ prep_for_file_return(
   ptr_web_response->is_set = true; 
   ptr_web_response->file_name = file_name; // freed by caller
   status = extract_extension(file_name, &extension); cBYE(status);
-  status = set_http_headers(extension, 
+  status = set_http_headers(extension, is_cache, 
       &(ptr_web_response->num_headers),
       &(ptr_web_response->header_key),
       &(ptr_web_response->header_val));

@@ -22,6 +22,7 @@ bridge_csp(
   //---------------------------------------------------------
   if ( func == NULL ) { go_BYE(-1); }
   lua_getglobal(L, func);
+  if ( lua_gettop(L) != 1 ) { go_BYE(-1); }
   //---------------------------------------------------------
   if ( args == NULL ) { 
     lua_pushnil(L);
@@ -29,6 +30,7 @@ bridge_csp(
   else {
     lua_pushstring(L, args); 
   }
+  if ( lua_gettop(L) != 2 ) { go_BYE(-1); }
   //---------------------------------------------------------
   status = lua_pcall(L, 1, 1, 0);
   if ( status != 0 ) { 

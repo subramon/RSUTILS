@@ -269,6 +269,7 @@ SRCS += multiple.c
 SRCS += num_cols.c
 SRCS += num_lines.c
 SRCS += set_http_headers.c
+SRCS += parse_json_array.c  
 SRCS += q_omp_get_num_procs.c  
 SRCS += qtypes.c 
 SRCS += queue_helpers.c  
