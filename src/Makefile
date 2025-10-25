@@ -263,6 +263,7 @@ SRCS += ls.c
 SRCS += mk_dir_file_name.c 
 SRCS += mk_file.c 
 SRCS += mem_info.c 
+SRCS += mk_temp_copy.c
 SRCS += mk_temp_file.c
 SRCS += mk_temp_file_name.c
 SRCS += multiple.c 
