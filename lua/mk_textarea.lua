@@ -92,9 +92,8 @@ local function  mk_textarea(disp_str, aux)
   X[#X+1] = "</textarea>"
   return table.concat(X, "")
 end
---[[ UNIT TEST 
 return  mk_textarea
---]]
+--[[ UNIT TEST 
 local aux = {}
 local disp_str = "This is a text area "
 aux.rows = 10
@@ -110,3 +109,4 @@ aux.placeholder = "placeholder xx"
 print(mk_textarea(disp_str, aux))
 
 
+--]]

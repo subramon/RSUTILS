@@ -30,7 +30,7 @@ local function mk_button(I)
   if ( I.id ) then 
     assert(type(I.id) == "string")
     assert(no_funny_chars(I.id))
-    X[#X+1] = string.format('id = "%s" ', I.id)
+    X[#X+1] = string.format('id = "%sSubmit" ', I.id) -- TODO DISCUSS S
   end 
   --=== handle endpoint
   local name 
@@ -45,20 +45,20 @@ local function mk_button(I)
   assert(no_funny_chars(I.button_string, { " ", }))
   X[#X+1] = I.button_string
   X[#X+1] = "</button>"
+  X[#X+1] = string.format('<div class="status-ajax" id="%sStatus"></div> ',
+    I.id) -- TODO Discuss
   return table.concat(X, "")
 end
---[[ UNIT TEST 
 return  mk_button
---]]
+--[[ UNIT TEST 
 local I = {}
 I.id = "button_id_xx"
 I.button_string = "Submit button"
 I.endpoint = "Ignore"
 print(mk_button(I))
+--]]
 
 --[[
--- WHAT ABOUT 
---               <div class="status-ajax" id="%sStatus"></div>
 --
 --DISCUSS WITH UTPAL
 --data-endpoint="/Set%s"
