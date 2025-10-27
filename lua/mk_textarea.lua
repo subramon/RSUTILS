@@ -43,16 +43,6 @@ local function  mk_textarea(disp_str, aux)
     assert(aux.maxlength >= 1)
     X[#X+1] = string.format('maxlength = "%d" ', aux.maxlength)
   end
-  --=== handle minlength 
-  if ( aux.minlength ) then 
-    assert(type(aux.minlength) == "number")
-    assert(aux.minlength >= 1)
-    X[#X+1] = string.format('minlength = "%d" ', aux.minlength)
-  end
-  --=====
-  if ( ( aux.maxlength ) and ( aux.minlength ) ) then 
-    assert(aux.maxlength >= aux.minlength)
-  end
   --=== handle wrap 
   local wrap 
   if ( aux.wrap ) then 
@@ -99,7 +89,6 @@ local aux = {}
 local disp_str = "This is a text area "
 aux.rows = 10
 aux.cols = 20
-aux.minlength = 30
 aux.maxlength = 40
 aux.readonly = true 
 aux.id = "id_xx"

@@ -53,7 +53,7 @@ local function mk_textarea_with_button(disp_str, aux, taux, baux)
   assert(#baux.endpoint > 0)
   --========================================
   if ( not(baux.onclick) ) then 
-    baux.onclick = "submitAjax((this)"
+    baux.onclick = "submitAjax(this)"
   end
   assert(type(baux.onclick) == "string")
   assert(#baux.onclick > 0)
@@ -79,9 +79,9 @@ local function mk_textarea_with_button(disp_str, aux, taux, baux)
   local str = table.concat(X, "")
   return str
 end
-return mk_textarea_with_button
-
 --[[ UNIT TEST 
+return mk_textarea_with_button
+--]]
 
 local aux = {}
 aux.id = "Model"
@@ -91,7 +91,6 @@ local taux = {}
 local disp_str = "This is a text area "
 taux.rows = 10
 taux.cols = 20
-taux.minlength = 30
 taux.maxlength = 40
 taux.readonly = true 
 taux.wrap = "soft"
@@ -103,4 +102,3 @@ baux.debug = true
 print(mk_textarea_with_button(disp_str, aux, taux, baux))
 
 
---]]
