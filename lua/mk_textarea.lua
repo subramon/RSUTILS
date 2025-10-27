@@ -83,6 +83,7 @@ local function  mk_textarea(disp_str, aux)
     assert(no_funny_chars(aux.name, { " ", }))
     X[#X+1] = string.format('placeholder = "%s" ', aux.placeholder)
   end 
+  -- default behavior is textarea is editable 
   if ( aux.readonly ) then 
     assert(type(aux.readonly) == "boolean")
     X[#X+1] = " readonly "

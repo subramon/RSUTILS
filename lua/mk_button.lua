@@ -30,23 +30,28 @@ local function mk_button(I)
   if ( I.id ) then 
     assert(type(I.id) == "string")
     assert(no_funny_chars(I.id))
-    X[#X+1] = string.format('id = "%sSubmit" ', I.id) -- TODO DISCUSS S
+    X[#X+1] = string.format('id = "%s" ', I.id) 
   end 
-  --=== handle endpoint
-  local name 
-  if ( I.endpoint ) then  -- TODO Is this compulsory
-    assert(type(I.endpoint) == "string")
-    assert(no_funny_chars(I.endpoint))
-    X[#X+1] = string.format('data-endpoint = "/%s" ', I.endpoint)
-  end 
-  X[#X+1] = ' onclick="submitAjax(this)" '
+  --= handle endpoint
+  assert(type(I.endpoint) == "string")
+  X[#X+1] = string.format('data-endpoint = "/%s" ', I.endpoint)
+  --=== handle method
+  assert(type(I.method) == "string")
+  X[#X+1] = string.format('data-method = "%s" ', I.method)
+  --=== handle onclick
+  assert(type(I.onclick) == "string")
+  X[#X+1] = string.format('onclick= "%s" ', I.onclick)
+  --===================
   X[#X+1] = " > "
   assert(type(I.button_string) == "string")
+  assert(#I.button_string > 0)
   assert(no_funny_chars(I.button_string, { " ", }))
   X[#X+1] = I.button_string
   X[#X+1] = "</button>"
-  X[#X+1] = string.format('<div class="status-ajax" id="%sStatus"></div> ',
-    I.id) -- TODO Discuss
+  if ( I.status_id ) then 
+    X[#X+1] = string.format(
+    '<div class="status-ajax" id="%sStatus"></div> ', I.status_id) 
+  end
   return table.concat(X, "")
 end
 return  mk_button
