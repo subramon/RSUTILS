@@ -11,12 +11,6 @@ all : ${MYSO}  ut_task_cpu_time \
 	../lua/csv_meta_t.lua  \
 	../lua/csv_spec_t.lua   \
 	../lua/qtypes_def.lua  \
-	../lua/web_info.lua  \
-	webserver.o \
-	hit_endp.o \
-	setup_curl.o \
-	execute_curl.o \
-	cli_hit_endp \
 	cli_asc_to_bin \
 
 
@@ -237,17 +231,12 @@ SRCS += cat_to_buf.c
 SRCS += copy_file.c 
 SRCS += csv_meta_aux.c 
 SRCS += csv_spec_aux.c 
-SRCS += extract_api_args.c 
-SRCS += extract_extension.c 
-SRCS += extract_name_value.c 
-SRCS += extract_json_value.c 
 SRCS += file_cat.c 
 SRCS += file_as_str.c 
 SRCS += file_exists.c 
 SRCS += fp32tobf16.c
 SRCS += free_2d_array.c 
 SRCS += get_bit_u64.c  
-SRCS += get_body.c 
 SRCS += get_time_usec.c 
 SRCS += get_file_size.c 
 SRCS += gsub.c 
@@ -270,8 +259,6 @@ SRCS += mk_temp_file_name.c
 SRCS += multiple.c 
 SRCS += num_cols.c
 SRCS += num_lines.c
-SRCS += set_http_headers.c
-SRCS += parse_json_array.c  
 SRCS += q_omp_get_num_procs.c  
 SRCS += qtypes.c 
 SRCS += queue_helpers.c  
@@ -330,7 +317,7 @@ read_csv.o : QCFLAGS += -Wno-cast-align # for ARM
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
 	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
-		${GEN_OBJS} ${OBJS} -o ${MYSO} -levent -latomic -ljansson
+		${GEN_OBJS} ${OBJS} -o ${MYSO} -latomic 
 
 ut_task_cpu_time : ut_task_cpu_time.c
 	gcc -I../inc/ ut_task_cpu_time.c -o ut_task_cpu_time ${MYSO} -lpthread -lm
@@ -342,14 +329,6 @@ clean :
 	rm -f cli_asc_to_bin 
 	rm -f cli_hit_endp 
 
-
-../lua/web_info.lua : ${RSUTILS_SRC_ROOT}/inc/web_struct.h
-	echo " return [[ " > _xxx
-	luajit ${RSUTILS_SRC_ROOT}/lua/cli_for_cdef.lua  \
-	${RSUTILS_SRC_ROOT}/inc/web_struct.h >> _xxx
-	echo " ]] " >> _xxx
-	cat _xxx | sed s'/lua_State/void/'g > ../lua/web_info.lua
-	rm _xxx
 
 ../lua/csv_meta_t.lua : ${RSUTILS_SRC_ROOT}/inc/qtypes.h
 	echo " return [[ " > ../lua/csv_meta_t.lua 
@@ -374,20 +353,6 @@ clean :
 
 cli_asc_to_bin :  cli_asc_to_bin.c
 	gcc ${QCFLAGS} ${INCS} cli_asc_to_bin.c -o cli_asc_to_bin librsutils.so
-
-cli_hit_endp :  \
-	cli_hit_endp.o \
-	hit_endp.o \
-	isfile.o \
-	setup_curl.o  \
-	execute_curl.o  
-	gcc \
-	cli_hit_endp.o \
-	hit_endp.o \
-	isfile.o \
-	setup_curl.o  \
-	execute_curl.o  \
-		-o cli_hit_endp /usr/local/lib/libcurl.so
 
 # do not use following unless you absolutely need to
 # else, it breaks the build from UTILS/build/
