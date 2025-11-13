@@ -45,7 +45,7 @@ make_dist : make_dist.o
 	gcc make_dist.o -o make_dist ${MYLIBS}
 
 calc_dist : calc_dist.o 
-	gcc calc_dist.o -o calc_dist ${MYLIBS}
+	gcc calc_dist.o -o calc_dist ${MYLIBS} ${LIBS}
 
 
 clean :

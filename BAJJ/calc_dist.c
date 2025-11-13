@@ -1,3 +1,5 @@
+#include <math.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -22,28 +24,49 @@ calc_dist(
   char *X = NULL; size_t nX = 0;
   char *Y = NULL; size_t nY = 0;
 
-  int nMprime = (int)multiple_n((uint64_t)nM, REGISTER_SZ_BYTES); 
-  int nSprime = (int)multiple_n((uint64_t)nS, REGISTER_SZ_BYTES); 
-
+  // open chromosomes for reading 
   status = rs_mmap(infile, &X, &nX, 0); cBYE(status); // read-only
+  // open distances for writing 
   status = rs_mmap(opfile, &Y, &nY, 1); cBYE(status); // writable 
+  memset(Y, 0, nY);
   //----------------------------------------------------------------
   int blksz = 2;  // TODO P1
-  for ( int j = 0; j < nS; j++ ) {
-    for ( int k = 0; k < nS; k++ ) { 
+  for ( int j = 0; j < nS; j += blksz ) { 
+    for ( int k = j; k < nS; k += blksz ) { 
       // We will compute distances between (j, j+1, ..) and (k, k+1, ...)
-      int jlb = j*blksz; 
+      int jlb = j;
       int jub = jlb + blksz; if ( jub > nS ) { jub = nS; } 
-
-      int klb = k*blksz; 
+      int klb = k;
       int kub = klb + blksz; if ( kub > nS ) { kub = nS; } 
 
-      if ( jlb < klb ) { continue; }
+      if ( klb < jlb ) { go_BYE(-1); }
 
+      printf(" [%d, %d] -> [%d, %d ] \n", jlb, jub, klb, kub);
       // #pragma omp parallel for 
       for ( int jj = jlb; jj < jub; jj++ ) { 
         for ( int kk = klb; kk < kub; kk++ ) { 
-          printf("%02d,%02d \n", jj, kk); 
+          if ( kk <= jj ) { continue; } 
+          // compute offset into distance array 
+          size_t offset = 0; 
+          if ( jj == 0 ) { 
+            offset = 0;
+          }
+          else if ( jj == 1 ) { 
+            offset = nS;
+          }
+          else {
+            offset = (size_t)((jj*nS) - (jj*(jj-1))/ 2);
+          }
+          if ( jj == 0 ) { 
+            offset += kk; 
+          }
+          else { 
+            offset += kk - k; 
+          }
+          printf("%02d,%02d,%4ld \n", jj, kk, offset); 
+          if ( offset > nY ) { go_BYE(-1); } 
+          if ( Y[offset] != 0 ) { go_BYE(-1); }
+          Y[offset] = 1;
           /*
           int d = 0;
           for ( l = 0; l < nMprime; l++ ) { 
@@ -56,6 +79,7 @@ calc_dist(
         }
       }
     }
+    printf("=================================\n");
   }
 
   //----------------------------------------------------------------
