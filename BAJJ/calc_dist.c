@@ -11,7 +11,41 @@
 #include "consts.h"
 #include "calc_dist.h"
 
+// compute offset into distance array 
+static inline size_t 
+calc_offset(
+    int j, 
+    int k, 
+    int nS,
+    size_t nY
+    )
+{
+  size_t offset = 0; 
+  if ( j == 0 ) { 
+    offset = 0;
+  }
+  else if ( j == 1 ) { 
+    offset = (size_t)nS;
+  }
+  else {
+    offset = (size_t)((j*nS) - (j*(j-1))/ 2);
+  }
+  if ( j == 0 ) { 
+    offset += (size_t)k; 
+  }
+  else { 
+    offset += (size_t)(k - j); 
+  }
+  printf("%02d,%02d,%4ld \n", j, k, offset); 
+  if ( offset > nY ) { WHEREAMI; return UINT_MAX; } // some bad number
+  return offset;
+}
 // make distance matrix as a file which will be mmap'd
+typedef struct _todo_t { 
+    int j;
+    int k;
+    size_t o;
+} todo_t;
 int
 calc_dist(
     int nS, // number of samples 
@@ -23,6 +57,7 @@ calc_dist(
   int status = 0;
   char *X = NULL; size_t nX = 0;
   char *Y = NULL; size_t nY = 0;
+  todo_t *todo = NULL; 
 
   // open chromosomes for reading 
   status = rs_mmap(infile, &X, &nX, 0); cBYE(status); // read-only
@@ -30,7 +65,11 @@ calc_dist(
   status = rs_mmap(opfile, &Y, &nY, 1); cBYE(status); // writable 
   memset(Y, 0, nY);
   //----------------------------------------------------------------
+  int ctr = 1; 
   int blksz = 2;  // TODO P1
+  int max_todo = blksz * blksz;
+  todo = malloc((size_t)max_todo * sizeof(todo_t));
+  memset(todo, 0,  (size_t)max_todo * sizeof(todo_t));
   for ( int j = 0; j < nS; j += blksz ) { 
     for ( int k = j; k < nS; k += blksz ) { 
       // We will compute distances between (j, j+1, ..) and (k, k+1, ...)
@@ -43,41 +82,33 @@ calc_dist(
 
       printf(" [%d, %d] -> [%d, %d ] \n", jlb, jub, klb, kub);
       // #pragma omp parallel for 
+      int ll = 0; 
       for ( int jj = jlb; jj < jub; jj++ ) { 
         for ( int kk = klb; kk < kub; kk++ ) { 
           if ( kk <= jj ) { continue; } 
-          // compute offset into distance array 
-          size_t offset = 0; 
-          if ( jj == 0 ) { 
-            offset = 0;
-          }
-          else if ( jj == 1 ) { 
-            offset = nS;
-          }
-          else {
-            offset = (size_t)((jj*nS) - (jj*(jj-1))/ 2);
-          }
-          if ( jj == 0 ) { 
-            offset += kk; 
-          }
-          else { 
-            offset += kk - k; 
-          }
-          printf("%02d,%02d,%4ld \n", jj, kk, offset); 
-          if ( offset > nY ) { go_BYE(-1); } 
-          if ( Y[offset] != 0 ) { go_BYE(-1); }
-          Y[offset] = 1;
-          /*
-          int d = 0;
-          for ( l = 0; l < nMprime; l++ ) { 
-            if ( X[jj][d] ==  X[kk][d] ) {
-              d++;
-            }
-          }
-          D[jj][kk] += d;
-          */
+          size_t offset = calc_offset(jj, kk, nS, nY);
+          todo[ll].j = jj;
+          todo[ll].k = kk;
+          todo[ll].o = offset;
+          ll++;
         }
       }
+      int num_todo = ll;
+      for ( int i = 0; i < num_todo; i++ ) { 
+        size_t offset = todo[i].o;
+        if ( Y[offset] != 0 ) { go_BYE(-1); } // TODO FAKE 
+        Y[offset] = 1;
+      }
+
+      /*
+         int d = 0;
+         for ( l = 0; l < nMprime; l++ ) { 
+         if ( X[jj][d] ==  X[kk][d] ) {
+         d++;
+         }
+         }
+         D[jj][kk] += d;
+         */
     }
     printf("=================================\n");
   }
@@ -85,6 +116,7 @@ calc_dist(
   //----------------------------------------------------------------
 
 BYE:
+  free_if_non_null(todo);
   mcr_rs_munmap(X, nX);
   mcr_rs_munmap(Y, nY);
   return status;
