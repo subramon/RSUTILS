@@ -44,10 +44,10 @@ make_data : make_data.o
 make_dist : make_dist.o 
 	gcc make_dist.o -o make_dist ${MYLIBS}
 
-calc_dist : calc_dist.o 
-	gcc calc_dist.o -o calc_dist ${MYLIBS} ${LIBS}
+calc_dist : calc_dist.o dist_j_k.o
+	gcc calc_dist.o dist_j_k.o -o calc_dist ${MYLIBS} ${LIBS}
 
 
 clean :
 	rm -f make_data make_dist calc_dist \
-	rm -f *.o
+	rm -f *.o _* *.S

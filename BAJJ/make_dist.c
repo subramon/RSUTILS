@@ -35,7 +35,8 @@ make_dist(
   printf("nS = %d, nD = %" PRIu64 "\n", nS, nD);
 #endif
 
-  size_t fsz  = (size_t)(sizeof(uint8_t) * nD);
+  // NOTE: that each entry of distance array is uint16_t
+  size_t fsz  = (size_t)(sizeof(uint16_t) * nD);
   status = mk_file(NULL, "_dist.bin", fsz); cBYE(status);
   
 BYE:

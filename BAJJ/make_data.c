@@ -19,27 +19,35 @@ make_data(
 {
   int status = 0;
   FILE *fp = NULL;
-  int nMprime = (int)multiple_n((uint64_t)nM, REGISTER_SZ_BYTES); 
   fp = fopen(opfile, "wb");
   return_if_fopen_failed(fp, opfile, "wb");
   if ( seed == 0 ) { seed = (unsigned int)time(NULL); } 
   srandom(seed); 
   for ( int i = 0; i < nS; i++ ) { 
-    for ( int j = 0; j < nM; j += 2 ) { 
-      uint16_t top = (uint16_t)(MINVAL + (random() % (MAXVAL+1)));
-      uint16_t bot = (uint16_t)(MINVAL + (random() % (MAXVAL+1)));
+    int num_bytes_written = 0;
+    for ( int j = 0; j < nM; ) { 
+      uint16_t top = (uint16_t)(MINVAL + (random() % (MAXVAL)));
+      if (( top < MINVAL ) || ( top > MAXVAL )) { go_BYE(-1); }
+      j++;
+      uint16_t bot = 0;
+      if ( j < nM ) { 
+        bot = (uint16_t)(MINVAL + (random() % (MAXVAL)));
+        if (( bot < MINVAL ) || ( bot > MAXVAL )) { go_BYE(-1); }
+      }
+      j++;
       uint8_t out = (uint8_t)( ( top << 4 ) | bot);
       fwrite(&out, sizeof(uint8_t), 1, fp);
+      num_bytes_written++; 
     }
     // pad with zeroes
-    // If nM was odd that means we wrote one extra above. 
-    if ( ( ( nM / 2 ) * 2 ) != nM ) { 
-      nM = nM+1; 
-    }
-    for ( int j = nM; j < nMprime; j += 2 ) { 
+    int ub =  ( num_bytes_written / REGISTER_SZ_BYTES ) * REGISTER_SZ_BYTES;
+    if ( ub != num_bytes_written ) { ub += REGISTER_SZ_BYTES; }
+    for ( int j = num_bytes_written; j < ub; j++ ) { 
       uint8_t x = 0; 
       fwrite(&x, sizeof(uint8_t), 1, fp);
+      num_bytes_written++;
     }
+    // printf("i = %d, num_bytes_written = %d \n", i, num_bytes_written);
   }
   
 BYE:
