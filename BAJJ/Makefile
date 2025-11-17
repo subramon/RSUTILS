@@ -35,6 +35,9 @@ CC=gcc
 # CC=clang
 # CFLAGS=-Weverything -Wno-switch-enum
 
+ispc_dist_j_k.o : ispc_dist_j_k.ispc
+	ispc -o $@ $< 
+
 .c.o :
 	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS)
 
@@ -44,8 +47,9 @@ make_data : make_data.o
 make_dist : make_dist.o 
 	gcc make_dist.o -o make_dist ${MYLIBS}
 
-calc_dist : calc_dist.o dist_j_k.o
-	gcc calc_dist.o dist_j_k.o -o calc_dist ${MYLIBS} ${LIBS}
+calc_dist : calc_dist.o dist_j_k.o ispc_dist_j_k.o
+	gcc calc_dist.o dist_j_k.o ispc_dist_j_k.o \
+		-o calc_dist ${MYLIBS} ${LIBS}
 
 
 clean :

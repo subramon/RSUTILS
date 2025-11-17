@@ -10,6 +10,7 @@
 #include "rs_mmap.h"
 #include "consts.h"
 #include "dist_j_k.h"
+#include "ispc_dist_j_k.h"
 #include "calc_dist.h"
 
 // compute offset into distance array 
@@ -107,10 +108,21 @@ calc_dist(
         int kkk = todo[i].k;
         if ( D[offset] != 0 ) { 
           go_BYE(-1); } 
-        uint16_t d;
-        status = c_dist_j_k((uint8_t *)X, jjj, kkk, nM, nMprime, &d);
+        uint16_t d1, d2;
+#ifdef DEBUG
+        uint16_t d1;
+        status = c_dist_j_k((uint8_t *)X, jjj, kkk, nM, nMprime, &d1);
         cBYE(status);
-        D[offset] = d;
+#endif
+        uint8_t *Xj = NULL;
+        uint8_t *Xk = NULL;
+        uint16_t d2;
+        status = ispc_dist_j_k(Xj, Xk, nD, &d2); 
+        cBYE(status);
+#ifdef DEBUG
+        if ( d1 != d2 ) { go_BYE(-1); }
+#endif
+        D[offset] = d2;
       }
     }
   }
