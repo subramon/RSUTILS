@@ -24,9 +24,12 @@ c_dist_j_k(
 
   register int l = 0;
   register int maxi = (int)(ceil(nM/2.0));
-  for ( int i = 0; i < nMprime; i++ ) { 
-    uint8_t xj = X[j*nMprime+i];
-    uint8_t xk = X[k*nMprime+i];
+  for ( int i = 0; i < nMprime; i++ ) {
+    uint8_t *xj = X + (j*nMprime);
+    uint8_t *xk = X + (k*nMprime);
+    uint8_t xj_i = xj[i];
+    uint8_t xk_i = xk[i];
+
     if ( i > maxi ) {
 #ifdef DEBUG
       if ( xj != 0 ) { go_BYE(-1); }
@@ -38,8 +41,8 @@ c_dist_j_k(
     if ( xj == 0 ) { go_BYE(-1); }
     if ( xk == 0 ) { go_BYE(-1); }
 #endif 
-    uint8_t topj = xj >> 4;
-    uint8_t topk = xk >> 4;
+    uint8_t topj = xj_i >> 4;
+    uint8_t topk = xk_i >> 4;
 #ifdef DEBUG
     if ( ( topj < MINVAL ) || ( topj > MAXVAL ) ) { go_BYE(-1); }
     if ( ( topk < MINVAL ) || ( topk > MAXVAL ) ) { go_BYE(-1); }
@@ -48,8 +51,8 @@ c_dist_j_k(
     l++;
     if ( l >= nM ) { break; }
 
-    uint8_t botj = xj & (uint8_t)0xF; 
-    uint8_t botk = xk & (uint8_t)0xF; 
+    uint8_t botj = xj_i & (uint8_t)0xF; 
+    uint8_t botk = xk_i & (uint8_t)0xF; 
 #ifdef DEBUG
     if ( ( botj < MINVAL ) || ( botj > MAXVAL ) ) { go_BYE(-1); }
     if ( ( botk < MINVAL ) || ( botk > MAXVAL ) ) { go_BYE(-1); }

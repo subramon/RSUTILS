@@ -48,6 +48,7 @@ typedef struct _todo_t {
     int k;
     size_t o;
 } todo_t;
+
 int
 calc_dist(
     int nS, // number of samples 
@@ -67,19 +68,27 @@ calc_dist(
   status = rs_mmap(infile, &X, &nX, 0); cBYE(status); // read-only
   // open distances for writing 
   status = rs_mmap(opfile, &Y, &nY, 1); cBYE(status); // writable 
-  memset(Y, 0, nY);
+  memset(Y, 0, nY); // not necessary *think*
   nD = (uint64_t)(nY / sizeof(uint16_t));  // number of "distances"
   if ( nD * sizeof(uint16_t) != nY ) { go_BYE(-1); } 
   D = (uint16_t *)Y;
   //----------------------------------------------------------------
   uint64_t x = (uint64_t)ceil((double)nM/2.0); 
   int nMprime = (int)multiple_n(x, REGISTER_SZ_BYTES);
+  // 2*k*k + k*nM = cache size = 2^9
   int blksz = 2;  // TODO P1
   int max_todo = blksz * blksz;
   todo = malloc((size_t)max_todo * sizeof(todo_t));
   memset(todo, 0,  (size_t)max_todo * sizeof(todo_t));
-  for ( int j = 0; j < nS; j += blksz ) { 
-    for ( int k = j; k < nS; k += blksz ) { 
+  /* naive implementation 
+  for ( int j = 0; j < nS; j++ ) { // row index
+    for ( int k = j; k < nS; k++ ) {  // column index
+      // calculate dist between j and k 
+    }
+  }
+  */
+  for ( int j = 0; j < nS; j += blksz ) { // row index
+    for ( int k = j; k < nS; k += blksz ) {  // column index
       // We will compute distances between (j, j+1, ..) and (k, k+1, ...)
       int jlb = j;
       int jub = jlb + blksz; if ( jub > nS ) { jub = nS; } 
@@ -94,6 +103,7 @@ calc_dist(
       for ( int jj = jlb; jj < jub; jj++ ) { 
         for ( int kk = klb; kk < kub; kk++ ) { 
           if ( kk <= jj ) { continue; } 
+          // D[jj][kk] = 9999;
           size_t offset = calc_offset(jj, kk, nS, nD);
           todo[ll].j = jj;
           todo[ll].k = kk;
@@ -102,23 +112,22 @@ calc_dist(
         }
       }
       int num_todo = ll;
-      for ( int i = 0; i < num_todo; i++ ) { 
+#pragma omp parallel for 
+      for ( int i = 0; i < num_todo; i++ ) {
         size_t offset = todo[i].o;
         int jjj = todo[i].j;
         int kkk = todo[i].k;
-        if ( D[offset] != 0 ) { 
-          go_BYE(-1); } 
-        uint16_t d1, d2;
+        if ( D[offset] != 0 ) { go_BYE(-1); } 
 #ifdef DEBUG
         uint16_t d1;
         status = c_dist_j_k((uint8_t *)X, jjj, kkk, nM, nMprime, &d1);
         cBYE(status);
 #endif
-        uint8_t *Xj = NULL;
-        uint8_t *Xk = NULL;
+        size_t bytes_per_sample = 64; // TODO P0
+        uint8_t *Xj = (uint8_t *)X + (size_t)jjj*bytes_per_sample;
+        uint8_t *Xk = (uint8_t *)X + (size_t)kkk*bytes_per_sample;
         uint16_t d2;
-        status = ispc_dist_j_k(Xj, Xk, nD, &d2); 
-        cBYE(status);
+        ispc_dist_j_k(Xj, Xk, bytes_per_sample, &d2); 
 #ifdef DEBUG
         if ( d1 != d2 ) { go_BYE(-1); }
 #endif

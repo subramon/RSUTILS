@@ -8,6 +8,7 @@
 #include "multiple.h"
 #include "make_data.h"
 
+// each sample has a multiple of 64 bytes
 // marker takes on values 1, 2, ... 7
 int
 make_data(
@@ -23,9 +24,9 @@ make_data(
   return_if_fopen_failed(fp, opfile, "wb");
   if ( seed == 0 ) { seed = (unsigned int)time(NULL); } 
   srandom(seed); 
-  for ( int i = 0; i < nS; i++ ) { 
+  for ( int i = 0; i < nS; i++ ) {
     int num_bytes_written = 0;
-    for ( int j = 0; j < nM; ) { 
+    for ( int j = 0; j < nM; ) {
       uint16_t top = (uint16_t)(MINVAL + (random() % (MAXVAL)));
       if (( top < MINVAL ) || ( top > MAXVAL )) { go_BYE(-1); }
       j++;
