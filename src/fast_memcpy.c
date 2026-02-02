@@ -8,17 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
-
-
-static uint64_t
-RDTSC(
-    void
-    )
-{
-  unsigned int lo, hi;
-  asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
-  return ((uint64_t)hi << 32) | lo;
-}
+#include "rdtsc.h"
 
 int
 main(
@@ -31,16 +21,16 @@ main(
   X = malloc(N * sizeof(int));
   Y = malloc(N * sizeof(int));
 
-  uint64_t t1 = RDTSC();
+  uint64_t t1 = rdtsc();
   for ( int i = 0; i < 100; i++ ) { 
     memcpy(X, Y, N * sizeof(int));
   }
-  printf("memcpy = %lu \n", RDTSC() - t1); 
+  printf("memcpy = %lu \n", rdtsc() - t1); 
 
-  t1 = RDTSC();
+  t1 = rdtsc();
   for ( int i = 0; i < 20; i++ ) { 
     _intel_fast_memcpy(X, Y, N * sizeof(int));
   }
-  printf("_intel_fast_memcpy = %lu \n", RDTSC() - t1); 
+  printf("_intel_fast_memcpy = %lu \n", rdtsc() - t1); 
 }
 

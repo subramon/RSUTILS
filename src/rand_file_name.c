@@ -5,22 +5,9 @@
 #include <sys/time.h>
 #include <time.h>
 #include "q_macros.h"
+#include "rdtsc.h"
 #include "rand_file_name.h"
 
-static inline uint64_t RDTSC(
-    void
-    )
-{
-#ifdef ARM
-  struct timeval Tps; struct timezone Tpf;
-  gettimeofday (&Tps, &Tpf);
-  return ((uint64_t )Tps.tv_sec + 1000000* (uint64_t )Tps.tv_usec);
-#else
-  unsigned int hi, lo;
-    __asm__ volatile("rdtsc" : "=a" (lo), "=d" (hi));
-  return ((uint64_t)hi << 32) | lo;
-#endif
-}
 //START_FUNC_DECL
 int
 rand_file_name(
@@ -37,7 +24,7 @@ rand_file_name(
   if (  bufsz < 47 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
   if ( seed == 0 ) { 
-    seed = RDTSC();
+    seed = rdtsc();
     srand48_r(seed, &buffer);
   }
   char ct[32];

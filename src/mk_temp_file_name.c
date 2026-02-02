@@ -25,21 +25,21 @@ mk_temp_file_name(
 
   if ( prefix == NULL ) { 
     if ( suffix  == NULL ) { 
-      sprintf(x, "_%" PRIu64 "_%lu", RDTSC(), syscall(SYS_gettid));
+      sprintf(x, "_%" PRIu64 "_%lu", rdtsc(), syscall(SYS_gettid));
     }
     else {
      sprintf(x, "_%" PRIu64 "_%lu_%s", 
-        RDTSC(), syscall(SYS_gettid), suffix);
+        rdtsc(), syscall(SYS_gettid), suffix);
     }
   }
   else {
     if ( suffix == NULL ) { 
       sprintf(x, "%s_%" PRIu64 "_%lu", prefix, 
-        RDTSC(), syscall(SYS_gettid));
+        rdtsc(), syscall(SYS_gettid));
     }
     else {
       sprintf(x, "%s_%" PRIu64 "_%lu_%s", prefix, 
-        RDTSC(), syscall(SYS_gettid), suffix);
+        rdtsc(), syscall(SYS_gettid), suffix);
     }
   }
   *ptr_name = x; 
