@@ -257,7 +257,7 @@ static int l_cutils_rdtsc(
     lua_State *L
     )
 {
-  uint64_t x = (uint64_t)RDTSC();
+  uint64_t x = (uint64_t)rdtsc();
   lua_pushnumber(L, x);
   return 1;
 }
@@ -703,6 +703,24 @@ static int l_cutils_getsize(
   int64_t file_size =  get_file_size(file_name);
   lua_pushnumber(L, file_size);
   return 1;
+}
+//----------------------------------------
+static int l_cutils_rename( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  if ( lua_gettop(L) != 2 ) { go_BYE(-1); }
+  const char *const oldfile = luaL_checkstring(L, 1);
+  const char *const newfile = luaL_checkstring(L, 2);
+  status = rename(oldfile, newfile); cBYE(status);
+  lua_pushboolean(L, true);
+  return 1; 
+BYE:
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3;
 }
 //----------------------------------------
 static int l_cutils_isfile( 
@@ -1162,6 +1180,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "realpath",    l_cutils_realpath },
     { "qtypes",      l_cutils_qtypes },
     { "rdtsc",       l_cutils_rdtsc },
+    { "rename",       l_cutils_rename },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
@@ -1203,6 +1222,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "mkdir",       l_cutils_mkdir },
     { "mk_file",     l_cutils_mk_file },
     { "mkstemp",     l_cutils_mkstemp },
+    { "mk_temp_file",     l_cutils_mk_temp_file},
     { "mk_temp_file_name",     l_cutils_mk_temp_file_name },
     { "num_cols",   l_cutils_num_cols },
     { "num_lines",   l_cutils_num_lines },
@@ -1213,6 +1233,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "realpath",       l_cutils_realpath },
     { "qtypes",       l_cutils_qtypes },
     { "rdtsc",       l_cutils_rdtsc },
+    { "rename",       l_cutils_rename },
     { "str_as_file", l_cutils_str_as_file },
     { "str_qtype_to_str_ctype", l_cutils_str_qtype_to_str_ctype },
     { "str_qtype_to_str_ispctype", l_cutils_str_qtype_to_str_ispctype },
