@@ -10,7 +10,7 @@ main()
 #define N 10
   uint64_t X[N];
 
-  srand48(RDTSC());
+  srand48(rdtsc());
 
   for ( int i = 0; i < N; i++ ) { 
     X[i] = lrand48();
