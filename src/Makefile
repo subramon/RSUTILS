@@ -224,6 +224,7 @@ lookup8.o : QCFLAGS += -Wno-implicit-fallthrough # not my code :-(
 spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
 SRCS := addr_as_hex_string.c 
+SRCS += almost_eq.c 
 SRCS += BL_to_txt.c 
 SRCS += bf16tofp32.c
 SRCS += bin_search_UI4.c
@@ -248,6 +249,7 @@ SRCS += isfile_in_dir.c
 SRCS += isdir.c 
 SRCS += line_finder.c
 SRCS += num_lines_safe.c
+SRCS += levenshtein.c
 SRCS += lookup8.c
 SRCS += ls.c
 SRCS += mk_dir_file_name.c 
