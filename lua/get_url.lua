@@ -31,11 +31,14 @@ local function get_url(url, cookie_file, cookie_jar)
   -- Cookies are written to the file during close/cleanup
   c:close()
 end
-
+return get_url
+--[[
+-- quick and dirty test
 url = "http://www.example.com"
 url = "http://localhost:8080/Login?User=subramon"
 cookie_file = "_cookies.txt"
 cookie_jar = "_cookies.txt"
 rslt = get_url(url, cookie_file, cookie_jar)
 print(rslt)
+--]]
 
