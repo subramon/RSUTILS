@@ -1,8 +1,12 @@
 --  sudo luarocks install Lua-cURL
 -- local cURL = require("lcurl")
-local curl = require("cURL")
+-- local curl = require("cURL")
+local curl = require("lcurl")
 local function get_url(url, cookie_file, cookie_jar)
   
+  -- for writeback
+  local y = ""
+  local function to_str(x) y = y .. x end
   -- Initialize curl easy session
   local c = curl.easy()
   
@@ -19,6 +23,9 @@ local function get_url(url, cookie_file, cookie_jar)
   -- Set target URL
   c:setopt(curl.OPT_URL, url)
   
+
+  -- Set writeback 
+  c:setopt_writefunction(to_str)
   -- Perform the request
   local success, err = pcall(function()
       c:perform()
@@ -26,19 +33,21 @@ local function get_url(url, cookie_file, cookie_jar)
   
   if not success then
       print("Curl error: ", err)
+      return false
   end
   
   -- Cookies are written to the file during close/cleanup
   c:close()
+  return y
 end
 return get_url
 --[[
 -- quick and dirty test
-url = "http://www.example.com"
 url = "http://localhost:8080/Login?User=subramon"
+url = "http://www.example.com"
 cookie_file = "_cookies.txt"
 cookie_jar = "_cookies.txt"
 rslt = get_url(url, cookie_file, cookie_jar)
-print(rslt)
+print("rslt = ", rslt)
 --]]
 
