@@ -244,6 +244,7 @@ SRCS += gsub.c
 SRCS += html_escape.c 
 SRCS += html_unescape.c 
 SRCS += is_valid_chars_for_num.c 
+SRCS += is_valid_yaml.c 
 SRCS += isfile.c 
 SRCS += isfile_in_dir.c 
 SRCS += isdir.c 
@@ -352,6 +353,10 @@ clean :
 		${RSUTILS_SRC_ROOT}/inc/qtypes.h \
 		>> ../lua/qtypes_def.lua 
 	echo " ]] " >> ../lua/qtypes_def.lua 
+
+ut_pg_get_rslt_set : pg_get_rslt_set.c
+	 gcc -o ut_pg_get_rslt_set pg_get_rslt_set.c ut_pg_get_rslt_set.c  \
+	   -lpq -I/usr/include/postgresql -I../inc/
 
 cli_asc_to_bin :  cli_asc_to_bin.c
 	gcc ${QCFLAGS} ${INCS} cli_asc_to_bin.c -o cli_asc_to_bin librsutils.so
