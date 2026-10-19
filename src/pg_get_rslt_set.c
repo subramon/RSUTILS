@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <libpq-fe.h>
@@ -70,6 +71,38 @@ void json_escape_append(StringBuffer *sb, const char *val) {
     }
     append_buffer(sb, "\"");
 }
+// Execute query 
+int
+pg_exec_query_no_rslt(
+    PGconn *conn, 
+    const char *query
+    ) 
+{
+  int status = 0;
+  if ( conn == NULL ) { go_BYE(-1); } 
+  if ( ( query == NULL ) || ( *query == '\0' ) ) { go_BYE(-1); } 
+
+  PGresult *res = PQexec(conn, query);
+
+  if ( res == NULL ) {
+    fprintf(stderr, "ERROR: [%s]\n", PQerrorMessage(conn)); go_BYE(-1); 
+  }
+  ExecStatusType pqstatus;
+  pqstatus = PQresultStatus(res); 
+  if (status != PGRES_COMMAND_OK) {
+    fprintf(stderr, "ERROR: [%s]\n", PQerrorMessage(conn)); go_BYE(-1); 
+  }
+  /* TODO P2 Should I check num rows affected?
+     char *rows_affected_str = PQcmdTuples(res);
+     int rows_affected = atoi(rows_affected_str);
+
+     if (rows_affected == 0) { ... }
+     */
+BYE:
+  if ( res != NULL ) { PQclear(res); }
+  return status;
+}
+
 
 // Execute query and return result as a JSON string
 char *query_to_json(PGconn *conn, const char *query) {
@@ -120,7 +153,37 @@ char *query_to_json(PGconn *conn, const char *query) {
 }
 
 int 
+pg_get_conn(
+    const char * const host,
+    const char * const db,
+    const char * const user,
+    const char * const pass,
+    PGconn **ptr_conn
+    ) 
+{
+  int status = 0;
+  PGconn *conn = NULL; bool conn_set = false;
+#define CONN_LEN 1024
+  char conn_info[CONN_LEN]; memset(conn_info, 0, CONN_LEN);
+  // Connection string format for libpq
+  *ptr_conn = NULL;
+  snprintf(conn_info, CONN_LEN-1, 
+      "host=%s dbname=%s user=%s password=%s", host, db, user, pass);
+
+  conn = PQconnectdb(conn_info);
+  if (PQstatus(conn) != CONNECTION_OK) {
+    fprintf(stderr, "Connection to database failed: %s\n", 
+        PQerrorMessage(conn));
+    go_BYE(-1);
+  }
+  *ptr_conn = conn;
+BYE:
+  return status;
+}
+
+int 
 pg_get_rslt_set(
+    PGconn *in_conn,
     const char * const query,
     const char * const host,
     const char * const db,
@@ -131,19 +194,18 @@ pg_get_rslt_set(
     ) 
 {
   int status = 0;
+  PGconn *conn = NULL; bool conn_set = false;
 #define CONN_LEN 1024
   char conn_info[CONN_LEN];
   // Connection string format for libpq
   //
-  memset(conn_info, 0, CONN_LEN);
-  snprintf(conn_info, CONN_LEN-1, 
-      "host=%s dbname=%s user=%s password=%s", host, db, user, pass);
-
-  PGconn *conn = PQconnectdb(conn_info);
-  if (PQstatus(conn) != CONNECTION_OK) {
-    fprintf(stderr, "Connection to database failed: %s\n", 
-        PQerrorMessage(conn));
-    go_BYE(-1);
+  if ( in_conn == NULL ) { 
+    status = pg_get_conn(host, db, user, pass, &conn);
+    cBYE(status);
+    conn_set = true;
+  }
+  else {
+    conn = in_conn;
   }
 
   *ptr_json_result = query_to_json(conn, query);
@@ -152,21 +214,6 @@ pg_get_rslt_set(
     go_BYE(-1);
   }
 BYE:
-  if ( conn != NULL ) { PQfinish(conn); }
+  if ( conn_set ) { if ( conn != NULL ) { PQfinish(conn); } }
   return status;
 }
-#undef UNIT_TEST
-#ifdef UNIT_TEST
-int 
-main() 
-{
-  int status = 0;
-  char *json_rslt_str = NULL;
-
-  status = pg_get_rslt_set("SELECT * FROM test", "localhost", "test_manager", "subramon", "P123456", &json_rslt_str);
-  cBYE(status);
-  printf("Result set = \n%s\n", json_rslt_str);
-BYE:
-  free_if_non_null(json_rslt_str);
-}
-#endif
