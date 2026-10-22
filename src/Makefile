@@ -238,13 +238,14 @@ SRCS += file_exists.c
 SRCS += fp32tobf16.c
 SRCS += free_2d_array.c 
 SRCS += get_bit_u64.c  
+SRCS += get_time_as_timestamp.c 
 SRCS += get_time_usec.c 
 SRCS += get_file_size.c 
 SRCS += gsub.c 
 SRCS += html_escape.c 
 SRCS += html_unescape.c 
 SRCS += is_valid_chars_for_num.c 
-SRCS += is_valid_yaml.c 
+# SRCS += is_valid_yaml.c 
 SRCS += isfile.c 
 SRCS += isfile_in_dir.c 
 SRCS += isdir.c 
@@ -272,12 +273,14 @@ SRCS += read_to_eoln.c
 SRCS += rmtree.c 
 SRCS += rs_mmap.c 
 SRCS += rs_strcat.c 
+SRCS += run_cmd_capture.c 
 SRCS += SC_to_txt.c 
 SRCS += send_udp_pkt.c  
 SRCS += set_bit_u64.c  
 SRCS += sort1.c 
 SRCS += split_str.c
 SRCS += spooky_hash.c 
+SRCS += sql_quote.c 
 SRCS += str_as_file.c  
 SRCS += stretch.c  
 SRCS += strnstr.c  
@@ -354,7 +357,7 @@ clean :
 		>> ../lua/qtypes_def.lua 
 	echo " ]] " >> ../lua/qtypes_def.lua 
 
-ut_pg_get_rslt_set : pg_get_rslt_set.c
+ut_pg_get_rslt_set : pg_get_rslt_set.c ut_pg_get_rslt_set.c
 	 gcc -o ut_pg_get_rslt_set pg_get_rslt_set.c ut_pg_get_rslt_set.c  \
 	   -lpq -I/usr/include/postgresql -I../inc/
 

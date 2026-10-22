@@ -14,40 +14,55 @@ typedef struct {
     size_t capacity;
 } StringBuffer;
 
-void init_buffer(StringBuffer *sb, size_t initial_capacity) {
-    sb->data = malloc(initial_capacity);
-    sb->data[0] = '\0';
-    sb->len = 0;
-    sb->capacity = initial_capacity;
+static 
+void init_buffer(
+    StringBuffer *sb, 
+    size_t initial_capacity
+    ) 
+{
+  sb->data = malloc(initial_capacity);
+  sb->data[0] = '\0';
+  sb->len = 0;
+  sb->capacity = initial_capacity;
 }
 
-void append_buffer(StringBuffer *sb, const char *fmt, ...) {
-    va_list args;
-    va_start(args, fmt);
-    
-    // Determine required length
-    va_list args_copy;
-    va_copy(args_copy, args);
-    int needed = vsnprintf(NULL, 0, fmt, args_copy);
-    va_end(args_copy);
+static 
+void append_buffer(
+    StringBuffer *sb, 
+    const char *fmt, 
+    ...)
+{
+  va_list args;
+  va_start(args, fmt);
 
-    if (needed < 0) {
-        va_end(args);
-        return;
-    }
+  // Determine required length
+  va_list args_copy;
+  va_copy(args_copy, args);
+  int needed = vsnprintf(NULL, 0, fmt, args_copy);
+  va_end(args_copy);
 
-    if (sb->len + needed + 1 >= sb->capacity) {
-        sb->capacity = (sb->len + needed + 1) * 2;
-        sb->data = realloc(sb->data, sb->capacity);
-    }
-
-    vsnprintf(sb->data + sb->len, sb->capacity - sb->len, fmt, args);
-    sb->len += needed;
+  if (needed < 0) {
     va_end(args);
+    return;
+  }
+
+  if (sb->len + needed + 1 >= sb->capacity) {
+    sb->capacity = (sb->len + needed + 1) * 2;
+    sb->data = realloc(sb->data, sb->capacity);
+  }
+
+  vsnprintf(sb->data + sb->len, sb->capacity - sb->len, fmt, args);
+  sb->len += needed;
+  va_end(args);
 }
 
 // Function to escape special JSON characters in values
-void json_escape_append(StringBuffer *sb, const char *val) {
+static 
+void json_escape_append(
+    StringBuffer *sb, 
+    const char *val
+    ) 
+{
     append_buffer(sb, "\"");
     if (val) {
         for (int i = 0; val[i] != '\0'; i++) {
@@ -89,7 +104,7 @@ pg_exec_query_no_rslt(
   }
   ExecStatusType pqstatus;
   pqstatus = PQresultStatus(res); 
-  if (status != PGRES_COMMAND_OK) {
+  if ( pqstatus != PGRES_COMMAND_OK) {
     fprintf(stderr, "ERROR: [%s]\n", PQerrorMessage(conn)); go_BYE(-1); 
   }
   /* TODO P2 Should I check num rows affected?
@@ -105,51 +120,58 @@ BYE:
 
 
 // Execute query and return result as a JSON string
-char *query_to_json(PGconn *conn, const char *query) {
-    PGresult *res = PQexec(conn, query);
+static char 
+*query_to_json(
+    PGconn *conn, 
+    const char *query,
+    int *ptr_n_rows
+    ) 
+{
+  PGresult *res = PQexec(conn, query);
 
-    if (PQresultStatus(res) != PGRES_TUPLES_OK) {
-        fprintf(stderr, "Query failed: %s\n", PQerrorMessage(conn));
-        PQclear(res);
-        return NULL;
-    }
-
-    int rows = PQntuples(res);
-    int cols = PQnfields(res);
-
-    StringBuffer sb;
-    init_buffer(&sb, 4096);
-
-    append_buffer(&sb, "[");
-
-    for (int i = 0; i < rows; i++) {
-        append_buffer(&sb, "%s{", (i == 0) ? "" : ",");
-        
-        for (int j = 0; j < cols; j++) {
-            const char *col_name = PQfname(res, j);
-            
-            append_buffer(&sb, "\"%s\":", col_name);
-
-            if (PQgetisnull(res, i, j)) {
-                append_buffer(&sb, "null");
-            } else {
-                // You can add logic here to check data types using PQftype(res, j)
-                // and avoid quotes for numbers/booleans. For simplicity, we 
-                // treat all values as strings or format appropriately.
-                json_escape_append(&sb, PQgetvalue(res, i, j));
-            }
-
-            if (j < cols - 1) {
-                append_buffer(&sb, ",");
-            }
-        }
-        append_buffer(&sb, "}");
-    }
-
-    append_buffer(&sb, "]");
-
+  if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+    fprintf(stderr, "Query failed: %s\n", PQerrorMessage(conn));
     PQclear(res);
-    return sb.data;
+    return NULL;
+  }
+
+  int rows = PQntuples(res);
+  *ptr_n_rows = rows; 
+  int cols = PQnfields(res);
+
+  StringBuffer sb;
+  init_buffer(&sb, 4096);
+
+  append_buffer(&sb, "[");
+
+  for (int i = 0; i < rows; i++) {
+    append_buffer(&sb, "%s{", (i == 0) ? "" : ",");
+
+    for (int j = 0; j < cols; j++) {
+      const char *col_name = PQfname(res, j);
+
+      append_buffer(&sb, "\"%s\":", col_name);
+
+      if (PQgetisnull(res, i, j)) {
+        append_buffer(&sb, "null");
+      } else {
+        // You can add logic here to check data types using PQftype(res, j)
+        // and avoid quotes for numbers/booleans. For simplicity, we 
+        // treat all values as strings or format appropriately.
+        json_escape_append(&sb, PQgetvalue(res, i, j));
+      }
+
+      if (j < cols - 1) {
+        append_buffer(&sb, ",");
+      }
+    }
+    append_buffer(&sb, "}");
+  }
+
+  append_buffer(&sb, "]");
+
+  PQclear(res);
+  return sb.data;
 }
 
 int 
@@ -162,13 +184,19 @@ pg_get_conn(
     ) 
 {
   int status = 0;
-  PGconn *conn = NULL; bool conn_set = false;
+  PGconn *conn = NULL; 
 #define CONN_LEN 1024
   char conn_info[CONN_LEN]; memset(conn_info, 0, CONN_LEN);
   // Connection string format for libpq
   *ptr_conn = NULL;
+  if ( ( pass == NULL ) || ( *pass == '\0' ) ) { 
+  snprintf(conn_info, CONN_LEN-1, 
+      "host=%s dbname=%s user=%s ", host, db, user); 
+  }
+  else {
   snprintf(conn_info, CONN_LEN-1, 
       "host=%s dbname=%s user=%s password=%s", host, db, user, pass);
+  }
 
   conn = PQconnectdb(conn_info);
   if (PQstatus(conn) != CONNECTION_OK) {
@@ -189,14 +217,14 @@ pg_get_rslt_set(
     const char * const db,
     const char * const user,
     const char * const pass,
-    char **ptr_json_result
-
+    char **ptr_json_result,
+    int *ptr_n_rows
     ) 
 {
   int status = 0;
   PGconn *conn = NULL; bool conn_set = false;
-#define CONN_LEN 1024
-  char conn_info[CONN_LEN];
+  *ptr_n_rows = 0;
+  *ptr_json_result = NULL;
   // Connection string format for libpq
   //
   if ( in_conn == NULL ) { 
@@ -208,7 +236,7 @@ pg_get_rslt_set(
     conn = in_conn;
   }
 
-  *ptr_json_result = query_to_json(conn, query);
+  *ptr_json_result = query_to_json(conn, query, ptr_n_rows);
 
   if ( *ptr_json_result == NULL ) {
     go_BYE(-1);

@@ -11,7 +11,8 @@ pg_get_rslt_set(
     const char * const db,
     const char * const user,
     const char * const pass,
-    char **ptr_json_result
+    char **ptr_json_result,
+    int *ptr_n_rows
     );
 extern int 
 pg_get_conn(

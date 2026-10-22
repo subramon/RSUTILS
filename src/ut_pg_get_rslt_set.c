@@ -13,8 +13,9 @@ main()
   char conn_info[CONN_LEN];
 
   // test without connection
+  int n_rows; 
   status = pg_get_rslt_set(NULL, "SELECT * FROM test", "localhost", 
-      "test_manager", "subramon", "P123456", &json_rslt_str);
+      "test_manager", "subramon", "P123456", &json_rslt_str, &n_rows);
   cBYE(status);
   printf("Result set = \n%s\n", json_rslt_str);
   free_if_non_null(json_rslt_str);
@@ -23,9 +24,10 @@ main()
   const char *host = "localhost";
   const char *db = "test_manager";
   const char *user = "subramon";
-  const char *pass = "P123456";
+  const char *pass = NULL; // "P123456"; Comes from ~/.pgpass
   snprintf(conn_info, CONN_LEN-1, 
-      "host=%s dbname=%s user=%s password=%s", host, db, user, pass);
+      "host=%s dbname=%s user=%s ", host, db, user, pass);
+  printf("%s\n", conn_info);
 
   conn = PQconnectdb(conn_info);
   if (PQstatus(conn) != CONNECTION_OK) {
@@ -35,7 +37,7 @@ main()
   }
   conn_set = true;
   status = pg_get_rslt_set(conn, "SELECT * FROM test", "localhost", 
-      "test_manager", "subramon", "P123456", &json_rslt_str);
+      "test_manager", "subramon", "P123456", &json_rslt_str, &n_rows);
   cBYE(status);
   printf("SUCCESS\n");
 BYE:

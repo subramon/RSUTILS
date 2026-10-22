@@ -18,12 +18,13 @@ str_as_file(
   fp = fopen(outfile, "wb");
   return_if_fopen_failed(fp, outfile, "wb");
   size_t len = strlen(str);
+  if ( len == 0 ) { goto BYE; } // nothing to do 
   size_t nw = fwrite(str, len, 1, fp); 
   if ( nw != 1 ) { go_BYE(-1); }
-  fclose_if_non_null(fp);
 #ifdef DEBUG
   if ( len != (size_t)get_file_size(outfile) ) { go_BYE(-1); }
 #endif
 BYE:
+  fclose_if_non_null(fp);
   return status;
 }
