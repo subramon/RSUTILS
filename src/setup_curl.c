@@ -32,6 +32,7 @@ WriteMemoryCallback(
   }
   if ( newsize != U->size ) { 
     U->base = realloc(U->base, newsize);
+    if ( U->base == NULL ) { WHEREAMI; return 0; } 
     U->size = newsize;
   }
   memcpy(U->base+U->offset, contents, bytes_to_write);

@@ -1,3 +1,5 @@
+#ifndef __SETUP_CURL
+#define __SETUP_CURL
 // for storing response from curl 
 typedef struct _curl_userdata_t { 
   char *base;
@@ -18,3 +20,4 @@ setup_curl(
     const char * const cookie_file,
     CURL **ptr_ch
     );
+#endif // __SETUP_CURL
