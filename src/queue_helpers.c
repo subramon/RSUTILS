@@ -1,5 +1,6 @@
 #include "q_incs.h"
 #include <stdatomic.h>
+#include <threads.h> // Requires C11 support 
 #include "get_time_usec.h"
 #include "queue_helpers.h"
 int
@@ -70,6 +71,7 @@ wait_for_spot(
     uint64_t t1 = get_time_usec();
     struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 10 * 1000000 };
     nanosleep(&tmspec, NULL);
+    // ALSO WORKS thrd_sleep(&(struct timespec){.tv_nsec = 10000000}, NULL);
     uint64_t t2 = get_time_usec();
     *ptr_t_sleep += (t2-t1);
     l_t_sleep += (t2-t1);
