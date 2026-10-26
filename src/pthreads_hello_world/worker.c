@@ -2,9 +2,11 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include "worker.h"
 
+extern _Atomic bool g_is_finished;
 
 void cleaner(
     void* arg
@@ -22,6 +24,7 @@ void cleaner(
   // 2. Unlock mutex to prevent deadlocking other threads
   // if any global sharing is likely to have happened
   printf("Cleanup done\n");
+  g_is_finished = true;
 }
 
 void* 
