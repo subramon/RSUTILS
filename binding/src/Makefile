@@ -1,5 +1,7 @@
 
-INCS= -I../../inc  -I/usr/include/lua5.1 \
+INCS= -I../../inc  \
+      -I${RSLUTILS_SRC_ROOT}/inc/\
+      -I/usr/include/lua5.1 \
 
 
 all: libcutils.so 
@@ -34,6 +36,14 @@ SRCS += ../../src/str_as_file.c
 SRCS += ../../src/tm2time.c 
 SRCS += ../../src/touch.c 
 SRCS += ../../src/trim.c 
+SRCS += ${RSLUTILS_SRC_ROOT}//src/get_tbl_of_key_vals.c 
+SRCS += ../../src/setup_curl.c
+SRCS += ../../src/post_curl.c
+SRCS += ../../src/shutdown_curl.c
+SRCS += ../../src/execute_curl.c
+SRCS += ../../src/xcurl.c
+SRCS += ../../src/txt_to_I8.c
+SRCS += ../../src/free_2d_array.c
 
 OBJS = $(SRCS:.c=.o)
 
@@ -47,5 +57,5 @@ clean:
 	rm -f *.so *.o _* ${OBJS} 
 		
 libcutils.so:   ${OBJS} 
-	gcc ${OBJS} -shared -o libcutils.so -lgomp ${QLDFLAGS}
+	gcc ${OBJS} -shared -o libcutils.so -lgomp ${QLDFLAGS} -lcurl
 

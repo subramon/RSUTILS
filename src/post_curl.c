@@ -14,12 +14,14 @@ post_curl(
   CURLcode curl_res;
   
   curl_easy_setopt(ch, CURLOPT_URL, url);
-  curl_easy_setopt(curl, CURLOPT_POSTFIELDS, post_data);
+  if ( ( post_data != NULL ) && ( *post_data != '\0' ) ) {
+    curl_easy_setopt(ch, CURLOPT_POSTFIELDS, post_data);
+  }
   // 3. (Optional) Force traditional form POST headers if needed,
   // though CURLOPT_POSTFIELDS adds this header automatically.
   // Users on Stack Overflow note that for custom/raw POST types (like JSON),
   // adding CURLOPT_POST is highly recommended.
-  curl_easy_setopt(curl, CURLOPT_POST, 1L);
+  curl_easy_setopt(ch, CURLOPT_POST, 1L);
 
   // 4. Set up the callbacks to capture the server response text
   // Commented out because assumption is that this has already been done

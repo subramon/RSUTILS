@@ -1,6 +1,6 @@
 #include <curl/curl.h>
 extern int
-execute_curl(
+post_curl(
     CURL *ch,
     const char *url,
     const char *const post_data,

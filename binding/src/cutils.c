@@ -21,6 +21,7 @@
 #include "file_as_str.h"
 #include "file_cat.h"
 #include "file_exists.h"
+#include "free_2d_array.h"
 #include "get_bit_u64.h"
 #include "get_file_size.h"
 #include "html_escape.h"
@@ -44,6 +45,8 @@
 #include "trim.h"
 #include "tm2time.h"
 #include "touch.h"
+#include "get_tbl_of_key_vals.h"
+#include "xcurl.h"
 extern char *strptime(const char *s, const char *format, struct tm *tm);
 
 int luaopen_libcutils (lua_State *L);
@@ -118,6 +121,62 @@ BYE:
   lua_pushnumber(L, status);
   return 3; 
 }
+//----------------------------------------
+
+static int l_cutils_post_curl( 
+    lua_State *L
+    )
+{
+  int status = 0;
+  char **curl_params = NULL; // [nC]
+  char **curl_opts = NULL; // [nC]
+  int nC = 0;
+  const char *body = NULL; 
+
+  char *str_response = NULL;
+  long int_response; 
+  int ntop = lua_gettop(L); 
+  if ( ( ntop < 2 ) || ( ntop > 4 ) ) { 
+    fprintf(stderr, "ntop = %d \\not\\in [2,4]\n", ntop); go_BYE(-1); 
+  }
+  const char *url = luaL_checkstring(L, 1);
+  return_if_null_str(url);
+  const char *method = luaL_checkstring(L, 2);
+  return_if_null_str(method);
+  if ( ntop >= 3 ) {
+    body = luaL_checkstring(L, 3);
+  }
+  if ( lua_gettop(L) == 4 ) { 
+    status = get_tbl_of_key_vals(L, 4, &curl_params, &curl_opts, &nC);
+    cBYE(status);
+  }
+  status = xcurl(url, method, body, curl_opts, curl_params, nC,
+      &int_response, &str_response);
+  cBYE(status);
+  lua_pushnumber(L, int_response);
+  if ( str_response == NULL ) {
+    lua_pushnil(L);
+  }
+  else {
+  lua_pushstring(L, str_response);
+  }
+  free_if_non_null(str_response); // TODO Check 
+  if ( nC > 0 ) {
+    free_2d_array(&curl_params, nC);
+    free_2d_array(&curl_opts, nC);
+  }
+  return 2; 
+BYE:
+  if ( nC > 0 ) {
+    free_2d_array(&curl_params, nC);
+    free_2d_array(&curl_opts, nC);
+  }
+  lua_pushnil(L);
+  lua_pushstring(L, __func__);
+  lua_pushnumber(L, status);
+  return 3; 
+}
+
 //----------------------------------------
 static int l_cutils_touch( 
     lua_State *L
@@ -647,8 +706,8 @@ static int l_cutils_trim(
   return_if_malloc_failed(outbuf);
   memset(outbuf, 0, sz);
   status = trim(inbuf, outbuf, sz-1); cBYE(status);
-  lua_pushstring(L, inbuf); 
-  free(inbuf); // Lua has taken control. TODO P0 Think
+  lua_pushstring(L, outbuf); 
+  free(outbuf); // Lua has taken control. TODO P0 Think
   return 1;
 BYE:
   lua_pushnil(L);
@@ -1188,6 +1247,7 @@ static const struct luaL_Reg cutils_methods[] = {
     { "unlink",      l_cutils_unlink },
     { "trim",        l_cutils_trim },
     { "write",       l_cutils_write },
+    { "post_curl",     l_cutils_post_curl },
     { NULL,  NULL         }
 };
  
@@ -1241,6 +1301,7 @@ static const struct luaL_Reg cutils_functions[] = {
     { "unlink",     l_cutils_unlink },
     { "trim",     l_cutils_trim },
     { "write",       l_cutils_write },
+    { "post_curl",     l_cutils_post_curl },
     { NULL,  NULL         }
 };
  
