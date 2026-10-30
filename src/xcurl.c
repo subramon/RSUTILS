@@ -8,6 +8,7 @@
 #include "setup_curl.h"
 #include "post_curl.h"
 #include "shutdown_curl.h"
+#include "execute_curl.h"
 #include "xcurl.h"
 
 int
@@ -41,6 +42,7 @@ xcurl(
         curl_res = curl_easy_setopt(ch, CURLOPT_TIMEOUT, (long)i8); 
         if ( curl_res != CURLE_OK ) { go_BYE(-1); }
       }
+      // TODO P1 Finish other options as well 
       else {
         fprintf(stderr, "Unknown option/param = %s/%s \n", 
             curl_options[i], curl_params[i]);

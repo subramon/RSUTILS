@@ -4,6 +4,7 @@
 #include <string.h>
 #include "q_macros.h"
 #include "isfile.h"
+#include "touch.h"
 #include "setup_curl.h"
 
 size_t
@@ -74,14 +75,19 @@ setup_curl(
   res = curl_easy_setopt(ch, CURLOPT_WRITEDATA, userdata);
   if ( res != CURLE_OK ) { go_BYE(-1); }
 
-  if ( ( cookie_file != NULL ) && ( *cookie_file != '\0' ) ) {
-    // make sure cookie_file is valid 
-    if ( isfile(cookie_file) ) { 
-      FILE *fp = fopen(cookie_file, "w");
-      return_if_fopen_failed(fp, cookie_file, "w");
-      fclose_if_non_null(fp); 
+  if ( cookie_file == NULL ) {
+    // Nothing to do 
+    if ( *cookie_file != '\0' ) { 
+      if ( !isfile(cookie_file) ) { 
+        status = touch(cookie_file); cBYE(status);
+      }
     }
+    // Okay for cookie_file to be ""
+    // Session Cookies Trick: If you pass an empty string ("") instead 
+    // of a file path, cURL won't read a file, but it will enable its 
+    // internal cookie engine to handle session cookies in memory.
     res = curl_easy_setopt(ch, CURLOPT_COOKIEFILE, cookie_file);
+    res = curl_easy_setopt(ch, CURLOPT_COOKIEJAR, cookie_file);
   }
   *ptr_ch = ch;
 BYE:

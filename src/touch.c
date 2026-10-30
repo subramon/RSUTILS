@@ -13,9 +13,12 @@ touch(
   int status = 0;
   FILE *fp = NULL;
   if ( ( file_name == NULL ) || ( *file_name == '\0' ) ) { go_BYE(-1); }
-  fp = fopen(file_name, "w");
-  return_if_fopen_failed(fp,  file_name, "w");
-  fclose_if_non_null(fp);
+  fp = fopen(file_name, "r");
+  if ( fp == NULL ) { 
+    fp = fopen(file_name, "w");
+    return_if_fopen_failed(fp,  file_name, "w");
+  }
 BYE:
+  fclose_if_non_null(fp);
   return status;
 }
