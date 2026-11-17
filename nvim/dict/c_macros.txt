@@ -1,0 +1,10 @@
+cBYE
+fclose_if_non_null
+free_if_non_null
+go_BYE
+mcr_alloc_null_str
+mcr_rs_munmap
+return_if_fopen_failed
+return_if_malloc_failed
+return_if_null_str
+return_if_I_am_the_boss
