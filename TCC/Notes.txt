@@ -1,0 +1,7 @@
+2. TCC-Based JIT Sandboxes and Scripting Engines (Educational & Utility Repos)
+Because libtcc's API is compact, it heavily inspires small, high-performance hobby engines and sandboxes:
+texane/tcc_examples: A well-known reference repository containing clean, minimal C examples demonstrating how to initialize libtcc, compile multiline strings or files in-memory (matmul, sin, etc.), and execute them natively on the fly.   
+GitHub
+MrOneTwo/tinycc-dynamic-compilation: A modern template showing how a host C program can watch an external .c target file, recompile it via libtcc upon modification, and hot-swap execution targets without restarting the process.   
+GitHub
+
