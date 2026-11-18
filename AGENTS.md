@@ -28,8 +28,14 @@ OpenMP, and valgrind for C tests.
 
 ## Build
 - `cd src && make` → `librsutils.so`, `cli_asc_to_bin`, `ut_task_cpu_time`, and regenerates
-  `lua/{csv_meta_t,csv_spec_t,qtypes_def}.lua`. `make gen_inc_files` regenerates headers.
-- `cd binding/src && make` → `libcutils.so` (needs the sourced env, curl, and sibling RSLUTILS).
+  `lua/{csv_meta_t,csv_spec_t,qtypes_def}.lua`. This build defaults `RSUTILS_SRC_ROOT` to the repo root
+  itself, so it works without sourcing `to_source`, and uses its own C17 `-Wall -Wextra -Wconversion`
+  CFLAGS (not `to_source`'s QCFLAGS). `make gen_inc_files` regenerates headers.
+- Build variants: `make strict` (= `WERROR=1`, warnings as errors) and `make SAN=1` / `make sanitize`
+  (ASan + UBSan) — the practical substitute for the CMake/sanitizer setup the docs prescribe.
+- `cd binding/src && make` → `libcutils.so`. Unlike the src build, this still needs the sourced env
+  (`RSLUTILS_SRC_ROOT`, `QCFLAGS`), curl, and the sibling `~/RSLUTILS` checkout, which supplies
+  `src/get_tbl_of_key_vals.c` (absent from this repo).
 - In `src/Makefile`, `hardclean` deletes generated sources; its own comment says don't use it unless
   absolutely necessary (it breaks builds from other trees). Use `make clean`.
 
@@ -49,11 +55,13 @@ then regenerate; direct edits get overwritten.
 - `test/C/run_all.sh` and `test/Lua/run_all.sh` each run only a short hardcoded list, not every test.
 
 ## Auto-loaded instructions: trust the executable source
-`opencode.json` `instructions` auto-loads `CONTRIBUTING.md` and `docs/c-style-guide.md`. They prescribe
-CMake + ctest + ASan/UBSan + `clang-tidy -p build` and an `src/`/`include/`/`tests/`/`build/` layout.
+`opencode.json` `instructions` auto-loads `CONTRIBUTING.md` and `docs/c-style-guide.md` (SEI CERT C).
+They prescribe CMake + ctest + `clang-tidy -p build` and an `src/`/`include/`/`tests/`/`build/` layout.
 None of that exists here (no `CMakeLists.txt`, `build/`, `compile_commands.json`; headers are in `inc/`,
-tests in `test/`). Apply the SEI CERT C coding rules as guidance, but use the Makefiles above and don't
-try to run ctest/clang-tidy. There is no `.clang-format` or formatter config — match surrounding style.
+tests in `test/`), so don't try ctest/clang-tidy. Apply the coding rules through the Makefiles instead
+(`make strict`, `make SAN=1`). `.clang-format` does exist and `opencode.json` registers a clang-format
+formatter for `.c`/`.h` — so formatting is configured and CONTRIBUTING's clang-format step is actionable
+(unlike its CMake/clang-tidy steps).
 
 ## Cross-repo coupling
 `inc/qtypes.h` is duplicated in `Q/UTILS/inc/` (see its header comment); changes must be copied there.

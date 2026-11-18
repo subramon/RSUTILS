@@ -1,5 +1,3 @@
--- local plpath = require 'pl.path'
--- local plstr  = require 'pl.stringx'
 function file_exists(name)
    local f=io.open(name,"r")
    if f~=nil then io.close(f) return true else return false end
@@ -34,7 +32,6 @@ local function extract_func_decl(
   --======
   z = string.gsub(z, "//START_FUNC_DECL", "")
   z = string.gsub(z, "//STOP_FUNC_DECL", "")
-  -- z = plstr.strip(z) -- replaced by all_trim
   z = all_trim(z)
   --=========================================
   local fn = string.gsub(infile, "^.*/", "")

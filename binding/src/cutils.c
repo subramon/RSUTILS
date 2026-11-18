@@ -285,8 +285,9 @@ static int l_cutils_realpath(
   const char *path = luaL_checkstring(L, 1);
   char *str_realpath = realpath(path, NULL);
   if ( str_realpath == NULL ) { go_BYE(-1); } 
-  if ( !isfile(str_realpath) ) { go_BYE(-1); } 
-
+  if ( ( !isfile(str_realpath) ) && ( !isdir(str_realpath) ) ) {
+    go_BYE(-1); 
+  }
   lua_pushstring(L, str_realpath);
   return 1;
 BYE:

@@ -83,73 +83,6 @@ gen_inc_files : \
 	../inc/trim.h 
 
 #----------------------------------
-
-../inc/txt_to_BL.h : 
-	luajit ../src/cli_extract_func_decl.lua txt_to_BL.c ${INCDIR}
-../inc/txt_to_SC.h :
-	luajit ../src/cli_extract_func_decl.lua txt_to_SC.c ${INCDIR}
-txt_to_BL.c : ../inc/txt_to_BL.h
-txt_to_SC.c : ../inc/txt_to_SC.h
-#----------------------------------
-../inc/txt_to_I1.h :
-	luajit gen_code_I.lua 
-../inc/txt_to_I2.h :
-	luajit gen_code_I.lua 
-../inc/txt_to_I4.h :
-	luajit gen_code_I.lua 
-../inc/txt_to_I8.h :
-	luajit gen_code_I.lua 
-../inc/txt_to_F4.h :
-	luajit gen_code_F.lua 
-../inc/txt_to_F8.h :
-	luajit gen_code_F.lua 
-#----------------------------------
-../src/txt_to_I1.c :
-	luajit gen_code_I.lua 
-../src/txt_to_I2.c :
-	luajit gen_code_I.lua 
-../src/txt_to_I4.c :
-	luajit gen_code_I.lua 
-../src/txt_to_I8.c :
-	luajit gen_code_I.lua 
-../src/txt_to_F4.c :
-	luajit gen_code_F.lua 
-../src/txt_to_F8.c :
-	luajit gen_code_F.lua 
-#----------------------------------
-../inc/BL_to_txt.h : 
-	lua ../src/cli_extract_func_decl.lua BL_to_txt.c ${INCDIR}
-../inc/SC_to_txt.h : 
-	lua ../src/cli_extract_func_decl.lua SC_to_txt.c ${INCDIR}
-BL_to_txt.c : ../inc/BL_to_txt.h
-SC_to_txt.c : ../inc/SC_to_txt.h
-#----------------------------------
-../inc/I1_to_txt.h :
-	luajit print_generator.lua I1
-../inc/I2_to_txt.h :
-	luajit print_generator.lua I2
-../inc/I4_to_txt.h :
-	luajit print_generator.lua I4
-../inc/I8_to_txt.h :
-	luajit print_generator.lua I8
-../inc/F4_to_txt.h :
-	luajit print_generator.lua F4
-../inc/F8_to_txt.h :
-	luajit print_generator.lua F8
-#----------------------------------
-../src/I1_to_txt.c :
-	luajit print_generator.lua I1
-../src/I2_to_txt.c :
-	luajit print_generator.lua I2
-../src/I4_to_txt.c :
-	luajit print_generator.lua I4
-../src/I8_to_txt.c :
-	luajit print_generator.lua I8
-../src/F4_to_txt.c :
-	luajit print_generator.lua F4
-../src/F8_to_txt.c :
-	luajit print_generator.lua F8
-
 ../inc/file_as_str.h : 
 	luajit ../src/cli_extract_func_decl.lua file_as_str.c ${INCDIR}
 
@@ -322,6 +255,7 @@ SRCS += I4_to_TM1.c
 
 OBJS = $(SRCS:.c=.o)
 
+#-- TODO P4: THese should be auto-generated. Not done so far
 GEN_SRCS := ../src/I1_to_txt.c  
 GEN_SRCS += ../src/I2_to_txt.c  
 GEN_SRCS += ../src/I4_to_txt.c 

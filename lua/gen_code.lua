@@ -31,6 +31,10 @@ local _dotfile = function(subs, opdir, lang, ext, src_root)
   assert(#opdir > 0)
   local func_name = subs.fn
   local basic_fname = opdir .. "/" .. func_name .. "." .. ext
+  print("===")
+  for k, v in pairs(subs) do print(k, v) end 
+  print("opdir = ", opdir)
+  print("===")
   if ( string.sub(opdir, 1, 1) ~= "/") then -- TODO P4: What if no '/' ?
     assert(type(src_root) == "string")
     opdir = src_root .. opdir

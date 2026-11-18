@@ -1,6 +1,16 @@
+unset Q_ROOT
+unset Q_SRC_ROOT
+unset RSLUTILS_SRC_ROOT
+unset RSUTILS_SRC_ROOT
+unset LUA_PATH
+unset LUA_CPATH
+unset QCFLAGS
+
+export Q_ROOT="${HOME}/local/Q/"
+export Q_SRC_ROOT="${HOME}/Q/"
 export RSLUTILS_SRC_ROOT="${HOME}/RSLUTILS/"
 export RSUTILS_SRC_ROOT="${HOME}/RSUTILS/"
-export LUA_PATH="$RSUTILS_SRC_ROOT/../?.lua;;"
+export LUA_PATH="${HOME}/?.lua;$RSUTILS_SRC_ROOT/lua/?.lua;;"
 export LUA_CPATH="$RSUTILS_SRC_ROOT/binding/src/?.so;;"
 export QCFLAGS="  -std=gnu99  -fPIC -g -Wall -W -Waggregate-return -Wcast-align -Wmissing-prototypes -Wnested-externs -Wshadow -Wwrite-strings -Wunused-variable  -Wunused-parameter -Wno-pedantic -fopenmp -Wno-unused-label  -Wmissing-declarations -Wredundant-decls -Wnested-externs -Wstrict-prototypes -Wmissing-prototypes -Wpointer-arith  -Wshadow -Wcast-qual -Wcast-align -Wwrite-strings  -Wold-style-definition -Wsuggest-attribute=noreturn -Wno-incompatible-pointer-types"
 echo "Sourced env variables in $PWD"

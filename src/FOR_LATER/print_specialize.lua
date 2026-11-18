@@ -1,4 +1,4 @@
-local qconsts       = require 'Q/UTILS/lua/qconsts'
+local cutils = require 'libcutils'
 local qcfg          = require 'Q/UTILS/lua/qcfg'
 local is_base_qtype = require 'Q/UTILS/lua/is_base_qtype'
 local tmpl          = qcfg.q_src_root .. '/UTILS/src/print.tmpl'
@@ -19,7 +19,7 @@ return function (
 
     local subs = {}
     subs.fn = qtype .. "_to_txt"
-    subs.ctype = assert(qconsts.qtypes[qtype].ctype)
+    subs.ctype = assert(cutils.str_qtype_to_str_ctype(qtype))
     subs.qtype = qtype
     subs.fmt   = fmt
     subs.default_fmt   = default_fmt
