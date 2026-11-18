@@ -4,8 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
-#ifndef __QTYPES_H
-#define __QTYPES_H
+#ifndef RSUTILS_INC_QTYPES_H
+#define RSUTILS_INC_QTYPES_H
 //START_FOR_CDEF
 typedef uint16_t bfloat16; 
 typedef enum { 
@@ -112,4 +112,4 @@ extern char *
 qtypes_as_lua_tbl(
     void
     );
-#endif // __QTYPES_H
+#endif // RSUTILS_INC_QTYPES_H

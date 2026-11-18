@@ -95,7 +95,7 @@ line_finder(
 #ifdef PRINT_CELLS
           printf("Identified %dth cell = []\n", col_idx);
 #endif
-          *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+          *ptr_eoln_idx = (uint32_t)(idx+1); // +1 because ub is exclusive
           eoln_found = true;
           break;
         }
@@ -112,7 +112,7 @@ line_finder(
         if ( c == dquote ) {
           state = S1;
           num_bslash = 0;
-          start_idx = idx+1; //+1 skips over dquote
+          start_idx = (uint32_t)(idx+1); //+1 skips over dquote
         }
         else if ( c == bslash ) {
           bool null_cell = false;
@@ -138,7 +138,7 @@ line_finder(
         }
         else {
           state = S2;
-          start_idx = idx;
+          start_idx = (uint32_t)idx;
         }
         break;
       case S1 : // inside a dquote demarcated cell 
@@ -154,9 +154,9 @@ line_finder(
             }
           }
           else if ( c == dquote ) { // end of cell 
-            stop_idx = idx;
+            stop_idx = (uint32_t)idx;
             if ( max_width != NULL ) { 
-              uint32_t width = (stop_idx - start_idx) - num_bslash;
+              uint32_t width = (stop_idx - start_idx) - (uint32_t)num_bslash;
               if ( col_idx > ncols ) { go_BYE(-1); }
               // Note that max_width needs one spot for nullc
               if ( width >= max_width[col_idx] ) { go_BYE(-1); }
@@ -173,7 +173,7 @@ line_finder(
               cBYE(status);
             }
             if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
-              *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+              *ptr_eoln_idx = (uint32_t)(idx+1); // +1 because ub is exclusive
               eoln_found = true;
               break;
             }
@@ -185,7 +185,7 @@ line_finder(
             if ( ( col_idx <  ncols) && ( c != fld_sep ) ) { go_BYE(-1); }
             if ( ( col_idx == ncols) && ( c != rec_sep ) ) { go_BYE(-1); }
             if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
-              *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+              *ptr_eoln_idx = (uint32_t)(idx+1); // +1 because ub is exclusive
               eoln_found = true;
               break;
             }
@@ -203,7 +203,7 @@ line_finder(
         else if ( 
             ( ( col_idx <  ncols-1) && ( c == fld_sep ) ) || 
             ( ( col_idx == ncols-1) && ( c == rec_sep ) ) ) {
-          stop_idx = idx;
+          stop_idx = (uint32_t)idx;
           if ( max_width != NULL ) { 
             uint32_t width = stop_idx - start_idx;
             if ( col_idx >= ncols ) { go_BYE(-1); }
@@ -224,7 +224,7 @@ line_finder(
             cBYE(status);
           }
           if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
-            *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+            *ptr_eoln_idx = (uint32_t)(idx+1); // +1 because ub is exclusive
             eoln_found = true;
             break;
           }
@@ -233,7 +233,7 @@ line_finder(
           if ( ( col_idx <  ncols) && ( c != fld_sep ) ) { go_BYE(-1); }
           if ( ( col_idx == ncols) && ( c != rec_sep ) ) { go_BYE(-1); }
           if ( ( col_idx == ncols) && ( c == rec_sep ) ) {
-            *ptr_eoln_idx = idx+1; // +1 because ub is exclusive
+            *ptr_eoln_idx = (uint32_t)(idx+1); // +1 because ub is exclusive
             eoln_found = true;
             break;
           }

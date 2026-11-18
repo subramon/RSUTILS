@@ -1,8 +1,8 @@
 
 #include <stdint.h>
 #include "q_macros.h"
-#ifndef __set_bit_u64_H
-#define __set_bit_u64_H
+#ifndef RSUTILS_INC_SET_BIT_U64_H
+#define RSUTILS_INC_SET_BIT_U64_H
 extern int // TODO inline this function
 set_bit_u64(
     uint64_t *X, 

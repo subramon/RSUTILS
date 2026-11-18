@@ -1,6 +1,6 @@
 #include <evhttp.h>
-#ifndef __HANDLER_H
-#define __HANDLER_H
+#ifndef RSUTILS_INC_HANDLER_H
+#define RSUTILS_INC_HANDLER_H
 
 #define MAX_LEN_API  31
 #define MAX_LEN_ARGS 1023
@@ -14,4 +14,4 @@ handler(
     struct evhttp_request *req,
     void *arg
     );
-#endif // __HANDLER_H
+#endif // RSUTILS_INC_HANDLER_H

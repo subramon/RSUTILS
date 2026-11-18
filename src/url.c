@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
@@ -44,12 +45,14 @@ url_encode(
   char *pbuf = NULL;
 
   pstr = (char *)in_str; 
-  int len = (strlen(in_str) * 3 + 1); 
+  size_t slen = strlen(in_str);
+  if ( slen > (SIZE_MAX - 1) / 3 ) { go_BYE(-1); }
+  size_t len = slen * 3 + 1;
   out_str = malloc(len);
   return_if_malloc_failed(out_str);
   pbuf = out_str;
 
-  int chk_len = 0;
+  size_t chk_len = 0;
   while (*pstr) {
     if ( ( isalnum(*pstr) ) || ( *pstr == '-' ) || ( *pstr == '_' ) 
         || ( *pstr == '.' ) || ( *pstr == '~') ) {
@@ -95,13 +98,13 @@ url_decode(
   if ( ( in_str == NULL ) || ( *in_str == '\0' ) )  { go_BYE(-1); }
 
   pstr = (char *)in_str; 
-  int len = strlen(in_str) + 1;
+  size_t len = strlen(in_str) + 1;
   out_str = malloc(len);
   return_if_malloc_failed(out_str);
   memset(out_str, '\0', len);
   pbuf = out_str;
 
-  int chk_len = 0;
+  size_t chk_len = 0;
   while (*pstr) {
     if ( chk_len > len ) { 
       go_BYE(-1); 
@@ -109,7 +112,7 @@ url_decode(
     if (*pstr == '%') {
       if (pstr[1] && pstr[2]) {
         if ( chk_len > len ) { go_BYE(-1); }
-	*pbuf = from_hex(pstr[1]) << 4 | from_hex(pstr[2]);
+	*pbuf = (char)(from_hex(pstr[1]) << 4 | from_hex(pstr[2]));
         // Note: We do not accept null characters
         if ( *pbuf == '\0' ) { go_BYE(-1); } 
         pbuf++;
@@ -148,8 +151,9 @@ ext_url_encode(
   char *out_str = NULL;
 
   status = url_encode(in_str, &out_str); cBYE(status);
-  if ( strlen(out_str) >= sz_rslt_buf ) { go_BYE(-1); }
-  strcpy(rslt_buf, out_str);
+  size_t out_len = strlen(out_str);
+  if ( out_len >= sz_rslt_buf ) { go_BYE(-1); }
+  memcpy(rslt_buf, out_str, out_len + 1);
 BYE:
   free_if_non_null(out_str);
   return status ;
@@ -168,8 +172,9 @@ ext_url_decode(
   char *out_str = NULL;
 
   status = url_decode(in_str, &out_str); cBYE(status);
-  if ( strlen(out_str) >= sz_rslt_buf ) { go_BYE(-1); }
-  strcpy(rslt_buf, out_str);
+  size_t out_len = strlen(out_str);
+  if ( out_len >= sz_rslt_buf ) { go_BYE(-1); }
+  memcpy(rslt_buf, out_str, out_len + 1);
 BYE:
   free_if_non_null(out_str);
   return status ;

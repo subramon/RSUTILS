@@ -1,11 +1,14 @@
 // gcc thread_cpu_time.c -lm -lpthread
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <string.h>
 #include <math.h>
 
 #include <unistd.h>
@@ -34,34 +37,44 @@ proc_info_as_json(
   int status = 0;
   *ptr_json = NULL;
   char tmp[64];
+  int nw = 0;
   char *buf = NULL; uint32_t bufsz = 1024; uint32_t buflen = 0;
-  buf = malloc(bufsz); bzero(buf, bufsz);
+  buf = malloc(bufsz); return_if_malloc_failed(buf);
+  memset(buf, 0, bufsz);
   status = cat_to_buf(&buf, &bufsz, &buflen, "{", 1); cBYE(status);
-  sprintf(tmp, " \"utime\" : %lu ", ptr_info->utime); 
+  nw = snprintf(tmp, sizeof(tmp), " \"utime\" : %lu ", ptr_info->utime);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"stime\" : %lu ", ptr_info->stime); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"stime\" : %lu ", ptr_info->stime);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"cutime\" : %ld ", ptr_info->cutime); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"cutime\" : %ld ", ptr_info->cutime);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"cstime\"  : %ld ", ptr_info->cstime); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"cstime\"  : %ld ", ptr_info->cstime);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"starttime\" : %llu ", ptr_info->starttime); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"starttime\" : %llu ", ptr_info->starttime);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"vsize\" : %lu ", ptr_info->vsize); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"vsize\" : %lu ", ptr_info->vsize);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
-  sprintf(tmp, ", \"rss\" : %ld ", ptr_info->rss); 
+  nw = snprintf(tmp, sizeof(tmp), ", \"rss\" : %ld ", ptr_info->rss);
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
   status = cat_to_buf(&buf, &bufsz, &buflen, tmp, 0);  cBYE(status);
 
   status = cat_to_buf(&buf, &bufsz, &buflen, "}", 1); cBYE(status);
 
   *ptr_json = buf;
 BYE:
+  if ( status != 0 ) { free_if_non_null(buf); }
   return status;
 }
 

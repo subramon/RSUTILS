@@ -26,8 +26,8 @@
 // slower than MD5.
 //
 
-#ifndef __SPOOKY_HASH
-#define __SPOOKY_HASH
+#ifndef RSUTILS_INC_SPOOKY_HASH_H
+#define RSUTILS_INC_SPOOKY_HASH_H
 
 extern void 
 spooky_shorthash (

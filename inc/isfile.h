@@ -1,7 +1,7 @@
-#ifndef __ISFILE_H
-#define __ISFILE_H
+#ifndef RSUTILS_INC_ISFILE_H
+#define RSUTILS_INC_ISFILE_H
 extern bool 
 isfile (
     const char * const filename
     );
-#endif // __ISFILE_H
+#endif // RSUTILS_INC_ISFILE_H

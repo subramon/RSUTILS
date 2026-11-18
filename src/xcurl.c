@@ -1,6 +1,7 @@
 // This is a combination of setup_curl, post_curl and shutdown_curl
 // that can be invoked from Lua without any knowledge of curl handles
 // More inefficient since we create and close handle each time 
+#include <string.h>
 #include <curl/curl.h>
 #include <lua.h>
 #include "q_macros.h"
@@ -26,7 +27,7 @@ xcurl(
   int status = 0; 
   CURLcode curl_res;
   CURL *ch = NULL; 
-  curl_userdata_t userdata; bzero(&userdata, sizeof(userdata));
+  curl_userdata_t userdata; memset(&userdata, 0, sizeof(userdata));
 
   status = setup_curl(&userdata, NULL, &ch);  cBYE(status);
   if ( n_curl_opts > 0 ) { 
@@ -59,10 +60,11 @@ xcurl(
     fprintf(stderr, "Unknown method %s \n", method);
   }
   cBYE(status); 
-  if ( userdata.base != NULL ) { 
-    *ptr_str_response = malloc(userdata.size+1);
-    memset(*ptr_str_response, 0, userdata.size+1);
-    strncpy(*ptr_str_response, userdata.base,userdata.size);
+  if ( userdata.base != NULL ) {
+    *ptr_str_response = malloc(userdata.size + 1);
+    if ( *ptr_str_response == NULL ) { go_BYE(-1); }
+    memset(*ptr_str_response, 0, userdata.size + 1);
+    memcpy(*ptr_str_response, userdata.base, userdata.size);
   }
 
 BYE:

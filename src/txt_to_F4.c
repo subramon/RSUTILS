@@ -11,7 +11,7 @@ txt_to_F4(
   int status = 0;
   *ptr_out = 0;
   char *endptr;
-  double out;
+  long double out;
   if ( ( X == NULL ) || ( *X == '\0' ) ) { status = -1; goto BYE; }
   out = strtold(X, &endptr);
   if ( ( *endptr != '\0' ) && ( *endptr != '\n' ) ) { status = -1; goto BYE; }

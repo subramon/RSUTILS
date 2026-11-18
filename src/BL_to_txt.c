@@ -17,14 +17,10 @@ BL_to_txt(
 {
   int status = 0;
   if ( X == NULL ) { go_BYE(-1); }
-  if ( nX < 5 ) { go_BYE(-1); }
+  if ( nX < 6 ) { go_BYE(-1); }
   memset(X, '\0', nX);
-  if ( val ) { 
-    strncpy(X, "true", nX);
-  }
-  else {
-    strncpy(X, "false", nX);
-  }
+  int nw = snprintf(X, nX, "%s", val ? "true" : "false");
+  if ( ( nw < 0 ) || ( (size_t)nw >= nX ) ) { go_BYE(-1); }
 BYE:
   return status;
 }

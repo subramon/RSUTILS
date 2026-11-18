@@ -67,8 +67,8 @@ ls(
   if ( szX < 0 ) { go_BYE(-1); }
   if ( szX == 0 ) { return status; }
   //-- allocate output 
-  X = malloc(szX * sizeof(char *)); // NOTE: over allocation
-  memset(X, 0, szX * sizeof(char *));
+  X = malloc((size_t)szX * sizeof(char *)); // NOTE: over allocation
+  memset(X, 0, (size_t)szX * sizeof(char *));
   // re-read directory
   d = opendir(dir_name);  if ( d == NULL ) { go_BYE(-1); }
   int xidx = 0;
@@ -102,7 +102,7 @@ ls(
     }
   }
   *ptr_X  =  X;
-  *ptr_nX = xidx;
+  *ptr_nX = (uint32_t)xidx;
 BYE:
   if ( d != NULL ) { closedir(d); d = NULL; }// Close directory
   if ( is_regex ) { 

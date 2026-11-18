@@ -66,7 +66,7 @@ html_escape(
         }
         output_string = temp;
       }
-      strcpy(output_string + current_output_len, replacement);
+      memcpy(output_string + current_output_len, replacement, replacement_len + 1);
       current_output_len += replacement_len;
     } else {
       if (current_output_len + 1 >= output_buffer_size) {

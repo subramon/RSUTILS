@@ -1,6 +1,6 @@
 #include <stdint.h>
-#ifndef _PROC_INFO_H
-#define  _PROC_INFO_H
+#ifndef RSUTILS_INC_PROC_INFO_H
+#define  RSUTILS_INC_PROC_INFO_H
 typedef struct _proc_info_t {
   unsigned long utime; // 14 
   unsigned long stime; // 15 
@@ -21,7 +21,7 @@ get_proc_info_for_tid(
     long tid,
     proc_info_t *ptr_info
     ) ;
-#endif //  _PROC_INFO_H
+#endif //  RSUTILS_INC_PROC_INFO_H
 
 /*
 (16) cutime  %ld

@@ -1,9 +1,25 @@
 #!/bin/bash
 
 
-CC = gcc 
+CC = gcc
 INCS=-I../inc/ -I../inc/
 INCDIR=../inc/
+
+# Default the repo root so the 'all' target works without sourcing to_source.
+RSUTILS_SRC_ROOT ?= $(abspath ..)
+
+# Compiler flags per docs/c-style-guide.md (SEI CERT C).
+# _GNU_SOURCE is needed for the POSIX APIs used here (strdup, DT_DIR, mkstemp, ...).
+CFLAGS = -std=c17 -D_GNU_SOURCE -fPIC -g -fopenmp \
+         -Wall -Wextra -pedantic -Wconversion -Wshadow -Wformat=2 -Wstrict-prototypes
+# opt in with: make WERROR=1
+ifeq ($(WERROR),1)
+CFLAGS += -Werror
+endif
+# opt in with: make SAN=1  (AddressSanitizer + UndefinedBehaviorSanitizer)
+ifeq ($(SAN),1)
+CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+endif
 
 MYSO = librsutils.so
 
@@ -12,6 +28,13 @@ all : ${MYSO}  ut_task_cpu_time \
 	../lua/csv_spec_t.lua   \
 	../lua/qtypes_def.lua  \
 	cli_asc_to_bin \
+
+# Guideline checks. `strict` fails on any warning; `sanitize` builds with ASan/UBSan.
+strict:
+	$(MAKE) WERROR=1 all
+
+sanitize:
+	$(MAKE) SAN=1 WERROR=1 all
 
 
 gen_inc_files : \
@@ -215,13 +238,13 @@ GEN_INC_FILES = \
 	../inc/trim.h  \
 #--------
 
-lookup8.o : QCFLAGS += -Wno-implicit-fallthrough # not my code :-(
+lookup8.o : CFLAGS += -Wno-implicit-fallthrough # not my code :-(
 
 .c.o :
-	$(CC) -c -o $@ $< $(QCFLAGS)  $(INCS)
+	$(CC) -c -o $@ $< $(CFLAGS)  $(INCS)
 
 
-spooky_hash.o : QCFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
+spooky_hash.o : CFLAGS += -Wno-implicit-fallthrough -Wno-cast-qual
 
 SRCS := addr_as_hex_string.c 
 SRCS += almost_eq.c 
@@ -319,10 +342,10 @@ GEN_SRCS += ../src/txt_to_F8.c
 GEN_OBJS = $(GEN_SRCS:.c=.o)
 #----------------------------------
 
-read_csv.o : QCFLAGS += -Wno-cast-align # for ARM
+read_csv.o : CFLAGS += -Wno-cast-align # for ARM
 
 ${MYSO} : ${GEN_OBJS} ${OBJS}  
-	gcc -shared ${QCFLAGS} ${QLDFLAGS} ${INCS} \
+	gcc -shared ${CFLAGS} ${QLDFLAGS} ${INCS} \
 		${GEN_OBJS} ${OBJS} -o ${MYSO} -latomic 
 
 ut_task_cpu_time : ut_task_cpu_time.c
@@ -362,7 +385,7 @@ ut_pg_get_rslt_set : pg_get_rslt_set.c ut_pg_get_rslt_set.c
 	   -lpq -I/usr/include/postgresql -I../inc/
 
 cli_asc_to_bin :  cli_asc_to_bin.c
-	gcc ${QCFLAGS} ${INCS} cli_asc_to_bin.c -o cli_asc_to_bin librsutils.so
+	gcc ${CFLAGS} ${INCS} cli_asc_to_bin.c -o cli_asc_to_bin librsutils.so
 
 # do not use following unless you absolutely need to
 # else, it breaks the build from UTILS/build/

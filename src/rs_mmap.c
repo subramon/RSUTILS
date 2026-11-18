@@ -41,9 +41,10 @@ rs_mmap(
   }
   // henceforth, fd >= 0
   status = fstat(fd, &filestat); cBYE(status);
-  len = filestat.st_size;
+  if ( filestat.st_size < 0 ) { go_BYE(-1); }
+  len = (size_t)filestat.st_size;
   /* It is okay for file size to be 0 */
-  *ptr_file_size = -1;
+  *ptr_file_size = SIZE_MAX;
   if ( len == 0 ) { 
     *ptr_mmapped_file = NULL;
     *ptr_file_size = 0;
@@ -56,7 +57,7 @@ rs_mmap(
   else {
     *ptr_mmapped_file = (void *)mmap(NULL, (size_t) len, PROT_READ, MAP_SHARED, fd, 0);
   }
-  *ptr_file_size = filestat.st_size;
+  *ptr_file_size = (size_t)filestat.st_size;
 BYE:
   if ( fd >= 0 ) { close(fd); fd = -1; }
   return(status);

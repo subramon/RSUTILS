@@ -1,8 +1,8 @@
-#ifndef __UDPSERVER_H
-#define __UDPSERVER_H
+#ifndef RSUTILS_INC_UDPSERVER_H
+#define RSUTILS_INC_UDPSERVER_H
 #define UDP_BUFSIZE 1456
 extern __attribute__((noreturn))
 void *udpserver(
     void *arg
     );
-#endif // __UDPSERVER_H
+#endif // RSUTILS_INC_UDPSERVER_H

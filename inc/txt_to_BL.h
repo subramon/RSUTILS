@@ -1,5 +1,5 @@
-#ifndef __txt_to_BL_H
-#define __txt_to_BL_H
+#ifndef RSUTILS_INC_TXT_TO_BL_H
+#define RSUTILS_INC_TXT_TO_BL_H
 extern int
 txt_to_BL(
       const char * const X,

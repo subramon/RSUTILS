@@ -12,5 +12,5 @@ get_bit_u64(
   uint64_t widx = i >> 6; 
   uint64_t bidx = i & 0x3F; 
   uint64_t val = ( X[widx] >> bidx )  & 0x1; 
-  return val;
+  return (int)val;
 }

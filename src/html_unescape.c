@@ -7,7 +7,6 @@ unescapeHtml( // works in situ
     char *str
     ) 
 {
-  int status = 0; 
   if (str == NULL) { return ; }
 
   char *read_ptr = str;

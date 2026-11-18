@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <limits.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -26,15 +27,17 @@ trim(
   int start_idx, stop_idx;
   if ( inbuf[n-1] != '\0' ) { go_BYE(-1); }
   //---------------------------------------
-  int len = strlen(inbuf); // simple case of empty string
+  size_t slen = strlen(inbuf);
+  if ( slen > (size_t)INT_MAX ) { go_BYE(-1); }
+  int len = (int)slen; // simple case of empty string
   if ( len == 0 ) {
-    memset(outbuf, '\0', n);
+    memset(outbuf, '\0', (size_t)n);
     return status;
   }
   //---------------------------------------
   if ( ( !isspace(inbuf[0]) ) && ( !isspace(inbuf[len-1]) ) ) {
     // simple case of no trimming needed
-    strcpy(outbuf, inbuf); 
+    memcpy(outbuf, inbuf, (size_t)len + 1);
     return status;
   }
   //---------------------------------------

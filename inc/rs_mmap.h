@@ -1,7 +1,7 @@
 
 #include "q_incs.h"
-#ifndef __rs_mmap_H
-#define __rs_mmap_H
+#ifndef RSUTILS_INC_RS_MMAP_H
+#define RSUTILS_INC_RS_MMAP_H
 extern int
 rs_mmap(
 	const char *file_name,

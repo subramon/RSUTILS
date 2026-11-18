@@ -38,14 +38,14 @@ send_udp_pkt(
 {
   int status = 0;
   int sockfd = -1; 
-  int serverlen;
+  socklen_t serverlen;
   struct sockaddr_in serveraddr;
   ssize_t n_send;
 
   status = send_udp_setup(hostname, portno, &sockfd, &serveraddr);
   cBYE(status);
   /* send the message to the server */
-  serverlen = sizeof(serveraddr);
+  serverlen = (socklen_t)sizeof(serveraddr);
   n_send = sendto(sockfd, buf, buflen, 0, &serveraddr, serverlen);
   if (n_send < 0)  {
     error("ERROR in sendto"); go_BYE(-1);
@@ -81,10 +81,14 @@ send_udp_setup(
   }
 
   /* build the server's Internet address */
-  bzero((char *) &serveraddr, sizeof(serveraddr));
+  memset(&serveraddr, 0, sizeof(serveraddr));
   serveraddr.sin_family = AF_INET;
-  bcopy((char *)server->h_addr, 
-      (char *)&serveraddr.sin_addr.s_addr, server->h_length);
+  if ( ( server->h_addr_list[0] == NULL ) ||
+       ( (size_t)server->h_length > sizeof(serveraddr.sin_addr.s_addr) ) ) {
+    go_BYE(-1);
+  }
+  memcpy(&serveraddr.sin_addr.s_addr, server->h_addr_list[0],
+      (size_t)server->h_length);
   serveraddr.sin_port = htons(portno);
 
   *ptr_serveraddr = serveraddr;

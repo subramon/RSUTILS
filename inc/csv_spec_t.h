@@ -1,5 +1,5 @@
-#ifndef _CSV_SPEC_H
-#define _CSV_SPEC_H
+#ifndef RSUTILS_INC_CSV_SPEC_T_H
+#define RSUTILS_INC_CSV_SPEC_T_H
 
 //START_FOR_CDEF
 typedef struct _csv_spec_t {
@@ -11,4 +11,4 @@ typedef struct _csv_spec_t {
   uint32_t nB; 
 } csv_spec_t;
 //STOP_FOR_CDEF
-#endif // _CSV_SPEC_H
+#endif // RSUTILS_INC_CSV_SPEC_T_H

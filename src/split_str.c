@@ -56,7 +56,7 @@ split_str(
       lens[idx] = len;
       len = 0;
       if ( idx < n_outs ) { 
-        offs[idx+1] = i+1;
+        offs[idx+1] = (uint32_t)(i+1);
       }
       idx++;
     }
@@ -99,7 +99,7 @@ split_str_nullc_sep(
   char * cptr = in_str;
   uint32_t offset = 0;
   for ( uint32_t i = 0; i < n_outs; i++ ) { 
-    uint32_t len = strlen(cptr);
+    uint32_t len = (uint32_t)strlen(cptr);
     outs[i] = strdup(cptr);
     cptr += (len+1);
     // to make sure you have not gone too far down in_str

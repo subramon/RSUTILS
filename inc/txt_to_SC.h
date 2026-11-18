@@ -1,5 +1,5 @@
-#ifndef __txt_to_SC_H
-#define __txt_to_SC_H
+#ifndef RSUTILS_INC_TXT_TO_SC_H
+#define RSUTILS_INC_TXT_TO_SC_H
 extern int
 txt_to_SC(
       char * const X,

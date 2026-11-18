@@ -18,12 +18,12 @@ multiple_n(
     )
 {
   if ( n == 8 )  {
-  uint32_t m = (x >> 3) << 3;
+  uint64_t m = (x >> 3) << 3;
   if ( m != x ) { m += n; }
   return m;
   }
   else {
-  uint32_t m = (x / n) * n;
+  uint64_t m = (x / n) * n;
   if ( m != x ) { m += n; }
   return m;
   }

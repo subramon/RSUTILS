@@ -1,5 +1,5 @@
-#ifndef _CSV_META_H
-#define _CSV_META_H
+#ifndef RSUTILS_INC_CSV_META_T_H
+#define RSUTILS_INC_CSV_META_T_H
 
 #include "qtypes.h"
 //START_FOR_CDEF
@@ -15,4 +15,4 @@ typedef struct _csv_meta_t {
   //--------------------------------------------
 } csv_meta_t;
 //STOP_FOR_CDEF
-#endif // _CSV_META_H
+#endif // RSUTILS_INC_CSV_META_T_H

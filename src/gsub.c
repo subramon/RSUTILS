@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,8 +34,17 @@ gsub(
     pos += len_b;
   }
 
-  // Allocate memory for new string
-  size_t new_len = len_a + count * (len_c - len_b) + 1;
+  // Allocate memory for new string (avoid unsigned underflow when shrinking)
+  size_t new_len;
+  if ( len_c >= len_b ) {
+    if ( count > (SIZE_MAX - len_a - 1) / (len_c - len_b) ) { go_BYE(-1); }
+    new_len = len_a + count * (len_c - len_b) + 1;
+  }
+  else {
+    size_t shrink = count * (len_b - len_c);
+    if ( shrink > len_a ) { go_BYE(-1); }
+    new_len = len_a - shrink + 1;
+  }
   char* result = malloc(new_len);
   if (!result) { go_BYE(-1); }
 
@@ -42,7 +52,7 @@ gsub(
   const char* src = a;
   char* dst = result;
   while ((pos = strstr(src, b)) != NULL) {
-    size_t prefix_len = pos - src;
+    size_t prefix_len = (size_t)(pos - src);
     memcpy(dst, src, prefix_len);
     dst += prefix_len;
     memcpy(dst, c, len_c);
@@ -50,7 +60,7 @@ gsub(
     src = pos + len_b;
   }
   // Copy the remainder
-  strcpy(dst, src);
+  memcpy(dst, src, strlen(src) + 1);
 
   *ptr_result = result; 
 BYE:

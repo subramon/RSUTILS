@@ -1,5 +1,5 @@
-#ifndef __rand_file_name_H
-#define __rand_file_name_H
+#ifndef RSUTILS_INC_RAND_FILE_NAME_H
+#define RSUTILS_INC_RAND_FILE_NAME_H
 extern int
 rand_file_name(
     char *buf,

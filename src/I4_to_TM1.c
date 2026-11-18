@@ -24,14 +24,14 @@ I4_to_TM1(
   }
 
   memset(out, 0, sizeof(tm_t));
-  out->tm_year = time_struct->tm_year;
-  out->tm_mon  = time_struct->tm_mon;
-  out->tm_mday  = time_struct->tm_mday;
+  out->tm_year = (int16_t)time_struct->tm_year;
+  out->tm_mon  = (int8_t)time_struct->tm_mon;
+  out->tm_mday  = (int8_t)time_struct->tm_mday;
   if ( get_all ) { 
-    out->tm_hour  = time_struct->tm_hour;
+    out->tm_hour  = (int8_t)time_struct->tm_hour;
   }
-  out->tm_wday  = time_struct->tm_wday;
-  out->tm_yday  = time_struct->tm_yday;
+  out->tm_wday  = (int8_t)time_struct->tm_wday;
+  out->tm_yday  = (int16_t)time_struct->tm_yday;
 BYE:
   return status;
 }

@@ -32,11 +32,12 @@ str_between(
   cptr3 = strstr(cptr2, stop);
   // If no match found, then quit 
   if ( cptr3 == NULL ) { return status; }
-  size_t len = cptr3 - cptr2; 
-  val = malloc(len+1); 
-  memset(val, 0,  len+1); 
-  strncpy(val, cptr2, len); 
-  *ptr_val = val; 
+  size_t len = (size_t)(cptr3 - cptr2);
+  val = malloc(len+1);
+  if ( val == NULL ) { go_BYE(-1); }
+  memset(val, 0,  len+1);
+  memcpy(val, cptr2, len);
+  *ptr_val = val;
 BYE:
   return status ;
 }

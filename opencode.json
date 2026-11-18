@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "basalt": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Basalt Remote Node",
+      "options": {
+        "baseURL": "http://192.168.1.115:8080/v1"
+      },
+      "models": {
+        "Qwen3.8-Flash-Next UD-IQ2_XS" : {
+          "name": "Basalt Coder"
+        }
+      }
+    }
+  },
+    "formatter": {
+    "clang-format": {
+      "command": ["clang-format", "-i", "$FILE"],
+      "extensions": [".c", ".C", ".h", ".H"]
+    }
+  },
+  "instructions": [
+    "CONTRIBUTING.md",
+    "docs/c-style-guide.md"
+  ]
+}

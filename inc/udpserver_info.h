@@ -1,5 +1,5 @@
-#ifndef _UDPSERVER_H
-#define _UDPSERVER_H
+#ifndef RSUTILS_INC_UDPSERVER_INFO_H
+#define RSUTILS_INC_UDPSERVER_INFO_H
 
 typedef int (*udp_proc_fn_t)(
     const char *body,
@@ -23,4 +23,4 @@ typedef struct _udpserver_info_t {
   uint64_t stime;
   // STOP : For debugging
 } udpserver_info_t;
-#endif // _UDPSERVER_H
+#endif // RSUTILS_INC_UDPSERVER_INFO_H

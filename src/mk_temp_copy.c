@@ -14,28 +14,27 @@ mk_temp_copy(
   char * template = NULL;
   int fd = -1;
 
+  if ( in_tmpl == NULL ) { go_BYE(-1); }
   size_t in_len = strlen(in_tmpl);
   if ( in_len <= 6 ) { go_BYE(-1); }
-  if ( strcmp(in_tmpl+ (in_len-6), "XXXXXX") != 0 ) { 
+  if ( strcmp(in_tmpl + (in_len - 6), "XXXXXX") != 0 ) {
     go_BYE(-1);
   }
 
-  if ( in_tmpl == NULL )  {
-    template = "/tmp/_temp_file_XXXXXX";
+  if ( suffix == NULL ) {
+    template = strdup(in_tmpl);
+    if ( template == NULL ) { go_BYE(-1); }
+    fd = mkstemp(template); // modified by mkstemp
   }
   else {
-    if ( suffix == NULL ) { 
-      template = strdup(in_tmpl);
-      fd =  mkstemp(template); // modified by mkstemp
-    }
-    else {
-      size_t len = strlen(in_tmpl) + strlen(suffix) + 1; 
-      template = malloc(len);
-      sprintf(template, "%s%s", in_tmpl, suffix);
-      fd =  mkstemps(template, strlen(suffix)); // modified by mkstemps
-    }
+    size_t len = in_len + strlen(suffix) + 1;
+    template = malloc(len);
+    if ( template == NULL ) { go_BYE(-1); }
+    int nw = snprintf(template, len, "%s%s", in_tmpl, suffix);
+    if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { go_BYE(-1); }
+    fd = mkstemps(template, (int)strlen(suffix)); // modified by mkstemps
   }
-  if ( fd < 0 ) { go_BYE(-1); }
+  if ( fd < 0 ) { free_if_non_null(template); go_BYE(-1); }
   close(fd); 
   *ptr_outfile = template;
   status = copy_file(infile, *ptr_outfile); cBYE(status);

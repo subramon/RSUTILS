@@ -21,27 +21,29 @@ mk_temp_file_name(
   if ( prefix != NULL ) { len += strlen(prefix); }
   if ( suffix != NULL ) { len += strlen(suffix); }
   len = multiple_n(len, 8);
-  char *x = malloc(len); memset(x, 0, len);
+  char *x = malloc(len); return_if_malloc_failed(x);
+  memset(x, 0, len);
+  const uint64_t stamp = rdtsc();
+  const unsigned long tid = (unsigned long)syscall(SYS_gettid);
+  int nw = 0;
 
-  if ( prefix == NULL ) { 
-    if ( suffix  == NULL ) { 
-      sprintf(x, "_%" PRIu64 "_%lu", rdtsc(), syscall(SYS_gettid));
+  if ( prefix == NULL ) {
+    if ( suffix == NULL ) {
+      nw = snprintf(x, len, "_%" PRIu64 "_%lu", stamp, tid);
     }
     else {
-     sprintf(x, "_%" PRIu64 "_%lu_%s", 
-        rdtsc(), syscall(SYS_gettid), suffix);
+      nw = snprintf(x, len, "_%" PRIu64 "_%lu_%s", stamp, tid, suffix);
     }
   }
   else {
-    if ( suffix == NULL ) { 
-      sprintf(x, "%s_%" PRIu64 "_%lu", prefix, 
-        rdtsc(), syscall(SYS_gettid));
+    if ( suffix == NULL ) {
+      nw = snprintf(x, len, "%s_%" PRIu64 "_%lu", prefix, stamp, tid);
     }
     else {
-      sprintf(x, "%s_%" PRIu64 "_%lu_%s", prefix, 
-        rdtsc(), syscall(SYS_gettid), suffix);
+      nw = snprintf(x, len, "%s_%" PRIu64 "_%lu_%s", prefix, stamp, tid, suffix);
     }
   }
+  if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { free_if_non_null(x); go_BYE(-1); }
   *ptr_name = x; 
 BYE:
   return status; 

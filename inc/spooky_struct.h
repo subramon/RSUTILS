@@ -1,5 +1,5 @@
-#ifndef __SPOOKY_STRUCT_H
-#define __SPOOKY_STRUCT_H
+#ifndef RSUTILS_INC_SPOOKY_STRUCT_H
+#define RSUTILS_INC_SPOOKY_STRUCT_H
 //START_FOR_CDEF
 #define SC_NUMVARS 12 // keep in sync with NUMVARS below
 #define SC_BLOCKSIZE (8 * SC_NUMVARS)

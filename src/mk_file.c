@@ -26,7 +26,7 @@ mk_file(
 //STOP_FUNC_DECL
 {
   int status= 0;
-  int result, fd;
+  off_t result; int fd;
   char *full_name = NULL;
 
   if ( filename == NULL ) { go_BYE(-1); }
@@ -49,9 +49,10 @@ mk_file(
    */
   // create fully qualified file name 
   if ( dir != NULL ) {
-    int len = strlen(filename) + strlen(dir) + 4;
+    size_t len = strlen(filename) + strlen(dir) + 4;
     full_name = malloc(len); return_if_malloc_failed(full_name);
-    sprintf(full_name, "%s/%s", dir, filename); 
+    int nw = snprintf(full_name, len, "%s/%s", dir, filename);
+    if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { go_BYE(-1); }
   }
   else {
     full_name = strdup(filename);
@@ -62,8 +63,8 @@ mk_file(
     go_BYE(-1);
   }
   /* Stretch the file size to the size of the (mmapped) array of ints */
-  result = lseek(fd, filesize - 1, SEEK_SET);
-  if (result == -1) {
+  result = lseek(fd, (off_t)filesize - 1, SEEK_SET);
+  if (result == (off_t)-1) {
     close(fd);
     fprintf(stderr, "Error calling lseek() to 'stretch' file [%s]\n", filename);
     go_BYE(-1);

@@ -21,8 +21,14 @@ cat_to_buf(
   uint32_t buflen = *ptr_buflen; 
 
   if ( str == NULL ) { go_BYE(-1); } 
-  if ( str_len == 0  ) {  str_len  = strlen(str); }
+  if ( str_len == 0  ) {
+    size_t slen = strlen(str);
+    if ( slen > (size_t)INT_MAX ) { go_BYE(-1); }
+    str_len = (int)slen;
+  }
   if ( str_len == 0  ) {  return status; } // nothing to do 
+  if ( str_len < 0 ) { go_BYE(-1); }
+  uint32_t l_str_len = (uint32_t)str_len;
 
   if ( *str == '\0' ) { go_BYE(-1); }
   if ( buf == NULL ) { 
@@ -33,11 +39,11 @@ cat_to_buf(
     memset(buf, 0, MIN_TO_ADD);
     bufsz = MIN_TO_ADD;
   }
-  if ( (str_len + buflen)  > (bufsz-1) ) { // +1 for nullc
-    uint32_t n1 = str_len + buflen +1; 
-    uint32_t n2 = str_len + bufsz; 
+  if ( (l_str_len + buflen)  > (bufsz-1) ) { // +1 for nullc
+    uint32_t n1 = l_str_len + buflen +1;
+    uint32_t n2 = l_str_len + bufsz;
     bufsz = mcr_max(n1, n2); 
-    bufsz = multiple_n(bufsz, 8);
+    bufsz = (uint32_t)multiple_n(bufsz, 8);
     char *newbuf = malloc(bufsz);
     return_if_malloc_failed(newbuf);
     memset(newbuf, 0, bufsz); 
@@ -55,8 +61,8 @@ cat_to_buf(
     WHEREAMI;
   }
 #endif
-  memcpy(buf + buflen, str, str_len);
-  buflen += str_len;
+  memcpy(buf + buflen, str, l_str_len);
+  buflen += l_str_len;
 #ifdef DEBUG
   if ( buflen != strlen(buf) ) { 
     uint32_t len = strlen(buf); 

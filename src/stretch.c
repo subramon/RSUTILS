@@ -1,5 +1,6 @@
 //START_INCLUDES
 #include <stdio.h>
+#include <stdint.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include "q_macros.h"
@@ -30,7 +31,8 @@ stretch(
   fd = open(file_name, O_RDWR);
   if ( fd < 0 ) { go_BYE(-1); }
   // o2 = lseek(fd, 0, SEEK_END);
-  off_t offset = lseek(fd, new_file_size, SEEK_CUR);
+  if ( new_file_size > (uint64_t)INT64_MAX ) { go_BYE(-1); }
+  off_t offset = lseek(fd, (off_t)new_file_size, SEEK_CUR);
   if ( offset < 0 ) { go_BYE(-1); } 
   // reset to start of file 
   offset = lseek(fd, old_file_size, SEEK_SET);

@@ -1,5 +1,5 @@
-#ifndef __Q_INCS
-#define __Q_INCS
+#ifndef RSUTILS_INC_Q_INCS_H
+#define RSUTILS_INC_Q_INCS_H
 #include <alloca.h>
 #include <assert.h>
 #include <ctype.h>

@@ -1,5 +1,7 @@
 // gcc thread_cpu_time.c -lm -lpthread
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -19,7 +21,7 @@ get_task_id(
     void
     ) 
 {
-  pid_t tid = syscall(SYS_gettid);
+  pid_t tid = (pid_t)syscall(SYS_gettid);
   return tid;
 }
 
@@ -32,7 +34,7 @@ get_task_cpu_time(
     ) 
 {
   char fname[200];
-  snprintf(fname, sizeof(fname), "/proc/self/task/%d/stat", (int) get_task_id());
+  snprintf(fname, sizeof(fname), "/proc/self/task/%d/stat", (int)tid);
   FILE *fp = fopen(fname, "r");
   if ( !fp ) return -1;
 

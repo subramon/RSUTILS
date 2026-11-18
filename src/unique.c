@@ -10,11 +10,11 @@ copy_where_good(
     uint32_t in_n, 
     qtype_t qtype,
     char * restrict vals, 
-    int n
+    uint32_t n
     )
 {
   int status = 0;
-  int outidx = 0;
+  uint32_t outidx = 0;
   switch ( qtype ) { 
     case I1 :
       for ( uint32_t i = 0; i < in_n; i++ ) {
@@ -99,7 +99,7 @@ num_unique(
   bfloat16 valF2; const bfloat16 *F2vals = (const bfloat16 * const)in_vals;
   float    valF4; const float    *F4vals = (const float * const)in_vals;
   double   valF8; const double   *F8vals = (const double * const)in_vals;
-  int width = get_width_c_qtype(qtype); if ( width <= 0 ) { go_BYE(-1); }
+  size_t width = get_width_c_qtype(qtype); if ( width == 0 ) { go_BYE(-1); }
 
   vals = malloc(in_n * width); return_if_malloc_failed(vals);
   if ( nn == NULL ) { 
@@ -108,7 +108,7 @@ num_unique(
   else {
     for ( uint32_t i = 0; i < in_n; i++ ) { 
       if ( ( nn[i] != 0 ) && ( nn[i] != 1 ) ) { go_BYE(-1); }
-      n += nn[i];
+      if ( nn[i] != 0 ) { n++; }
     }
     if ( n == 0 ) { *ptr_num = 0; goto BYE; } // all null values
     status = copy_where_good(in_vals, nn, in_n, qtype, vals, n); 

@@ -128,7 +128,7 @@ get_free_spot(
           __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST);
       // if spot is busy, then skip to next spot
       if ( rslt ) { 
-        found = true; qidx = i; break; 
+        found = true; qidx = (int)i; break;
       }
     }
     if ( found ) { break; }
@@ -154,7 +154,7 @@ acquire_lock(
     )
 {
   int status = 0;
-  int t_sleep = 0; 
+  uint64_t t_sleep = 0;
 
   *ptr_lock_got = false;
   for ( ; ; ) { 
@@ -171,13 +171,12 @@ acquire_lock(
       nanosleep(&tmspec, NULL);
       uint64_t t2 = get_time_usec();
       t_sleep += (t2-t1) / 1000; 
-      if ( ( max_wait_msec > 0 ) && ( t_sleep > max_wait_msec ) ) {
+      if ( ( max_wait_msec > 0 ) && ( t_sleep > (uint64_t)max_wait_msec ) ) {
         *ptr_lock_got = false;
         break;
       }
     }
   }
-BYE:
   return status;
 }
 int
@@ -207,7 +206,7 @@ acquire_lock64(
     )
 {
   int status = 0;
-  int t_sleep = 0; 
+  uint64_t t_sleep = 0;
   uint64_t l_expected = expected; // experimental
   uint64_t l_desired  = desired; // experimental
 
@@ -226,13 +225,12 @@ acquire_lock64(
       nanosleep(&tmspec, NULL);
       uint64_t t2 = get_time_usec();
       t_sleep += (t2-t1) / 1000; 
-      if ( ( max_wait_msec > 0 ) && ( t_sleep > max_wait_msec ) ) {
+      if ( ( max_wait_msec > 0 ) && ( t_sleep > (uint64_t)max_wait_msec ) ) {
         *ptr_lock_got = false;
         break;
       }
     }
   }
-BYE:
   return status;
 }
 int
@@ -285,7 +283,6 @@ lock64(
     struct timespec  tmspec = { .tv_sec = 0, .tv_nsec = 1000000 };
     nanosleep(&tmspec, NULL);
   }
-BYE:
   return status;
 }
 

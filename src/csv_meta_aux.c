@@ -27,7 +27,8 @@ csv_meta_to_json(
   int status = 0;
   *ptr_buf = NULL;
   char *buf = NULL; uint32_t bufsz = 1024; uint32_t buflen = 0;
-  buf = malloc(bufsz); bzero(buf, bufsz); 
+  buf = malloc(bufsz); return_if_malloc_failed(buf);
+  memset(buf, 0, bufsz);
   const char *preamble = 
     "  <!DOCTYPE html> "
     "<html> "
@@ -43,8 +44,7 @@ csv_meta_to_json(
 
   status = cat_to_buf(&buf, &bufsz,  &buflen, preamble, 0); cBYE(status);
   // table header 
-  char hdr[1024]; 
-  strcpy(hdr, 
+  const char *hdr =
       "<thead><tr> "
       "<td> <b> Column </b> </td> "
       "<td> <b> Width </b> </td> "
@@ -52,7 +52,7 @@ csv_meta_to_json(
       "<td> <b> qtype </b> </td> "
       "<td> <b> has_nulls </b> </td> "
       "<td> <b> is_load </b> </td> "
-      "</tr></thead> ");
+      "</tr></thead> ";
   status = cat_to_buf(&buf, &bufsz,  &buflen, hdr, 0); cBYE(status);
   for ( uint32_t i = 0; i < ptr_M->nC; i++ ) { 
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<tr>", 0); cBYE(status);
@@ -61,44 +61,35 @@ csv_meta_to_json(
     status = cat_to_buf(&buf, &bufsz,  &buflen, ptr_M->col_names[i], 0); 
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
-    char tmp[64]; memset(tmp, 0, 64); 
+    char tmp[64]; memset(tmp, 0, sizeof(tmp));
+    int nw = 0;
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<td>", 0); cBYE(status);
-    sprintf(tmp, "%u", ptr_M->widths[i]); 
+    nw = snprintf(tmp, sizeof(tmp), "%u", ptr_M->widths[i]);
+    if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
     status = cat_to_buf(&buf, &bufsz,  &buflen, tmp, 0); cBYE(status);
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<td>", 0); cBYE(status);
-    if ( ptr_M->formats[i] == NULL ) { 
-      strcpy(tmp, " -- ");
-    }
-    else {
-      strcpy(tmp, ptr_M->formats[i]);
-    }
+    nw = snprintf(tmp, sizeof(tmp), "%s",
+        ( ptr_M->formats[i] == NULL ) ? " -- " : ptr_M->formats[i]);
+    if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
     status = cat_to_buf(&buf, &bufsz,  &buflen, tmp, 0); cBYE(status);
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<td>", 0); cBYE(status);
-    status = cat_to_buf(&buf, &bufsz,  &buflen, 
+    status = cat_to_buf(&buf, &bufsz,  &buflen,
         get_str_qtype(ptr_M->qtypes[i]), 0);
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<td>", 0); cBYE(status);
-    if ( ptr_M->has_nulls[i] ) { 
-      strcpy(tmp, "true");
-    }
-    else {
-      strcpy(tmp, "false"); 
-    }
+    nw = snprintf(tmp, sizeof(tmp), "%s", ptr_M->has_nulls[i] ? "true" : "false");
+    if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
     status = cat_to_buf(&buf, &bufsz,  &buflen, tmp, 0); cBYE(status);
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
     status = cat_to_buf(&buf, &bufsz,  &buflen, "<td>", 0); cBYE(status);
-    if ( ptr_M->is_load[i] ) { 
-      strcpy(tmp, "true");
-    }
-    else {
-      strcpy(tmp, "false"); 
-    }
+    nw = snprintf(tmp, sizeof(tmp), "%s", ptr_M->is_load[i] ? "true" : "false");
+    if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(tmp) ) ) { go_BYE(-1); }
     status = cat_to_buf(&buf, &bufsz,  &buflen, tmp, 0); cBYE(status);
     status = cat_to_buf(&buf, &bufsz,  &buflen, "</td>", 0); cBYE(status);
     //-----------------------------------------------------------
@@ -129,13 +120,13 @@ main()
   M.is_load = malloc(M.nC * sizeof(bool));
   char buf[64];
   for ( int i = 0; i < M.nC; i++ ) { 
-    sprintf(buf, "name_%d \n", i+1); 
-    M.col_names[i] = strdup(buf); 
+    snprintf(buf, sizeof(buf), "name_%d \n", i+1);
+    M.col_names[i] = strdup(buf);
 
     M.qtypes[i] = i+1; // dangerous but okay for testing 
 
-    sprintf(buf, "format_%d \n", i+1); 
-    M.formats[i] = strdup(buf); 
+    snprintf(buf, sizeof(buf), "format_%d \n", i+1);
+    M.formats[i] = strdup(buf);
 
     M.widths[i] = get_width_c_qtype(M.qtypes[i]); 
 

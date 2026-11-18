@@ -21,8 +21,10 @@ isfile_in_dir (
   if ( (  dir_name == NULL ) || ( *dir_name == '\0' ) ) { return false; }
   if ( !isdir(dir_name) ) { return false; }
   size_t len = strlen(file_name) + strlen(dir_name) + 32;
-  buf = malloc(len); 
-  sprintf(buf, "%s/%s", dir_name, file_name);
+  buf = malloc(len);
+  if ( buf == NULL ) { return false; }
+  int nw = snprintf(buf, len, "%s/%s", dir_name, file_name);
+  if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { free_if_non_null(buf); return false; }
   bool rslt = isfile(buf);
   free_if_non_null(buf);
   return rslt;

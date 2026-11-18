@@ -52,10 +52,11 @@ rmtree(
 
     free_if_non_null(full_path);
     // determinate a full path of an entry
-    full_path = calloc(path_len + strlen(entry->d_name) + 4, sizeof(char));
-    strcpy(full_path, path);
-    strcat(full_path, "/");
-    strcat(full_path, entry->d_name);
+    size_t full_path_len = path_len + strlen(entry->d_name) + 4;
+    full_path = calloc(full_path_len, sizeof(*full_path));
+    if ( full_path == NULL ) { go_BYE(-1); }
+    int nw = snprintf(full_path, full_path_len, "%s/%s", path, entry->d_name);
+    if ( ( nw < 0 ) || ( (size_t)nw >= full_path_len ) ) { go_BYE(-1); }
 
     // stat for the entry
     stat(full_path, &stat_entry);

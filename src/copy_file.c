@@ -18,11 +18,14 @@ copy_file(
 
   if ( !isfile(src) ) { go_BYE(-1); }
   if ( isdir(dst) ) {
-    const char *dir = dst; // we have been given directory not file 
-    int len = strlen(dir) + strlen(src) + 8;
-    x_dst = malloc(len * sizeof(char));
+    const char *dir = dst; // we have been given directory not file
+    const char *basename_src = strrchr(src, '/');
+    basename_src = ( basename_src != NULL ) ? basename_src + 1 : src;
+    size_t len = strlen(dir) + strlen(basename_src) + 8;
+    x_dst = malloc(len * sizeof(*x_dst));
     return_if_malloc_failed(x_dst);
-    sprintf(x_dst, "%s/%s", dir, basename((char *)src));
+    int nw = snprintf(x_dst, len, "%s/%s", dir, basename_src);
+    if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { go_BYE(-1); }
   }
   else {
     x_dst = strdup(dst);

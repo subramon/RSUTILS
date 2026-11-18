@@ -18,16 +18,18 @@ mk_dir_file_name(
   char *fname = NULL; 
 
   if ( ( f == NULL ) || ( *f == '\0' ) ) { go_BYE(-1); }
-  int len = strlen(f) + 8; // +8 for kosuru
+  size_t len = strlen(f) + 8; // +8 for kosuru
   if ( ( d != NULL ) && ( *d != '\0' ) ) {
     len += strlen(d);
   }
-  fname = malloc(len); memset(fname, 0, len);
+  fname = malloc(len); return_if_malloc_failed(fname);
+  memset(fname, 0, len);
   if ( ( d != NULL ) && ( *d != '\0' ) ) {
-    sprintf(fname, "%s/%s", d, f);
+    int nw = snprintf(fname, len, "%s/%s", d, f);
+    if ( ( nw < 0 ) || ( (size_t)nw >= len ) ) { go_BYE(-1); }
   }
   else {
-    strcpy(fname, f);
+    memcpy(fname, f, strlen(f) + 1);
   }
   *ptr_fname = fname;
 BYE:

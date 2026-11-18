@@ -1,5 +1,5 @@
-#ifndef __trim_H
-#define __trim_H
+#ifndef RSUTILS_INC_TRIM_H
+#define RSUTILS_INC_TRIM_H
 extern int 
 trim(
     const char * const restrict inbuf,  /* input */

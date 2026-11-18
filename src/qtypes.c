@@ -46,7 +46,7 @@ get_width_qtype(
     const char * const str_qtype
     )
 {
-  if ( str_qtype == NULL ) { WHEREAMI; return -1; }
+  if ( str_qtype == NULL ) { WHEREAMI; return UINT32_MAX; }
   if ( strncmp(str_qtype, "SC:", strlen("SC:")) == 0 ) { 
     const char *cptr = str_qtype + strlen("SC:");
     for ( const char *xptr = cptr; *xptr != '\0'; xptr++ ) { 
@@ -55,11 +55,11 @@ get_width_qtype(
     int width = atoi(cptr);
     if ( width < 2 ) { WHEREAMI; return 0; } // need 1 for nullc
     if ( width > 16384 ) { WHEREAMI; return 0; } // some reasonable limit 
-    return width;
+    return (uint32_t)width;
   }
   qtype_t qtype = get_c_qtype(str_qtype);
-  int width = get_width_c_qtype(qtype);
-  return width;
+  int width = (int)get_width_c_qtype(qtype);
+  return (uint32_t)width;
 }
 // return string should be freed by caller 
 char *
@@ -284,18 +284,22 @@ qtypes_as_lua_tbl(
 {
   int status = 0;
   char *out_str  = NULL;  uint32_t out_sz = 0, out_len = 0;
-  char buf[64]; memset(buf, 0, 64);
-  sprintf(buf, "local qtypes = {}\n");
+  char buf[64]; memset(buf, 0, sizeof(buf));
+  int nw = snprintf(buf, sizeof(buf), "local qtypes = {}\n");
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(buf) ) ) { go_BYE(-1); }
   status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
 
   int idx = 0;
-  for ( qtype_t qt = Q0; qt < QF; qt++ ) { 
+  for ( qtype_t qt = Q0; qt < QF; qt++ ) {
     const char *str = get_str_qtype(qt); if ( str == NULL ) { go_BYE(-1); }
-    sprintf(buf, "qtypes['%s'] = %d \n", get_str_qtype(qt), idx++);
+    nw = snprintf(buf, sizeof(buf), "qtypes['%s'] = %d \n", str, idx++);
+    if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(buf) ) ) { go_BYE(-1); }
     status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
   }
-  sprintf(buf, "return qtypes\n");
+  nw = snprintf(buf, sizeof(buf), "return qtypes\n");
+  if ( ( nw < 0 ) || ( (size_t)nw >= sizeof(buf) ) ) { go_BYE(-1); }
   status = cat_to_buf(&out_str, &out_sz, &out_len, buf, 0); cBYE(status);
 BYE:
-  if ( status != 0 ) { return NULL; } else { return out_str; }
+  if ( status != 0 ) { free_if_non_null(out_str); return NULL; }
+  return out_str;
 }

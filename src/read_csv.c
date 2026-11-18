@@ -1,5 +1,6 @@
 #include "q_incs.h"
 #include "qtypes.h"
+#include "fp32tobf16.h"
 #include "rs_mmap.h"
 #include <time.h>
 // TODO P4 strptime should be in time.h. But following still needed
@@ -39,11 +40,12 @@ read_csv(
   char bslash = '\\';
   bool is_load_j, has_nulls_j;
   char *X = NULL; size_t nX = 0;
-  int bufsz = 511;  // default 
+  size_t bufsz = 511;  // default
   char *buf = NULL;
   if ( widths != NULL ) {
     for ( uint32_t i = 0; i < ncols; i++ ) { 
-      if ( bufsz < 2*widths[i] ) { bufsz = 2*widths[i]; }
+      size_t w = 2 * (size_t)widths[i];
+      if ( bufsz < w ) { bufsz = w; }
     }
   }
 
@@ -226,7 +228,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
             float *fptr = (float *)out[j];
-            fptr[i] = dval;
+            fptr[i] = (float)dval;
           }
           break;
           //-------------------------------------------
@@ -236,7 +238,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( ( dval > FLT_MAX ) || ( dval < -FLT_MAX ) ) { go_BYE(-1); }
             bfloat16 *fptr = (bfloat16 *)out[j];
-            fptr[i] = dval;
+            fptr[i] = fp32tobf16((float)dval);
           }
           break;
           //-------------------------------------------
@@ -245,7 +247,7 @@ CELL_COMPLETE:
             long long int ival = strtoll(buf, &endptr, 10);
             mcr_chk_endptr(endptr, buf);
             int64_t *iptr = (int64_t *)out[j];
-            iptr[i] = ival;
+            iptr[i] = (int64_t)ival;
           }
           break;
         case I4 : 
@@ -258,7 +260,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( ( ival > INT_MAX ) || ( ival < INT_MIN ) ) { go_BYE(-1); }
             int32_t *iptr = (int32_t *)out[j];
-            iptr[i] = ival;
+            iptr[i] = (int32_t)ival;
           }
           break;
         case BL : 
@@ -282,7 +284,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( ( ival > SCHAR_MAX ) || ( ival < SCHAR_MIN ) ) { go_BYE(-1); }
             int8_t *iptr = (int8_t *)out[j];
-            iptr[i] = ival;
+            iptr[i] = (int8_t)ival;
           }
           break;
         case I2 : 
@@ -291,7 +293,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( ( ival > SHRT_MAX ) || ( ival < SHRT_MIN ) ) { go_BYE(-1); }
             int16_t *iptr = (int16_t *)out[j];
-            iptr[i] = ival;
+            iptr[i] = (int16_t)ival;
           }
           break;
           //-------------------------------------------
@@ -300,16 +302,16 @@ CELL_COMPLETE:
             unsigned long long int uival = strtoull(buf, &endptr, 10);
             mcr_chk_endptr(endptr, buf);
             uint64_t *uiptr = (uint64_t *)out[j];
-            uiptr[i] = uival;
+            uiptr[i] = (uint64_t)uival;
           }
           break;
         case UI4 : 
           {
-            unsigned long int uival = strtol(buf, &endptr, 10);
+            unsigned long int uival = strtoul(buf, &endptr, 10);
             mcr_chk_endptr(endptr, buf);
             if ( uival > UINT_MAX ) { go_BYE(-1); }
             uint32_t *uiptr = (uint32_t *)out[j];
-            uiptr[i] = uival;
+            uiptr[i] = (uint32_t)uival;
           }
           break; 
         case UI2 : 
@@ -318,7 +320,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( uival > USHRT_MAX ) { go_BYE(-1); }
             uint16_t *uiptr = (uint16_t *)out[j];
-            uiptr[i] = uival;
+            uiptr[i] = (uint16_t)uival;
           }
           break;
         case UI1 : 
@@ -327,7 +329,7 @@ CELL_COMPLETE:
             mcr_chk_endptr(endptr, buf);
             if ( uival > UCHAR_MAX ) { go_BYE(-1); }
             uint8_t *uiptr = (uint8_t *)out[j];
-            uiptr[i] = uival;
+            uiptr[i] = (uint8_t)uival;
           }
           break; 
           //-------------------------------------------
@@ -360,14 +362,14 @@ CELL_COMPLETE:
               if ( ( l_tm.tm_yday < 0 ) || ( l_tm.tm_yday > 365 ) ) { go_BYE(-1); }
               if ( ( l_tm.tm_mon < 0 ) || ( l_tm.tm_mon > 12 ) ) { go_BYE(-1); }
 #endif
-              tptr[i].tm_year = l_tm.tm_year;
-              tptr[i].tm_mon = l_tm.tm_mon;
-              tptr[i].tm_mday = l_tm.tm_mday;
-              tptr[i].tm_hour = l_tm.tm_hour;
+              tptr[i].tm_year = (int16_t)l_tm.tm_year;
+              tptr[i].tm_mon = (int8_t)l_tm.tm_mon;
+              tptr[i].tm_mday = (int8_t)l_tm.tm_mday;
+              tptr[i].tm_hour = (int8_t)l_tm.tm_hour;
               // tptr[i].tm_min = l_tm.tm_min;
               // tptr[i].tm_sec = l_tm.tm_sec;
-              tptr[i].tm_wday = l_tm.tm_wday;
-              tptr[i].tm_yday = l_tm.tm_yday;
+              tptr[i].tm_wday = (int8_t)l_tm.tm_wday;
+              tptr[i].tm_yday = (int16_t)l_tm.tm_yday;
             }
           }
           break;

@@ -26,7 +26,7 @@ void *udpserver(
   uint16_t port = udp_info->port; 
 
   int sockfd; /* socket */
-  int clientlen; /* byte size of client's address */
+  socklen_t clientlen; /* byte size of client's address */
   struct sockaddr_in serveraddr; /* server's addr */
   struct sockaddr_in clientaddr; /* client addr */
   struct hostent *hostp; /* client host info */
@@ -54,7 +54,7 @@ void *udpserver(
   /*
    * build the server's Internet address
    */
-  bzero((char *) &serveraddr, sizeof(serveraddr));
+  memset(&serveraddr, 0, sizeof(serveraddr));
   serveraddr.sin_family = AF_INET;
   serveraddr.sin_addr.s_addr = htonl(INADDR_ANY);
   serveraddr.sin_port = htons(port);
@@ -70,7 +70,7 @@ void *udpserver(
   /* 
    * main loop: wait for a datagram, then echo it
    */
-  clientlen = sizeof(clientaddr);
+  clientlen = (socklen_t)sizeof(clientaddr);
   bool first = true; 
   udp_info->t_start = get_time_usec(); 
   while (1) {
@@ -84,7 +84,7 @@ void *udpserver(
     /*
      * recvfrom: receive a UDP datagram from a client
      */
-    bzero(buf, UDP_BUFSIZE);
+    memset(buf, 0, UDP_BUFSIZE);
     ssize_t n_recv = recvfrom(sockfd, buf, UDP_BUFSIZE, 0,
         (struct sockaddr *) &clientaddr, &clientlen);
     if (n_recv < 0) { 

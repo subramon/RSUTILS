@@ -1,5 +1,5 @@
-#ifndef __QMEM_STRUCT_H
-#define __QMEM_STRUCT_H
+#ifndef RSUTILS_INC_DEPRECATED_QMEM_STRUCT_H
+#define RSUTILS_INC_DEPRECATED_QMEM_STRUCT_H
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

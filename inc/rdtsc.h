@@ -1,5 +1,5 @@
-#ifndef __rdtsc_H
-#define __rdtsc_H
+#ifndef RSUTILS_INC_RDTSC_H
+#define RSUTILS_INC_RDTSC_H
 extern uint64_t
 rdtsc(
     void

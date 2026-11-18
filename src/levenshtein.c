@@ -22,8 +22,8 @@ levenshtein_distance(
     ) 
 {
   unsigned int s1len, s2len;
-  s1len = strlen(s1);
-  s2len = strlen(s2);
+  s1len = (unsigned int)strlen(s1);
+  s2len = (unsigned int)strlen(s2);
 
   // Create a 2D array (matrix) to store distances
   // The matrix size is (s2len+1) x (s1len+1)
@@ -34,12 +34,12 @@ levenshtein_distance(
   // Initialize the first row and column
   // Distance from empty string to s1 prefix (deletion costs)
   for (unsigned int i = 0; i <= s1len; i++) {
-    matrix[0][i] = i;
+    matrix[0][i] = (int)i;
   }
 
   // Distance from empty string to s2 prefix (insertion costs)
   for (unsigned int j = 0; j <= s2len; j++) {
-    matrix[j][0] = j;
+    matrix[j][0] = (int)j;
   }
 
   // Fill the matrix using dynamic programming

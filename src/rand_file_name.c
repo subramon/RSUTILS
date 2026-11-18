@@ -24,7 +24,7 @@ rand_file_name(
   if (  bufsz < 47 ) { go_BYE(-1); }
   memset(buf, '\0', bufsz);
   if ( seed == 0 ) { 
-    seed = rdtsc();
+    seed = (uint32_t)rdtsc();
     srand48_r(seed, &buffer);
   }
   char ct[32];
@@ -37,7 +37,7 @@ rand_file_name(
   int bufidx = 0;
   buf[bufidx++] = '_';
   for ( int i = 0; i < 16; i++ ) {  // 16 bytes
-    uint8_t c = ct[i];
+    uint8_t c = (uint8_t)ct[i];
     uint8_t c1 = c & 15;
     uint8_t c2 = c >> 4;
     buf[bufidx++] = hex[c1];

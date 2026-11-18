@@ -375,7 +375,7 @@ spooky_update(
 
   // handle all whole blocks of SC_BLOCKSIZE bytes
   endp = u.p64 + (length/SC_BLOCKSIZE)*SC_NUMVARS;
-  remainder = (uint8_t)(length-((const uint8_t *)endp - u.p8));
+  remainder = (uint8_t)(length-(size_t)((const uint8_t *)endp - u.p8));
   if ( ( ALLOW_UNALIGNED_READS ) || ( (u.i & 0x7) == 0 ) ) {
     while (u.p64 < endp) {
       mix(u.p64, &h0, &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
@@ -508,10 +508,10 @@ void spooky_hash128
     }
 
   // handle the last partial block of SC_BLOCKSIZE bytes
-  remainder = (length - ((const uint8_t *)endp-(const uint8_t *)message));
+  remainder = (uint8_t)(length - (size_t)((const uint8_t *)endp-(const uint8_t *)message));
   memcpy(buf, endp, remainder);
   memset(((uint8_t *)buf)+remainder, 0, SC_BLOCKSIZE-remainder);
-  ((uint8_t *)buf)[SC_BLOCKSIZE-1] = remainder;
+  ((uint8_t *)buf)[SC_BLOCKSIZE-1] = (uint8_t)remainder;
   mix(buf, &h0 , &h1, &h2, &h3, &h4, &h5, &h6, &h7, &h8, &h9, &h10, &h11);
 
   // do some final mixing

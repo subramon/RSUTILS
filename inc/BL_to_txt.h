@@ -1,5 +1,5 @@
-#ifndef __BL_to_txt_H
-#define __BL_to_txt_H
+#ifndef RSUTILS_INC_BL_TO_TXT_H
+#define RSUTILS_INC_BL_TO_TXT_H
 extern int
 BL_to_txt(
     bool val,
