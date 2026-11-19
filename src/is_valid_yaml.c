@@ -1,5 +1,7 @@
 #include "q_incs.h"
 #include <yaml.h>
+#include "is_valid_yaml.h"
+
 bool
 is_valid_yaml(
     const char * const str,
@@ -12,10 +14,10 @@ is_valid_yaml(
   if ( ( str == NULL ) || ( len == 0 ) ) { go_BYE(-1); }
   yaml_parser_set_input_string(&parser, str, len);
   yaml_event_t event;
-  int done = 0; bool error = false;
+  int done = 0; 
   while (!done) {
     if (!yaml_parser_parse(&parser, &event)) {
-      error = true; 
+      status = -1; 
       done = 1; // Stop parsing on error
     } 
     else {
@@ -26,5 +28,5 @@ is_valid_yaml(
   }
   yaml_parser_delete(&parser);
 BYE:
-  if ( status != 0 ) { return false; } else { return true; }
+  if ( status == 0 ) { return true; } else { return false; }
 }
